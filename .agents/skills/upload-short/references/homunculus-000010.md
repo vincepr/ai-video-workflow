@@ -16,15 +16,19 @@ User requested the selected finished version, metadata and tags, without release
 ## Description
 
 ```text
-About this video
-Homunculus follows Susumu Nakoshi into a fever dream of psychological horror. This short explores desperation, shame and the fears and desires people learn to look away from, as his journey into other minds becomes a descent into his own madness.
+Homunculus manga by Hideo Yamamoto turns psychological horror into a curse: Susumu Nakoshi sees the fears and desires everyone else hides.
+
+This short manga commentary explores the cost of seeing too much. Nakoshi sleeps in his car, clinging to the appearance of his former life. A desperate bargain pulls him into a disturbing world where shame, cruelty and the need to be loved become impossible to ignore. Looking deeper into other people draws him into his own madness.
+
+A brief introduction to Homunculus as a psychological thriller, focused on Nakoshi's descent and the curse of seeing beneath the surface. This is thematic commentary, rather than a full plot or ending explanation.
+
+Manga: Homunculus by Hideo Yamamoto.
+Commentary: HiddenPicks.
 
 Music credit
 Music track: The Day We Met by Aeris
 Source: https://freetouse.com/music
 Free Vlog Music Without Copyright
-
-Manga: Homunculus by Hideo Yamamoto. Commentary by HiddenPicks.
 
 #Homunculus #Manga #PsychologicalHorror
 ```
@@ -44,3 +48,5 @@ Comparable researched titles leaned on disturbing-reading claims: [The Most Dist
 Use pic 2, Nakoshi curled up in the car: `projects/homunculus/media/homunculus/options/anguish.jpg`. Current thumbnail: `projects/homunculus/media/thumbnails/000010-he-sees-too-much.png`, with a matching attribution sidecar. The user corrected the headline to present tense: HE SEES / TOO MUCH. It keeps the black-and-white manga composition, a small HOMUNCULUS label and red on TOO MUCH. Keep his face, hands and hunched posture readable at phone size.
 
 The corrected HE SEES TOO MUCH thumbnail is installed. The initial `thumbnails.set` API attempt returned HTTP 403, and Studio required phone-number verification. After the user completed verification and requested another attempt, the API accepted the corrected file. The local receipt contains the returned thumbnail URLs and update time. Keep the existing MP4 and private visibility.
+
+The user also requested descriptions with common search terms near the beginning and ongoing persistence of lessons in the skill. The revised description leads with the manga title, author, psychological horror and protagonist, then explains the curse theme. A generic Studio description tip was not evidence that the prior 490-character description was too short; inspect actual validation before diagnosing a colored outline.

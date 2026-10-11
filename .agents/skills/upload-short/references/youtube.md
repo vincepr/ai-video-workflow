@@ -6,6 +6,12 @@ The user explicitly requires AI disclosure to be Yes for this workflow. The help
 
 Read the numbered export's context.md, video.mp4.description.txt, video.mp4.release.json and frozen episode. Build a viewer-facing title, synopsis, author credit, relevant tags and a few hashtags. Preserve required music attribution exactly. Keep private production notes out of the description. Check music restrictions against the requested use; attribution does not establish panel or narration rights.
 
+## Descriptions and search terms
+
+Follow [YouTube's description guidance](https://support.google.com/youtube/answer/12948449): put the main topic and relevant terms in the opening sentence, then give a clear overview matching the actual video. For Homunculus, use Homunculus manga, Hideo Yamamoto, psychological horror and Susumu Nakoshi naturally near the start. Explain the curse of seeing too much, rather than promising a full plot or ending explanation that the Short does not provide. Keep credits below the overview and use only a few relevant hashtags.
+
+Do not add length for its own sake, stuff repeated keywords, or claim search-volume evidence without research. A red outline or generic optimization tip alone does not establish why a field is invalid. Inspect the field's validation message and saved state. Preserve exact music attribution while making revisions, verify the saved text after reload, and record confirmed lessons in the skill and local upload receipt.
+
 Save snippet metadata as `projects/<id>/work/uploads/<iteration>-youtube.metadata.json`: title, description, tags, categoryId, defaultLanguage and optional defaultAudioLanguage. English entertainment commentary currently uses categoryId `24` and language `en`; choose values for the actual content.
 
 Run from the repository root:
