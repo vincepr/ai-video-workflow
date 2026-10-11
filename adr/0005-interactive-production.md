@@ -15,7 +15,7 @@ Refine the selected angle using browser draft updates and local checkpoints. Dep
 
 Require approval of the exact draft before production. Changes to the draft clear approval. Validate the approval snapshot again in the production command. Approval in the desk does not start a background render; the agent starts production when asked.
 
-Start Homunculus with original symbolic graphics and a free local English scratch voice. Treat visual previews as directions, not actual manga panels or finished videos. Derive final duration from narration; captions initially use approximate timing.
+Use actual source panels for manga commentary through `.agents/skills/source-images/`. Report missing scenes rather than substituting artwork. Original symbolic graphics require an explicit smoke-test option. Keep speech bubbles in the first draft; cleanup is optional and preserves originals. Use a free local English scratch voice. Derive duration from narration; captions initially use approximate timing.
 
 ## Reason
 
@@ -23,6 +23,6 @@ An interactive review makes editorial decisions visible before generating media 
 
 ## Validation
 
-Tests reject unapproved or edited briefs and invalid media paths. Browser checks cover selection, editing, persistence and approval. Run a synthetic production smoke test before handing off the workflow. Check the exported video and audio metadata.
+Tests reject unapproved or edited briefs, missing source images and invalid media paths. Confirm selected panels and camera paths survive production. Browser checks cover selection, editing, persistence and approval. Check the exported video and audio metadata.
 
 Before proposing concepts, review plot coverage and scene support. During refinement, check that the selected draft and visual beats follow the editorial brief and that existing research is reused.

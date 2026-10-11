@@ -35,11 +35,11 @@ The sample is a silent, 9-second motion test using an original SVG. Anime footag
 
 ## Interactive creation
 
-Ask the agent to use `create-short` with a topic or link. It researches the topic and opens Creator Desk with three video concepts and two commentary drafts each. Choose an angle, edit or leave notes, and ask the agent to revise. Approve the final draft, then say “Make the approved draft.” No manual asset collection is needed for the original-graphics test.
+Ask the agent to use `create-short` with a topic or link. It researches the topic and opens Creator Desk with three video concepts and two commentary drafts each. Choose an angle, edit or leave notes, and ask the agent to revise. Approve the final draft, then say “Make the approved draft.” The repo's `source-images` skill finds and inspects real panels; speech-bubble cleanup is optional after the first draft.
 
 The [Homunculus desk](https://homunculus-creator-desk.muddytitan6.chatgpt.site) is private. `npm run desk` opens the same tool locally at localhost:4173. Drafts stay in that browser and origin; they do not sync between the local and hosted pages.
 
-`npm run produce -- out/approved-brief.json` creates original graphics, a local Windows English scratch voice and an MP4 under `out/homunculus-<concept>/`. The skill reads the approved brief from the shared browser. Use `--silent` for a visual-only draft or `--prepare-only` to prepare files without rendering. Narration determines actual duration; captions use approximate timing. Later formats need their own production adapter.
+`npm run produce -- out/approved-brief.json --assets out/homunculus/images.json` uses selected panels, a local Windows English scratch voice and writes an MP4 under `out/homunculus-<concept>/`. The skill reads the approved brief from the shared browser. Use `--silent` for a visual-only draft, `--prepare-only` to prepare files or `--symbolic` instead of `--assets` for a smoke test. Narration determines duration; captions use approximate timing.
 
 ## Agent workflow
 

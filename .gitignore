@@ -50,6 +50,7 @@ credentials/
 *.webp
 *.gif
 *.psd
+*.pdf
 
 # Model weights and downloaded archives
 *.safetensors
