@@ -93,7 +93,8 @@ export function resetPicker(session, id) {
 export function requestRebuild(session) {
   const changes = pendingChanges(session);
   if (!changes.changed.length) throw new Error('No changes to rebuild');
-  return {...session, rebuildRequest: {id: crypto.randomUUID(), status: 'requested', createdAt: new Date().toISOString(), ...changes, state: draftState(session)}};
+  const next = saveReviewVersion(session, `Rebuild ${session.versions.length + 1}`);
+  return {...next, rebuildRequest: {id: crypto.randomUUID(), status: 'requested', createdAt: new Date().toISOString(), ...changes, state: draftState(next)}};
 }
 
 export function saveReviewVersion(session, label) {

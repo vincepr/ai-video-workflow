@@ -162,7 +162,6 @@ function refreshDraft() {
   renderPickers(); renderCommentary(); updatePreviews(); openTab(session.activeTab);
 }
 $('reset-tab').onclick = () => {syncImages(); session = resetPicker(session, session.activeTab); save(); refreshDraft();};
-$('save-version').onclick = () => {syncImages(); session = saveReviewVersion(session, `Review ${session.versions.length + 1}`); save(false);};
 $('review-version').onchange = () => {
   const id = $('review-version').value;
   if (!id) {session = restoreWorkingDraft(session); save(false); refreshDraft(); return;}
@@ -171,7 +170,7 @@ $('review-version').onchange = () => {
   session = restoreReviewVersion(session, id); save(false); refreshDraft();
 };
 $('rebuild-session').onclick = () => {
-  syncImages(); session = saveReviewVersion(session, `Rebuild ${session.versions.length + 1}`);
+  syncImages();
   session = requestRebuild(session); save(false);
 };
 function download(value, name) {

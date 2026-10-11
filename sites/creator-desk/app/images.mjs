@@ -86,12 +86,6 @@ $('beat-links').replaceChildren(...catalog.beats.map((beat, index) => {
 $('image-notes').value = selection.notes;
 $('image-notes').oninput = () => {selection = {...selection, notes: $('image-notes').value}; save();};
 $('reset-order').onclick = () => {selection = {...selection, order: catalog.beats.map((beat) => beat.id)}; save(); render();};
-$('save-images').onclick = () => {save(); $('image-feedback').textContent = 'Choices saved. Tell the agent to use this selection when you are ready.';};
-$('download-images').onclick = () => {
-  const url = URL.createObjectURL(new Blob([JSON.stringify(exportSelection(selection, catalog), null, 2) + '\n'], {type: 'application/json'}));
-  const link = element('a'); link.href = url; link.download = 'homunculus-image-selection.json'; link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-};
 $('close-image').onclick = () => $('image-dialog').close();
 window.creatorDesk = {
   getImageSelection: () => exportSelection(selection, catalog),

@@ -18,8 +18,13 @@ test('the desk serves its page and modules without exposing repository files', a
     const html = await page.text();
     assert.match(html, /Creator Desk/);
     assert.match(html, /id="review-version"/);
+    assert.match(html, /id="rebuild-session"/);
+    assert.doesNotMatch(html, /id="save-version"/);
     assert.equal((await fetch(origin + '/workflow.mjs')).status, 200);
     assert.equal((await fetch(origin + '/images.html')).status, 200);
+    const images = await fetch(origin + '/images.html').then(response => response.text());
+    assert.doesNotMatch(images, /id="save-images"/);
+    assert.doesNotMatch(images, /id="download-images"/);
     assert.equal((await fetch(origin + '/image-selection.mjs')).status, 200);
     assert.equal((await fetch(origin + '/panel-options/../../.env')).status, 404);
     assert.equal((await fetch(origin + '/.env')).status, 404);

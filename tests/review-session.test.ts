@@ -30,6 +30,8 @@ test('rebuild captures changes together, flags dependent images and resets one t
   session = updatePicker(session, 'motion', {movement: 'strong'});
   assert.deepEqual(review.pendingChanges(session), {changed: ['commentary', 'motion'], review: ['images', 'voice']});
   const requested = review.requestRebuild(session);
+  assert.equal(requested.versions.length, 1);
+  assert.deepEqual(requested.versions[0].state, requested.rebuildRequest.state);
   assert.equal(requested.rebuildRequest.state.script, 'Revised');
   assert.equal(requested.applied.script, 'Original');
   session = review.resetPicker(requested, 'motion');

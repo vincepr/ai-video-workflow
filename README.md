@@ -39,9 +39,9 @@ Ask the agent to use `create-short` with a topic or link. It researches the topi
 
 Run `npm run desk` and open [Creator Desk](http://localhost:4173/). Review stays local, including versions, picker state, video playback and file availability. The agent starts the server and opens the page for you. The previous hosted page is no longer part of the workflow; do not deploy desk updates.
 
-Add optional pickers only when needed; inactive pickers have no effect. Tabs indicate pending changes and dependencies. Reset discards a tab's pending choices. Save or restore review versions at the top right without changing Videos. Browser previews do not render a video. Sessions save under `out/homunculus/session.json` and in the local browser.
+Add optional pickers only when needed; inactive pickers have no effect. Tabs indicate pending changes and dependencies. Reset discards a tab's pending choices. Restore review versions at the top right without changing Videos. Browser previews do not render a video. Sessions save under `out/homunculus/session.json` and in the local browser.
 
-“Rebuild with changes” saves a frozen request for the agent. It cannot start an agent turn; ask the agent to process it. The applied state changes only after a matching video has been rendered and inspected.
+“Rebuild with changes” creates a review version and saves a frozen request for all pending changes together. It is the only explicit save/apply action. It cannot start an agent turn; ask the agent to process it. The applied state changes only after a matching video has been rendered and inspected.
 
 The Videos tab plays registered renders and greys out deleted or replaced files while preserving their snapshots. For a reviewed render, pass `--session out/homunculus/session.json` after the output path to save the picker snapshot alongside the actual episode. See ADR 0007.
 
