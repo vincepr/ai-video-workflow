@@ -1,6 +1,19 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {createSelection, chooseImage, moveImage, exportSelection} from '../sites/creator-desk/app/image-selection.mjs';
+import * as imageSelection from '../sites/creator-desk/app/image-selection.mjs';
+
+test('a late parent initializes an already loaded picker before reading its stale selection', () => {
+  const initialize = (imageSelection as any).readSessionImages;
+  assert.equal(typeof initialize, 'function');
+  const desired = {selection: {choices: {first: 'street'}}};
+  let current = {selection: {choices: {first: 'portrait'}}};
+  const desk = {setImageSelection: (value: any) => {current = structuredClone(value);}, getImageSelection: () => current};
+  assert.deepEqual(initialize(null, desired, false), {ready: false, value: null});
+  assert.deepEqual(initialize(desk, desired, false), {ready: true, value: desired});
+  current = {selection: {choices: {first: 'car'}}};
+  assert.deepEqual(initialize(desk, desired, true), {ready: true, value: current});
+});
 
 test('moving an image keeps commentary order and review choices intact', async () => {
   const catalog = {id: 'test', script: 'First line. Second line.', beats: [

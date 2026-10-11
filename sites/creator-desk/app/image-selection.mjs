@@ -1,3 +1,9 @@
+export function readSessionImages(desk, images, ready) {
+  if (!desk?.getImageSelection || !desk?.setImageSelection) return {ready: false, value: null};
+  if (!ready && images) desk.setImageSelection(images);
+  return {ready: true, value: desk.getImageSelection()};
+}
+
 export function createSelection(catalog, saved) {
   const ids = catalog.beats.map((beat) => beat.id);
   const valid = saved?.catalogId === catalog.id && Array.isArray(saved.order) &&

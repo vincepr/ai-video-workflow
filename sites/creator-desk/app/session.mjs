@@ -1,8 +1,9 @@
 import {createReviewSession, updatePicker, addComparison, pickerOptions, sessionSnapshot, initializeReview, pendingChanges, resetPicker, requestRebuild, draftState, saveReviewVersion, restoreReviewVersion, restoreWorkingDraft, applyRebuild} from './review-session.mjs';
+import {readSessionImages} from './image-selection.mjs';
 const [catalog, concepts] = await Promise.all(['image-options.json', 'concepts.json'].map((file) => fetch(file).then((response) => response.json())));
 const $ = (id) => document.getElementById(id);
 const storageKey = `creator-desk:session:${catalog.id}`;
-let local = false, saved, history = [], saveTimer, sampleTick = 0, paused = false, submitting = false;
+let local = false, saved, history = [], saveTimer, sampleTick = 0, paused = false, submitting = false, imagePickerReady = false;
 try {saved = JSON.parse(localStorage.getItem(storageKey));} catch {}
 try {
   const response = await fetch('/api/session');
@@ -38,7 +39,9 @@ function save(edited = true) {
   renderTabs(); renderChanges(); renderVersions();
 }
 function syncImages() {
-  const value = $('image-picker').contentWindow?.creatorDesk?.getImageSelection?.();
+  const result = readSessionImages($('image-picker').contentWindow?.creatorDesk, session.images, imagePickerReady);
+  imagePickerReady = result.ready;
+  const value = result.value;
   if (value && JSON.stringify(value) !== JSON.stringify(session.images)) {
     session.images = value;
     if (!session.applied.images) session.applied.images = structuredClone(value);
@@ -238,7 +241,7 @@ $('add-comparison').onsubmit = (event) => {
   catch (error) {$('comparison-error').textContent = error.message;}
 };
 $('image-picker').onload = () => {
-  if (session.images) $('image-picker').contentWindow?.creatorDesk?.setImageSelection?.(session.images);
+  imagePickerReady = false;
   syncImages();
 };
 window.creatorDesk = {
@@ -252,7 +255,7 @@ window.creatorDesk = {
   },
   revise: (changes) => {session = {...session, ...changes}; if (changes.script) session.commentaryDrafts[session.commentaryChoice] = changes.script; save(); renderCommentary(); updatePreviews();},
 };
-renderPickers(); renderCommentary(); renderHistory(); openTab(location.hash === '#videos' ? 'videos' : session.activeTab);
+syncImages(); renderPickers(); renderCommentary(); renderHistory(); openTab(location.hash === '#videos' ? 'videos' : session.activeTab);
 setInterval(() => {if (!paused && session.activeTab === 'captions') {sampleTick++; updateCaption();}}, 450);
 setInterval(() => {if (session.activeTab === 'images') syncImages();}, 1000);
 setInterval(() => {if (session.activeTab === 'videos') refreshHistory();}, 10000);

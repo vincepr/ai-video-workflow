@@ -23,6 +23,8 @@ After successful rendering, save an immutable record under `out/render-history/<
 
 ## Reason
 
+Initialize the embedded image picker from session choices before reading it, including when its load completes before the parent module. Older image storage must not replace a saved request or restored version.
+
 One review loop avoids separate workflows for every creative choice. Saved render state makes comparisons understandable after the session changes.
 
 ## Validation
