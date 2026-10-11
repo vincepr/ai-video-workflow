@@ -140,7 +140,8 @@ function updateCaption() {
   else sample.textContent = words.join(' ');
 }
 function renderExtra(tab) {
-  const panel = $('panel-extra'); panel.replaceChildren(node('h2', tab.label), node('p', 'Keep this comparison with the rest of the session.', 'hint'));
+  const hint = /music/i.test(tab.label) ? 'Review choices only. This tab does not play or mix audio. Videos lists the music actually used in each render.' : 'Keep this comparison with the rest of the session.';
+  const panel = $('panel-extra'); panel.replaceChildren(node('h2', tab.label), node('p', hint, 'hint'));
   const options = node('div', '', 'picker-cards');
   options.append(...tab.options.map((option) => {
     const card = button(option, () => {tab.choice = option; save(); renderExtra(tab);}, 'picker-card'); card.setAttribute('aria-pressed', String(option === tab.choice)); return card;
@@ -199,7 +200,7 @@ $('rebuild-session').onclick = async () => {
   finally {submitting=false;save(false);}
 };
 function download(value, name) {
-  const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2) + '\n'], {type: 'application/json'}));
+  const url = URL.createObjectURL(new Blob([typeof value === 'string' ? value : JSON.stringify(value, null, 2) + '\n'], {type: typeof value === 'string' ? 'text/plain' : 'application/json'}));
   const link = node('a'); link.href = url; link.download = name; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 function renderHistory() {
@@ -214,6 +215,11 @@ function renderHistory() {
     if (record.status === 'available') {const video = node('video'); video.controls = true; video.preload = 'metadata'; video.src = record.videoUrl; card.append(video);}
     else if (record.status === 'local') {const link = node('a', 'Open in local desk ↗'); link.href = 'http://localhost:4173/session.html#videos'; card.append(link);}
     card.append(node('p', `Voice: ${episode.audio?.split('/').pop() ?? 'None'}`));
+    if (episode.music) card.append(node('p', `Music: ${episode.music.title} by ${episode.music.artist}`));
+    if (record.release?.description) {
+      const credits=node('details');credits.append(node('summary','Upload description'),node('pre',record.release.description));
+      card.append(credits,button('Download description',()=>download(record.release.description,`${record.id}.description.txt`),'secondary'));
+    }
     if (!record.snapshot.pickers) card.append(node('p', 'Older render: episode settings are preserved; picker choices were not captured.'));
     const details = node('details'); details.append(node('summary', 'State when this video was rendered'), node('pre', JSON.stringify(record.snapshot, null, 2)));
     card.append(details, button('Download snapshot', () => download(record.snapshot, `${record.id}.snapshot.json`), 'secondary'));

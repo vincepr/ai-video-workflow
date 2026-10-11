@@ -1,6 +1,6 @@
-import {AbsoluteFill, Audio, Img, Sequence, staticFile, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, Audio, Img, Sequence, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import type {Episode, Shot} from './episode';
-import {cameraAt, timeline} from './timing';
+import {cameraAt, timeline, musicVolume} from './timing';
 
 function Panel({shot, frames}: {shot: Shot; frames: number}) {
   const frame = useCurrentFrame();
@@ -19,8 +19,10 @@ function Panel({shot, frames}: {shot: Shot; frames: number}) {
 }
 
 export function Video({episode}: {episode: Episode}) {
+  const {durationInFrames} = useVideoConfig();
   return <AbsoluteFill style={{background: '#202627', fontFamily: 'Arial, sans-serif'}}>
     {episode.audio && <Audio src={staticFile(episode.audio)}/>}
+    {episode.music && <Audio src={staticFile(episode.music.audio)} volume={(frame) => musicVolume(frame,durationInFrames,episode.music!.volume)}/>}
     {timeline(episode).map(({shot, from, frames}, i) =>
       <Sequence key={i} from={from} durationInFrames={frames}>
         <Panel shot={shot} frames={frames}/>

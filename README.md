@@ -31,6 +31,8 @@ Git ignores media files, model weights, archives, credentials, caches and output
 
 Each shot has `image`, `seconds`, `text`, `from`, `to`, `source` and `rights`. Camera positions use `[x, y, zoom]`: x and y are object-position percentages from 0 to 100; zoom is 1 to 2. Text is a scene caption, not speech-aligned subtitles. Duration is rounded to whole frames per shot.
 
+Optional `music` contains `audio`, `volume` (0 to 1), `title`, `artist`, `source`, `license` and exact `attribution`. Narration stays separate; music fades at both ends. Each music render saves .description.txt and .release.json beside its MP4, plus credits in history. Videos offers a description download.
+
 The sample is a silent, 9-second motion test using an original SVG. Anime footage, model-generated video and posting are not implemented yet.
 
 ## Interactive creation

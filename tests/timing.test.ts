@@ -3,6 +3,17 @@ import test from 'node:test';
 import sample from '../episodes/sample.json';
 import {validateEpisode} from '../src/episode';
 import {cameraAt, timeline} from '../src/timing';
+import * as timing from '../src/timing';
+
+test('music fades at both ends while keeping the requested quiet level in the middle', () => {
+  const volume=(timing as any).musicVolume;
+  assert.equal(typeof volume,'function');
+  assert.equal(volume(0,1214,0.08),0);
+  assert.equal(volume(15,1214,0.08),0.04);
+  assert.equal(volume(300,1214,0.08),0.08);
+  assert.equal(volume(1183,1214,0.08),0.04);
+  assert.equal(volume(1213,1214,0.08),0);
+});
 
 test('shots occupy consecutive frame ranges with per-shot rounding', () => {
   const episode = validateEpisode(sample);

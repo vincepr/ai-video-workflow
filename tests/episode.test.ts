@@ -11,6 +11,14 @@ test('preserves a valid episode', () => {
   assert.deepEqual(validateEpisode(sample), sample);
 });
 
+test('background music requires a local recording, sensible volume and saved attribution', () => {
+  const music = {audio: 'media/music/kyoto.mp3', volume: 0.08, title: 'Kyoto', artist: 'Nebulite', source: 'https://freetouse.com/music/nebulite/kyoto', license: 'Free To Use Free License; attribution required', attribution: 'Music track: Kyoto by Nebulite\nSource: https://freetouse.com/music\nNo Copyright Vlog Music for Videos'};
+  assert.deepEqual(validateEpisode({...sample, music}), {...sample, music});
+  for (const patch of [{audio:'../secret.mp3'}, {audio:'https://example.com/song.mp3'}, {volume:-1}, {volume:1.1}, {volume:NaN}, {attribution:''}, {license:''}, {source:''}, {artist:''}]) {
+    assert.throws(() => validateEpisode({...sample, music:{...music,...patch}}), Error);
+  }
+});
+
 test('optional narration accepts local audio paths and rejects remote or traversing paths', () => {
   assert.throws(() => validateEpisode({...sample, audio: '../secret.wav'}), /audio/i);
   assert.throws(() => validateEpisode({...sample, audio: 'https://example.com/voice.wav'}), /audio/i);

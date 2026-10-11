@@ -1,6 +1,9 @@
 import type {Camera, Episode} from './episode';
 
 export const FPS = 30;
+export function musicVolume(frame: number, totalFrames: number, volume: number) {
+  return volume * Math.max(0, Math.min(1, frame / FPS, (totalFrames - 1 - frame) / (FPS * 2)));
+}
 export function timeline(episode: Episode) {
   let cursor = 0;
   return episode.shots.map((shot) => {

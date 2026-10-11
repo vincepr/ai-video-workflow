@@ -14,6 +14,7 @@ for (const shot of episode.shots) {
   await access(path.join('public', shot.image));
 }
 if (episode.audio) await access(path.join('public', episode.audio));
+if (episode.music) await access(path.join('public', episode.music.audio));
 await mkdir(path.dirname(output), {recursive: true});
 const propsFile = `${output}.props.json`;
 await writeFile(propsFile, JSON.stringify({episode}, null, 2) + '\n');

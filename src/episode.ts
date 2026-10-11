@@ -8,7 +8,8 @@ export type Shot = {
   source: string;
   rights: string;
 };
-export type Episode = {title: string; shots: Shot[]; audio?: string};
+export type BackgroundMusic = {audio: string; volume: number; title: string; artist: string; source: string; license: string; attribution: string};
+export type Episode = {title: string; shots: Shot[]; audio?: string; music?: BackgroundMusic};
 
 function record(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -39,6 +40,12 @@ export function validateEpisode(value: unknown): Episode {
   }
   const episode = record(value);
   text(episode.title, 'title', 80);
+  if (episode.music !== undefined) {
+    const music = record(episode.music);
+    if (typeof music.audio !== 'string' || !/^[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)*\.(wav|mp3|m4a)$/.test(music.audio)) throw new Error('Music must be a local audio path');
+    if (typeof music.volume !== 'number' || !Number.isFinite(music.volume) || music.volume < 0 || music.volume > 1) throw new Error('Music volume must be between 0 and 1');
+    for (const key of ['title','artist','source','license','attribution']) text(music[key], `music ${key}`, 1500);
+  }
   if (episode.audio !== undefined && (typeof episode.audio !== 'string' ||
       !/^[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)*\.(wav|mp3|m4a)$/.test(episode.audio))) {
     throw new Error('Audio must be a local audio path under public/');

@@ -25,10 +25,16 @@ export async function recordRender(root, {output, episode, pickers = null, sessi
   const resolved = await resolveRenderPath(root, file);
   const metadata = await stat(resolved);
   if (!metadata.isFile()) throw new Error('Render is not a file');
+  const release = episode.music ? {description: episode.music.attribution, music: structuredClone(episode.music)} : null;
   const record = {id: randomUUID(), sessionId, label: label ?? episode.title,
+    release,
     createdAt: new Date().toISOString(), file,
     fingerprint: {bytes: metadata.size, modifiedAt: metadata.mtimeMs},
     snapshot: {episode: structuredClone(episode), pickers: structuredClone(pickers), renderer: structuredClone(renderer)}};
+  if (release) {
+    await writeFile(`${resolved}.description.txt`, release.description + '\n');
+    await writeFile(`${resolved}.release.json`, JSON.stringify({renderId: record.id, file, ...release},null,2) + '\n');
+  }
   const directory = historyDirectory(root, sessionId);
   await mkdir(directory, {recursive: true});
   await writeFile(path.join(directory, `${record.id}.json`), JSON.stringify(record, null, 2) + '\n', {flag: 'wx'});
