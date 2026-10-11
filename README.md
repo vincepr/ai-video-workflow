@@ -15,6 +15,12 @@ npm run render
 
 Studio opens at http://localhost:3000. The default render writes `out/sample.mp4`: 1080 x 1920, 30 fps, H.264. The first render downloads Chrome Headless Shell. Remotion includes reduced FFmpeg and FFprobe builds. Advanced filters may need a full FFmpeg install.
 
+## Local credentials and files
+
+Copy `.env.example` to `.env` and set `OPENROUTER_API_KEY` there. `.env` stays local. Server scripts can load it with Node's `--env-file=.env` option. The renderer does not call OpenRouter yet. Keep the key in server scripts; never pass it to composition props or browser code.
+
+Git ignores media files, model weights, archives, credentials, caches and output folders by default. Put source assets in `public/media/` and exports in `out/`. The original SVG sample stays tracked. Check `git status --short` before committing. Do not force-add ignored files.
+
 ## Make an episode
 
 1. Copy `episodes/sample.json` to `episodes/your-episode.json`.
