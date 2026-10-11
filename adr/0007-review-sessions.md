@@ -13,7 +13,7 @@ Compare draft choices with the last applied state and show changes per tab. Comm
 
 Save review versions as independent copies of draft state. Restore a version without replacing the applied baseline or video history. Preserve the working draft before restoring. Video records contain their own snapshots and do not depend on review versions. Image arrangement changes image placement, not narration order.
 
-Put global Save and Save & send to T3 actions left of Videos in the sticky tab bar. Both create a full review version; only the second dispatches a frozen request to T3. Put reset icons beside tab labels. No picker-specific save or export buttons. Autosave updates the working draft without adding versions. Version restoration remains separate from production. See ADR 0008 for delivery.
+Put global Save and Save & send to T3 actions left of Videos in the sticky tab bar. Both create a full review version; only the second dispatches a frozen request to T3. Show reset icons beside tab labels only when that tab has pending changes. Hide them once the matching render is applied. No picker-specific save or export buttons. Autosave updates the working draft without adding versions. Version restoration remains separate from production. See ADR 0008 for delivery.
 
 Browser previews demonstrate style without rendering. Verify that production implements the reviewed settings; a saved preference is not proof that a renderer used it. Word captions require timings from the selected recording.
 

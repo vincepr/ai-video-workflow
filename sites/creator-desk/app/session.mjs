@@ -68,7 +68,7 @@ function renderTabs() {
     if (status) tab.append(node('span', status, 'tab-status'));
     tab.setAttribute('aria-selected', String(session.activeTab === id)); tab.setAttribute('aria-controls', `panel-${session.extraTabs.some((item) => item.id === id) ? 'extra' : id}`);
     const item = node('div', '', 'session-tab-item'); item.append(tab);
-    if (!['videos', 'add', 'music'].includes(id) && !inactive(id)) {
+    if (changes.changed.includes(id) && !inactive(id)) {
       const reset = button('↺', (event) => {event.stopPropagation(); resetTab(id);}, 'tab-reset');
       reset.setAttribute('aria-label', `Reset ${label}`); reset.title = `Reset ${label}`; item.append(reset);
     }
