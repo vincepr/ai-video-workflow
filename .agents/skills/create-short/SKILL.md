@@ -5,9 +5,10 @@ description: Research and refine a short video through a saved review session, c
 
 # Create a short
 
-Handle the tools and project files for the user. Keep one session and change one part at a time.
+Handle the tools and files for the user. Work in one assigned video project and change one part at a time.
 
-- Start `npm run desk` if needed and open `http://localhost:4173/`. Keep review local; do not deploy the desk. Read `window.creatorDesk.getReviewSession()` before changing choices. Save a checkpoint under `out/<topic>/session.json`; preserve existing drafts and image selections.
+- Create a project with `npm run project -- create <id> <title>` if needed. Open `http://localhost:4173/projects/<id>/`. Read `window.creatorDesk.getReviewSession()` before changing choices. Keep checkpoints in `projects/<id>/work/`.
+- Edit only the assigned project's data, media and numbered videos. Shared code, other projects and the shared media library are separate work. Follow ADR 0012 for boundaries and parallel runs.
 - For a T3 delivery, the frozen request state is authoritative. The working draft may have newer edits; do not replace them with the delivered version.
 - Load only the reference needed: [commentary](references/commentary.md), the repo's `source-images` skill, [motion and captions](references/presentation.md), [voice](references/voice.md), or [render history](references/history.md).
 - Offer a small set of comparable options. Add optional pickers only on request, with no selected default. Retain other choices. Reset discards pending overrides; save and restore review versions independently of video history.

@@ -18,11 +18,11 @@ export const pickerOptions = {
 };
 
 export function createReviewSession(catalog, saved) {
-  const defaults = {version: 1, reviewVersion: 2, sessionId: 'homunculus', catalogId: catalog.id, title: catalog.title,
+  const defaults = {version: 1, reviewVersion: 2, sessionId: catalog.projectId ?? catalog.id.split('-panels')[0], catalogId: catalog.id, title: catalog.title,
     script: catalog.script, commentaryChoice: 'current', commentaryDrafts: {current: catalog.script},
     images: null, motion: null, captions: null,
     voice: null, requestedPickers: [], extraTabs: [], activeTab: 'videos', notes: ''};
-  if (saved?.version !== 1 || saved.catalogId !== catalog.id) return defaults;
+  if (saved?.version !== 1 || saved.catalogId !== catalog.id || saved.sessionId !== defaults.sessionId) return defaults;
   const session = {...defaults, ...structuredClone(saved)};
   if (saved.reviewVersion !== 2) {
     session.reviewVersion = 2;

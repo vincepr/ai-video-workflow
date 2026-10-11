@@ -2,11 +2,11 @@ import {createReviewSession, updatePicker, addComparison, pickerOptions, session
 import {readSessionImages} from './image-selection.mjs';
 const [catalog, concepts] = await Promise.all(['image-options.json', 'concepts.json'].map((file) => fetch(file).then((response) => response.json())));
 const $ = (id) => document.getElementById(id);
-const storageKey = `creator-desk:session:${catalog.id}`;
+const storageKey = `creator-desk:session:${catalog.projectId ?? catalog.id}:${catalog.id}`;
 let local = false, saved, history = [], saveTimer, sampleTick = 0, paused = false, submitting = false, imagePickerReady = false;
-try {saved = JSON.parse(localStorage.getItem(storageKey));} catch {}
+try {saved = JSON.parse(localStorage.getItem(storageKey) ?? localStorage.getItem(`creator-desk:session:${catalog.id}`));} catch {}
 try {
-  const response = await fetch('/api/session');
+  const response = await fetch('./api/session');
   if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
     const result = await response.json(); local = true;
     if (result.session && (!saved || Date.parse(result.session.updatedAt ?? 0) > Date.parse(saved.updatedAt ?? 0))) saved = result.session;
@@ -17,7 +17,22 @@ if (!local) {
   try {history = (await fetch('./session-history.json').then((response) => response.json())).history;} catch {}
 }
 let session = createReviewSession(catalog, saved);
-const initialImageStorage = `creator-desk:images:${catalog.id}`;
+document.title = `${catalog.title} | Creator Desk`;
+$('project-title').textContent = catalog.title;
+try {
+  const {projects} = await fetch('/api/projects').then(response => response.json());
+  $('project-picker').replaceChildren(...projects.map(project => {const option = document.createElement('option'); option.value = project.id; option.textContent = project.title; return option;}));
+  $('project-picker').value = session.sessionId;
+  $('project-picker').onchange = async () => {
+    syncImages(); clearTimeout(saveTimer);
+    if (local) {
+      const response = await fetch('./api/session', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(sessionSnapshot(session))});
+      if (!response.ok) {$('save-status').textContent = 'Could not save this project before switching'; $('project-picker').value = session.sessionId; return;}
+    }
+    location.href = `/projects/${$('project-picker').value}/#videos`;
+  };
+} catch {$('project-picker').hidden = true;}
+const initialImageStorage = `creator-desk:images:${catalog.projectId ?? catalog.id}:${catalog.id}`;
 if (session.images?.selection && !localStorage.getItem(initialImageStorage)) localStorage.setItem(initialImageStorage, JSON.stringify(session.images.selection));
 function node(tag, text, className) {
   const element = document.createElement(tag); if (text) element.textContent = text; if (className) element.className = className; return element;
@@ -32,7 +47,7 @@ function save(edited = true) {
   clearTimeout(saveTimer);
   if (local) saveTimer = setTimeout(async () => {
     try {
-      const response = await fetch('/api/session', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(sessionSnapshot(session))});
+      const response = await fetch('./api/session', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(sessionSnapshot(session))});
       if (!response.ok) throw new Error(); $('save-status').textContent = 'Saved in browser and local session';
     } catch {$('save-status').textContent = 'Saved in browser; local save unavailable';}
   }, 350);
@@ -100,16 +115,12 @@ function renderPickers() {
   cards('caption-options', pickerOptions.captions, session.captions?.mode, (mode) => {
     session = updatePicker(session, 'captions', {mode}); save(); renderPickers(); sampleTick = 0; updateCaption();
   });
-  cards('voice-options', [
-    {id: 'browser', label: 'First browser recording', detail: 'Free Voice Reader / 36.4 seconds'},
-    {id: 'multilingual', label: 'Multilingual recording', detail: 'Second browser recording / 35.7 seconds'},
-    {id: 'elevenlabs', label: 'ElevenLabs: Rob', detail: 'Supplied ElevenLabs recording / 40.5 seconds'},
-  ], session.voice?.option, (option) => {session = updatePicker(session, 'voice', {option}); save(); renderPickers();});
+  cards('voice-options', catalog.voices ?? [], session.voice?.option, (option) => {session = updatePicker(session, 'voice', {option}); save(); renderPickers();});
   $('optional-pickers').replaceChildren(...optional.filter(inactive).map((id) => button(`Add ${tabs.find(([key]) => key === id)[1]}`, () => {
     session.requestedPickers.push(id); save(); renderPickers(); openTab(id);
   }, 'secondary')));
 }
-const angle = concepts.concepts.find((concept) => concept.id === 'perception') ?? concepts.concepts[0];
+const angle = concepts.concepts.find((concept) => concept.id === concepts.selectedConcept) ?? concepts.concepts[0] ?? {drafts: []};
 for (const [index, draft] of angle.drafts.entries()) session.commentaryDrafts[`draft-${index}`] ??= draft.text;
 session = initializeReview(session);
 function renderCommentary() {
@@ -122,10 +133,11 @@ function renderCommentary() {
 }
 function updatePreviews() {
   const shots = session.images?.shots;
-  const first = shots?.[0]?.preview ?? catalog.beats[0].options[0].preview;
-  const second = shots?.[1]?.preview ?? catalog.beats[1].options[0].preview;
-  document.querySelectorAll('.preview-first').forEach((image) => {image.src = first;});
-  document.querySelector('.preview-second').src = second;
+  const first = shots?.[0]?.preview ?? catalog.beats[0]?.options[0]?.preview;
+  const second = shots?.[1]?.preview ?? catalog.beats[1]?.options[0]?.preview ?? first;
+  document.querySelectorAll('.preview-first').forEach((image) => {if (first) image.src = first; else image.removeAttribute('src');});
+  const nextImage = document.querySelector('.preview-second');
+  if (second) nextImage.src = second; else nextImage.removeAttribute('src');
   $('motion-preview').className = `style-preview movement-${session.motion?.movement ?? 'still'} transition-${session.motion?.transition ?? 'cut'}`;
   updateCaption();
 }
@@ -191,9 +203,9 @@ $('rebuild-session').onclick = async () => {
   session.lastAction={status:'sending',requestId,message:'Saving version and sending to T3...'};save(false);
   clearTimeout(saveTimer);
   try {
-    const saved=await fetch('/api/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(sessionSnapshot(session))});
+    const saved=await fetch('./api/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(sessionSnapshot(session))});
     if(!saved.ok)throw new Error('Could not save locally. Nothing was sent to T3.');
-    const response=await fetch('/api/session/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requestId})});
+    const response=await fetch('./api/session/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requestId})});
     const result=await response.json();if(!response.ok)throw new Error(result.error ?? 'T3 did not confirm delivery');
     session.lastAction={status:'sent',requestId,sequence:result.sequence,message:session.rebuildRequest?.id === requestId ? 'Version saved and accepted by T3. Follow the turn in the chat.' : 'The earlier saved version was accepted by T3. Newer draft edits were not sent.'};
   } catch(error) {session.lastAction={status:'failed',requestId,message:`Saved version kept. ${error.message}`};}
@@ -211,7 +223,9 @@ function renderHistory() {
     const card = node('article', '', `render-card${unavailable ? ' unavailable' : ''}`);
     const episode = record.snapshot.episode;
     const seconds = episode.shots.reduce((total, shot) => total + shot.seconds, 0);
-    card.append(node('h3', record.label), node('p', `${seconds.toFixed(1)} seconds / ${new Date(record.createdAt).toLocaleString()}`), node('span', record.status === 'local' ? 'Local file' : record.status, 'status'));
+    const name = `${record.iteration ? record.iteration + ' / ' : ''}${record.label}`;
+    const selected = record.id === session.lastAppliedRender;
+    card.append(node('h3', name), node('p', `${seconds.toFixed(1)} seconds / ${new Date(record.createdAt).toLocaleString()}`), node('span', selected ? `${record.status} / Selected` : record.status === 'local' ? 'Local file' : record.status, 'status'), node('p', record.file, 'quiet'));
     if (record.status === 'available') {const video = node('video'); video.controls = true; video.preload = 'metadata'; video.src = record.videoUrl; card.append(video);}
     else if (record.status === 'local') {const link = node('a', 'Open in local desk ↗'); link.href = 'http://localhost:4173/session.html#videos'; card.append(link);}
     card.append(node('p', `Voice: ${episode.audio?.split('/').pop() ?? 'None'}`));
@@ -230,7 +244,7 @@ function renderHistory() {
 async function refreshHistory() {
   if (!local) {renderHistory(); return;}
   try {
-    const next = (await fetch('/api/session').then((response) => response.json())).history;
+    const next = (await fetch('./api/session').then((response) => response.json())).history;
     if (JSON.stringify(next) !== JSON.stringify(history)) {history = next; renderHistory();}
   } catch {$('history-note').textContent = 'Local file checks are temporarily unavailable.';}
 }
@@ -239,7 +253,7 @@ $('commentary-notes').oninput = () => {session.notes = $('commentary-notes').val
 $('voice-notes').value = session.voice?.notes ?? '';
 $('voice-notes').oninput = () => {session = updatePicker(session, 'voice', {notes: $('voice-notes').value}); save();};
 $('pause-preview').onclick = () => {paused = !paused; $('pause-preview').textContent = paused ? 'Play sample' : 'Pause sample';};
-$('download-session').onclick = () => {syncImages(); download(sessionSnapshot(session), 'homunculus.session.json');};
+$('download-session').onclick = () => {syncImages(); download(sessionSnapshot(session), `${session.sessionId}.session.json`);};
 $('refresh-history').onclick = () => refreshHistory();
 $('add-comparison').onsubmit = (event) => {
   event.preventDefault();

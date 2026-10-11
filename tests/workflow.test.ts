@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {createDraft, approvedBrief, approveDraft, reviseDraft, refreshExamples} from '../sites/creator-desk/app/workflow.mjs';
+import {createDraft, approvedBrief, approveDraft, reviseDraft, refreshExamples} from '../desk/workflow.mjs';
 
 const concept = {id: 'test', title: 'Test concept', drafts: [{label: 'Analysis', text:
   'A short commentary with enough words to test the approval boundary before any rendering work can begin.'}],

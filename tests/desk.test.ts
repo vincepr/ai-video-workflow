@@ -7,6 +7,46 @@ import path from 'node:path';
 import {recordRender} from '../scripts/render-history.mjs';
 import {createServer} from 'node:http';
 
+test('project desks keep catalogs, sessions and videos separate', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'desk-projects-'));
+  const server = createDeskServer({root});
+  await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
+  const address = server.address();
+  assert.ok(address && typeof address !== 'string');
+  const origin = `http://127.0.0.1:${address.port}`;
+  try {
+    for (const id of ['alpha', 'beta']) {
+      await mkdir(path.join(root, 'projects', id), {recursive: true});
+      await writeFile(path.join(root, 'projects', id, 'project.json'), JSON.stringify({id, title: id}));
+      await writeFile(path.join(root, 'projects', id, 'image-options.json'), JSON.stringify({id: `${id}-panels`, projectId: id}));
+    }
+    const listing = await fetch(origin + '/api/projects');
+    assert.equal(listing.status, 200);
+    assert.deepEqual((await listing.json()).projects.map((item: {id: string}) => item.id), ['alpha', 'beta']);
+    for (const id of ['alpha', 'beta']) {
+      const base = `${origin}/projects/${id}`;
+      assert.equal((await fetch(`${base}/image-options.json`).then(response => response.json())).projectId, id);
+      const state = {version: 1, sessionId: id, notes: `${id} choices`};
+      assert.equal((await fetch(`${base}/api/session`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(state)})).status, 200);
+    }
+    assert.equal((await fetch(`${origin}/projects/alpha/api/session`).then(response => response.json())).session.notes, 'alpha choices');
+    assert.equal((await fetch(`${origin}/projects/beta/api/session`).then(response => response.json())).session.notes, 'beta choices');
+    assert.equal((await fetch(`${origin}/projects/alpha/api/session`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({version: 1, sessionId: 'beta'})})).status, 400);
+    assert.equal((await fetch(`${origin}/projects/missing/api/session`)).status, 404);
+    assert.equal((await fetch(`${origin}/projects/alpha/work/session.json`)).status, 404);
+    const output = path.join(root, 'projects', 'alpha', 'videos', '000001-first-look', 'video.mp4');
+    await mkdir(path.dirname(output), {recursive: true});
+    await writeFile(output, 'alpha-video');
+    const record = await recordRender(root, {output, sessionId: 'alpha', episode: {title: 'Alpha', shots: []}});
+    const history = (await fetch(`${origin}/projects/alpha/api/session`).then(response => response.json())).history;
+    assert.equal(await fetch(origin + history[0].videoUrl).then(response => response.text()), 'alpha-video');
+    assert.equal((await fetch(`${origin}/projects/beta/api/renders/${record.id}/video`)).status, 404);
+  } finally {
+    await new Promise<void>(resolve => server.close(() => resolve()));
+    await rm(root, {recursive: true, force: true});
+  }
+});
+
 test('the desk serves its page and modules without exposing repository files', async () => {
   const server = createDeskServer();
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -18,6 +58,7 @@ test('the desk serves its page and modules without exposing repository files', a
     assert.equal(page.status, 200);
     const html = await page.text();
     assert.match(html, /Creator Desk/);
+    assert.match(html, /id="project-picker"/);
     assert.match(html, /id="review-version"/);
     assert.match(html, /id="rebuild-session"/);
     assert.match(html, /id="save-session"[^>]*>Save<\/button>/);

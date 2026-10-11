@@ -1,12 +1,22 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {createDraft, approveDraft} from '../sites/creator-desk/app/workflow.mjs';
+import {createDraft, approveDraft} from '../desk/workflow.mjs';
 import {buildEpisode} from '../src/production';
 import {validateEpisode} from '../src/episode';
 
 const concept = {id: 'perception', title: 'A question about sight', drafts: [{label: 'Analysis',
   text: 'What happens when sight becomes uncertain? A quiet opening gives the viewer time to look. Then a changed silhouette makes the same image feel different.'}],
   beats: ['Eye', 'Silhouette', 'Question'], sources: ['https://example.com/source']};
+
+test('a new topic can use its own concept and source assets without Homunculus rules', () => {
+  const brief = approveDraft(createDraft({...concept, id: 'forgotten-city'}));
+  const assets = [
+    {image: 'media/images/city.jpg', from: [50, 30, 1], to: [50, 60, 1.1], source: 'https://example.com/city', rights: 'Test fixture'},
+    {image: 'media/images/ruins.jpg', from: [40, 50, 1.2], to: [60, 50, 1.4], source: 'https://example.com/ruins', rights: 'Test fixture'},
+  ];
+  const episode = buildEpisode(brief, 30, undefined, assets);
+  assert.deepEqual(episode.shots.map(shot => shot.image), ['media/images/city.jpg', 'media/images/ruins.jpg']);
+});
 
 test('production rejects an unapproved brief before preparing media', () => {
   assert.throws(() => buildEpisode(createDraft(concept), 30), /approval/i);
@@ -17,7 +27,7 @@ test('an approved script becomes valid shots with the full commentary and matchi
   assert.equal(episode.title, concept.title);
   assert.equal(episode.shots.map((shot) => shot.text).join(' '), concept.drafts[0].text);
   assert.ok(Math.abs(episode.shots.reduce((n, shot) => n + shot.seconds, 0) - 30) < 0.001);
-  assert.ok(episode.shots.every((shot) => shot.image.startsWith('media/homunculus/') && shot.rights && shot.source));
+  assert.ok(episode.shots.every((shot) => shot.image.startsWith('media/generated/') && shot.rights && shot.source));
 });
 
 test('selected source panels and camera paths reach the rendered episode unchanged', () => {

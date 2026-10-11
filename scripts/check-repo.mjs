@@ -1,11 +1,12 @@
 import {execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
+import {forbiddenTrackedFiles, trackedFiles} from './repository-files.mjs';
 
 const files = new Set(execFileSync('git', ['ls-files', '-co', '--exclude-standard', '-z'])
   .toString().split('\0').filter(Boolean));
 const phrases = [['as', 'an', 'ai'], ['delve', 'into'], ['leverage', 'the'],
   ['game', 'changer'], ['seam' + 'lessly'], ['unlock', 'the', 'power']].map((parts) => parts.join(' '));
-const failures = [];
+const failures = forbiddenTrackedFiles(trackedFiles()).map(file => `${file}: local-only file is tracked`);
 for (const file of files) {
   if (file === 'package-lock.json' || !/\.(md|json|tsx?|mjs|ya?ml|svg)$/.test(file)) continue;
   const content = readFileSync(file, 'utf8');

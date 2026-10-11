@@ -5,16 +5,16 @@ description: Find real images or manga panels on the web, inspect them, save loc
 
 # Source images
 
-Use the approved visual beats and existing research. Keep downloaded files under ignored `public/media/<topic>/` and records under `out/<topic>/`.
+Use the approved visual beats and existing research for the assigned project. Keep downloads in ignored `projects/<id>/media/` and source records in `projects/<id>/sources.json`. Reusable assets belong in shared `media/` with attribution sidecars; copy them into project media before rendering.
 
 - Search for the actual work and scene. Prefer publisher previews, official galleries and public editorial excerpts. Use image search for discovery, then inspect the source page. Avoid generated lookalikes and unrelated fan art.
 - Download a small candidate set with request timeouts. Reuse existing assets. Do not bypass access controls or download a complete series to find a few panels.
 - Inspect every image before selecting it. Verify the character, scene, resolution and crop. Do not infer scene identity from search captions alone. Record uncertainty and missing scenes; do not silently substitute illustrations.
 - Match visible panel text to the commentary language unless the user requests otherwise, and record the verified language in `sources.json`.
 - Save `sources.json` with local path, source page, direct image or sample URL, work, available chapter/page, visual beat, crop and usage notes. A public preview is not a redistribution license. Keep review renders local unless publishing is requested.
-- Save `images.json` as an array in caption order. Each item has `image` relative to `public/`, `from` and `to` camera triples, `source` and `rights`. Use one entry per caption; repeat a source deliberately when needed. Crops and camera movement should follow the narrative.
-- For image review, populate Creator Desk's `image-options.json` with three inspected candidates per visual beat, scene fit and any gaps. Read `window.creatorDesk.getImageSelection()` from `images.html`; save a local checkpoint. Let the user choose and reorder before updating production files or rendering.
-- Run `npm run produce -- out/approved-brief.json --assets out/<topic>/images.json`. The command reports the required image count if the manifest and captions differ. No model request is needed for sourcing.
+- Save `projects/<id>/images.json` as an array in caption order. Each item has `image` relative to its project, starting with `media/`, `from` and `to` camera triples, `source` and `rights`. Use one entry per caption; repeat a source deliberately when needed.
+- Populate the project's `image-options.json` with three inspected candidates per beat, fit and gaps. Store thumbnails in project `media/previews/`, referenced as `panel-options/<name>.jpg`. Read `window.creatorDesk.getImageSelection()` from the project desk; save checkpoints in `work/`. Let the user choose and reorder before production.
+- Run `npm run produce -- projects/<id>/brief.json --project <id> --assets projects/<id>/images.json`. The command reports the required image count if the manifest and captions differ. No model request is needed for sourcing.
 
 ## Optional speech-bubble cleanup
 

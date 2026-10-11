@@ -4,6 +4,7 @@ import {randomUUID} from 'node:crypto';
 import path from 'node:path';
 import {readRenderHistory, resolveRenderPath} from './render-history.mjs';
 import {sendSavedRequest} from './t3-bridge.mjs';
+import {sessionDirectory} from './projects.mjs';
 
 function json(response, status, value) {
   response.writeHead(status, {'Content-Type': 'application/json', 'Cache-Control': 'no-store'});
@@ -28,7 +29,11 @@ export async function handleSessionRequest(request, response, {root, sessionId})
   }
   try {
     const history = await readRenderHistory(root, sessionId);
-    const sessionPath = path.join(root, 'out', sessionId, 'session.json');
+    const work = await sessionDirectory(root, sessionId);
+    const sessionPath = path.join(work, 'session.json');
+    if (work === path.join(root, 'projects', sessionId, 'work')) {
+      for (const record of history) if (record.videoUrl) record.videoUrl = `/projects/${sessionId}${record.videoUrl}`;
+    }
     if (pathname === '/api/session') {
       if (['GET', 'HEAD'].includes(request.method)) {
         let session = null;

@@ -8,6 +8,10 @@ downloads/
 generated/
 renders/
 final/
+# Each video project owns its local inputs, review state and numbered exports
+/projects/*/media/
+/projects/*/work/
+/projects/*/videos/
 output/
 dist/
 build/
@@ -72,6 +76,3 @@ credentials/
 *.log
 .DS_Store
 Thumbs.db
-
-# Exported local render history for the hosted desk
-/sites/creator-desk/app/session-history.json

@@ -2,6 +2,7 @@
 
 - Read README.md for commands. Read only the ADRs relevant to the task.
 - Keep changes small. Add dependencies only for a current requirement.
+- Work in the assigned projects/<id>/ folder. Shared code and media need separate scope; see adr/0012-project-boundaries.md.
 - Keep instructions concise and task specific. See adr/0001-context-and-writing.md.
 - Use plain language in files and commits. Do not use em dashes or stock assistant phrasing.
 - Edit episode data before changing the renderer. Keep animation frame based.

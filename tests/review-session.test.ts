@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as review from '../sites/creator-desk/app/review-session.mjs';
-import {createReviewSession, updatePicker, addComparison, sessionSnapshot} from '../sites/creator-desk/app/review-session.mjs';
+import * as review from '../desk/review-session.mjs';
+import {createReviewSession, updatePicker, addComparison, sessionSnapshot} from '../desk/review-session.mjs';
+
+test('review sessions use the catalog project ID and reject saved choices from another project', () => {
+  const catalog = {id: 'shared-catalog-name', projectId: 'alpha', title: 'Alpha', script: 'Alpha narration'};
+  const session = createReviewSession(catalog);
+  assert.equal(session.sessionId, 'alpha');
+  const restored = createReviewSession(catalog, {...session, sessionId: 'beta', script: 'Beta narration'});
+  assert.equal(restored.sessionId, 'alpha');
+  assert.equal(restored.script, 'Alpha narration');
+});
 
 test('a session keeps independent picker choices and added comparison tabs across reloads', async () => {
   const catalog = {id: 'homunculus-panels-v1', title: 'Homunculus', script: 'Original narration'};

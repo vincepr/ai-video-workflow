@@ -425,5 +425,23 @@
         }
       ]
     }
+  ],
+  "projectId": "homunculus",
+  "voices": [
+    {
+      "id": "browser",
+      "label": "First browser recording",
+      "detail": "Free Voice Reader / 36.4 seconds"
+    },
+    {
+      "id": "multilingual",
+      "label": "Multilingual recording",
+      "detail": "Second browser recording / 35.7 seconds"
+    },
+    {
+      "id": "elevenlabs",
+      "label": "ElevenLabs: Rob",
+      "detail": "Supplied ElevenLabs recording / 40.5 seconds"
+    }
   ]
 }

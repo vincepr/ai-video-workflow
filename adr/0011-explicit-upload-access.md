@@ -7,7 +7,7 @@ Date: 2026-10-11
 
 Use an explicit-only upload-short skill. Each upload request identifies a finished video, platform, destination account, metadata and visibility. Account setup and rendering do not authorize uploading.
 
-Store provider client credentials and OAuth tokens under ignored credentials/. Reuse the existing exclusion rather than adding secrets to environment examples. Keep upload receipts under ignored out/uploads/ and carry the render's attribution sidecars into upload metadata.
+Store provider client credentials and OAuth tokens under ignored credentials/. Reuse the existing exclusion rather than adding secrets to environment examples. Keep upload receipts under ignored projects/<id>/work/uploads/ as defined in ADR 0012 and carry the render's attribution sidecars into upload metadata.
 
 Start with YouTube desktop OAuth and upload-only permission. The local connection helper uses loopback, state and PKCE; it performs no uploads, hides token responses, applies a timeout and does not retry. It checks Git exclusion before using credentials. No provider SDK is needed for connection.
 

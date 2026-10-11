@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {createSelection, chooseImage, moveImage, exportSelection} from '../sites/creator-desk/app/image-selection.mjs';
-import * as imageSelection from '../sites/creator-desk/app/image-selection.mjs';
+import {createSelection, chooseImage, moveImage, exportSelection} from '../desk/image-selection.mjs';
+import * as imageSelection from '../desk/image-selection.mjs';
 
 test('a late parent initializes an already loaded picker before reading its stale selection', () => {
   const initialize = (imageSelection as any).readSessionImages;

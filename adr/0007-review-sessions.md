@@ -17,9 +17,9 @@ Put global Save and Save & send to T3 actions left of Videos in the sticky tab b
 
 Browser previews demonstrate style without rendering. Verify that production implements the reviewed settings; a saved preference is not proof that a renderer used it. Word captions require timings from the selected recording.
 
-Use the local desk at localhost:4173 for review. It saves `out/<session>/session.json`, serves registered videos and checks file availability. Keep media and versions local and ignored. Stop deploying desk updates; the previous hosted copy is outside the workflow.
+Use the local desk at localhost:4173/projects/<id>/ for review. It saves projects/<id>/work/session.json, serves registered videos and checks file availability. Keep media and versions local and ignored. See ADR 0012 for project boundaries. Stop deploying desk updates.
 
-After successful rendering, save an immutable record under `out/render-history/<session>/` with the episode, supplied picker snapshot, renderer identity and file fingerprint. Later picker edits never change that record. Deleted or replaced videos remain listed and greyed out. Older imports retain their episode data without inventing missing picker state.
+After successful rendering, save an immutable record under projects/<id>/work/history/ with the episode, supplied picker snapshot, renderer identity and file fingerprint. Later picker edits never change that record. Deleted or replaced videos remain listed and greyed out. Older imports retain their episode data without inventing missing picker state.
 
 ## Reason
 

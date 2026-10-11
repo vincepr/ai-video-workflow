@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Choose narration, panels and presentation, then compare saved renders.">
-  <title>Homunculus session | Creator Desk</title>
+  <title>Project session | Creator Desk</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="session.css">
 </head>
 <body>
-  <header class="topbar"><a href="session.html" class="brand"><span class="brand-mark">◒</span> Creator Desk</a><span class="project-label">HOMUNCULUS / SESSION</span><span id="save-status" class="quiet" role="status">Loading choices</span></header>
+  <header class="topbar"><a href="session.html" class="brand"><span class="brand-mark">◒</span> Creator Desk</a><label for="project-picker">Project</label><select id="project-picker" aria-label="Video project"></select><span id="save-status" class="quiet" role="status">Loading choices</span></header>
   <main class="session-main">
-    <div class="session-heading"><div><p class="eyebrow">ONE SESSION, SEPARATE CHOICES</p><h1>Nakoshi's descent</h1><p class="lede">Stage changes together. Videos keep their own snapshots.</p></div><div class="version-controls"><label for="review-version">Review version</label><select id="review-version"><option value="">Working draft</option></select><button id="download-session" class="secondary" type="button">Download session</button></div></div>
+    <div class="session-heading"><div><p class="eyebrow">ONE PROJECT, SEPARATE CHOICES</p><h1 id="project-title">Video project</h1><p class="lede">Stage changes together. Videos keep their own snapshots.</p></div><div class="version-controls"><label for="review-version">Review version</label><select id="review-version"><option value="">Working draft</option></select><button id="download-session" class="secondary" type="button">Download session</button></div></div>
     <div class="session-tab-bar"><div class="session-save-actions"><button id="save-session" class="secondary" type="button">Save</button><button id="rebuild-session" class="primary" type="button">Save &amp; send to T3</button></div><nav id="session-tabs" class="session-tabs" role="tablist" aria-label="Session pickers"></nav></div>
     <div class="review-toolbar"><p id="change-summary" role="status"></p></div>
     <p id="rebuild-status" class="hint" role="status"></p>

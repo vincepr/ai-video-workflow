@@ -1,0 +1,134 @@
+{
+  "images": [
+    {
+      "file": "portrait",
+      "sourcePage": "https://www.manga-passion.de/news/8474/leseprobe-zu-homunculus-veroeffentlicht",
+      "url": "https://www.bic-media.com/books/9783755501763/content/shortened/",
+      "page": "Egmont sample PDF page 12",
+      "beat": "Nakoshi after losing almost everything",
+      "crop": "Lower portrait panel",
+      "path": "media/homunculus/real/portrait.jpg",
+      "work": "Homunculus, Hideo Yamamoto",
+      "usage": "Copyright Hideo Yamamoto / Shogakukan. Local commentary draft; redistribution permission not established.",
+      "cleanup": "None; original bubbles retained",
+      "verification": "Visually inspected",
+      "language": "No dialogue; portrait has a sound effect only"
+    },
+    {
+      "file": "car-suit",
+      "sourcePage": "https://br.pinterest.com/pin/21673641949733336/",
+      "url": "https://i.pinimg.com/originals/b9/0e/d1/b90ed173e9492c77dffa2c85d9c02a1d.jpg",
+      "page": "Chapter and page unverified",
+      "beat": "Nakoshi alone in his car, still wearing his suit",
+      "crop": "Full panel",
+      "path": "media/homunculus/real/car-suit-english.jpg",
+      "work": "Homunculus, Hideo Yamamoto",
+      "usage": "Copyright Hideo Yamamoto / Shogakukan. Local commentary draft; redistribution permission not established.",
+      "cleanup": "None; original bubbles retained",
+      "verification": "Visually inspected: Nakoshi in suit and beanie, seated in car; both dialogue bubbles are English",
+      "replacedSource": {
+        "path": "media/homunculus/real/car-suit.jpg",
+        "sourcePage": "https://www.manga-passion.de/news/8474/leseprobe-zu-homunculus-veroeffentlicht",
+        "reason": "German dialogue in an English video"
+      },
+      "language": "English"
+    },
+    {
+      "file": "distorted",
+      "sourcePage": "https://www.homunculusmangafree.com/manga/homunculus-chapter-5/index.html",
+      "url": "https://1.bp.blogspot.com/-RG1ZJmVTNtM/YBhwmPTJV4I/AAAAAAAAEX4/1vJLiVGm-PcqVr2biDKZmCgWT7xcJqVrQCLcBGAsYHQ/s838/001.jpg",
+      "page": "Source labels chapter 5; printed page 109",
+      "beat": "Distorted person seen beside Nakoshi",
+      "crop": "Full page",
+      "path": "media/homunculus/real/distorted.jpg",
+      "work": "Homunculus, Hideo Yamamoto",
+      "usage": "Copyright Hideo Yamamoto / Shogakukan. Local commentary draft; redistribution permission not established.",
+      "cleanup": "None; original bubbles retained",
+      "verification": "Visually inspected",
+      "language": "English"
+    },
+    {
+      "file": "eye",
+      "sourcePage": "https://br.pinterest.com/pin/homunculus-mang--531354456050713635/",
+      "url": "https://i.pinimg.com/originals/f1/65/63/f16563832dd94f6d9342bacec396a05f.jpg",
+      "page": "Unverified chapter/page",
+      "beat": "The fear of seeing",
+      "crop": "Eye detail",
+      "path": "media/homunculus/real/eye.jpg",
+      "work": "Homunculus, Hideo Yamamoto",
+      "usage": "Copyright Hideo Yamamoto / Shogakukan. Local commentary draft; redistribution permission not established.",
+      "cleanup": "None; original bubbles retained",
+      "verification": "Visually inspected",
+      "language": "No text"
+    },
+    {
+      "file": "descent",
+      "sourcePage": "https://x.com/anime_panels/status/1342389133797449728",
+      "url": "https://pbs.twimg.com/media/EqEcKPuXAAAqjQb.jpg",
+      "page": "Printed page 98; source labels volume 15",
+      "beat": "A woman whose face divides between ordinary and distorted perception",
+      "crop": "Full panel; this is not Nakoshi",
+      "path": "media/homunculus/real/descent.jpg",
+      "work": "Homunculus, Hideo Yamamoto",
+      "usage": "Copyright Hideo Yamamoto / Shogakukan. Local commentary draft; redistribution permission not established.",
+      "cleanup": "None; original bubbles retained",
+      "verification": "Visually inspected",
+      "language": "English"
+    },
+    {
+      "file": "isolation",
+      "sourcePage": "https://www.pinterest.com/pin/homunculus--798544577694556196/",
+      "url": "https://i.pinimg.com/736x/df/b3/03/dfb3035194ed759324630ab42404424a.jpg",
+      "page": "Unverified chapter/page",
+      "beat": "Nakoshi alone, turned inward",
+      "crop": "Full panel",
+      "path": "media/homunculus/real/isolation.jpg",
+      "work": "Homunculus, Hideo Yamamoto",
+      "usage": "Copyright Hideo Yamamoto / Shogakukan. Local commentary draft; redistribution permission not established.",
+      "cleanup": "None; original bubbles retained",
+      "verification": "Visually inspected",
+      "language": "English"
+    }
+  ],
+  "gaps": [
+    "Exact suit-washing panel not located; opening uses Nakoshi portrait and suit/car panels."
+  ],
+  "edits": [
+    {
+      "id": "distorted",
+      "original": "media/homunculus/real/distorted.jpg",
+      "path": "media/homunculus/cleaned/distorted.png",
+      "sourcePage": "https://www.homunculusmangafree.com/manga/homunculus-chapter-5/index.html",
+      "work": "Homunculus, Hideo Yamamoto",
+      "usage": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+      "cleanup": "Lettering and punctuation inside white bubbles removed; outlines retained.",
+      "provider": "Built-in imagegen tool",
+      "verification": "Original and cleaned panel visually inspected.",
+      "prompt": "Blank all three bubbles: SAND, !?, BOMB. Preserve outlines, artwork, panel borders, page numbers and framing."
+    },
+    {
+      "id": "descent",
+      "original": "media/homunculus/real/descent.jpg",
+      "path": "media/homunculus/cleaned/descent.png",
+      "sourcePage": "https://x.com/anime_panels/status/1342389133797449728",
+      "work": "Homunculus, Hideo Yamamoto",
+      "usage": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+      "cleanup": "Lettering and punctuation inside white bubbles removed; outlines retained.",
+      "provider": "Built-in imagegen tool",
+      "verification": "Original and cleaned panel visually inspected.",
+      "prompt": "Blank all lettering in the upper-right jagged bubble. Preserve outline, tail, face, reflection, artwork and framing."
+    },
+    {
+      "id": "human",
+      "original": "media/homunculus/options/human.jpg",
+      "path": "media/homunculus/cleaned/human.png",
+      "sourcePage": "https://x.com/MikJaslol/status/1412968363278540807",
+      "work": "Homunculus, Hideo Yamamoto",
+      "usage": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+      "cleanup": "Lettering and punctuation inside white bubbles removed; outlines retained.",
+      "provider": "Built-in imagegen tool",
+      "verification": "Original and cleaned panel visually inspected.",
+      "prompt": "Blank the upper-right oval speech bubble. Preserve outline, tail, man, leaves, artwork and framing."
+    }
+  ]
+}

@@ -4,7 +4,7 @@ const catalog = await fetch('./image-options.json').then((response) => {
   return response.json();
 });
 const $ = (id) => document.getElementById(id);
-const storageKey = `creator-desk:images:${catalog.id}`;
+const storageKey = `creator-desk:images:${catalog.projectId ?? catalog.id}:${catalog.id}`;
 let saved;
 try {saved = JSON.parse(localStorage.getItem(storageKey));} catch {}
 let selection = createSelection(catalog, saved);

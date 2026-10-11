@@ -1,5 +1,6 @@
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
+import {sessionDirectory, projectPaths} from './projects.mjs';
 
 const pending = new Map();
 export async function sendSavedRequest(root, sessionId, requestId, {transport = fetch} = {}) {
@@ -12,14 +13,17 @@ export async function sendSavedRequest(root, sessionId, requestId, {transport = 
 }
 
 async function dispatchSaved(root, sessionId, requestId, transport) {
-  const directory = path.join(root,'out',sessionId,'requests');
+  const work = await sessionDirectory(root, sessionId);
+  const project = work === projectPaths(root, sessionId).work;
+  const directory = path.join(work, 'requests');
   const receiptPath = path.join(directory,`${requestId}.receipt.json`);
   try {return JSON.parse(await readFile(receiptPath,'utf8'));} catch(error) {if(error.code !== 'ENOENT') throw error;}
-  const session = JSON.parse(await readFile(path.join(root,'out',sessionId,'session.json'),'utf8'));
+  const session = JSON.parse(await readFile(path.join(work,'session.json'),'utf8'));
   const request = session.rebuildRequest;
   if (request?.id !== requestId || !request.state) throw new Error('No saved request matches this send');
   let config;
-  try {config = JSON.parse(await readFile(path.join(root,'credentials','t3.json'),'utf8'));} catch {throw new Error('The local T3 connection is not configured');}
+  const configPath = project ? path.join(root, 'credentials', 't3', `${sessionId}.json`) : path.join(root, 'credentials', 't3.json');
+  try {config = JSON.parse(await readFile(configPath,'utf8'));} catch {throw new Error(`The local T3 connection for ${sessionId} is not configured`);}
   const url = new URL(config.origin);
   if (url.protocol !== 'http:' || !['localhost','127.0.0.1','[::1]'].includes(url.hostname) || url.pathname !== '/' || url.search || url.username || url.password) throw new Error('T3 must use a local HTTP origin');
   if (!config.threadId || !config.cookie || /[\r\n]/.test(config.cookie)) throw new Error('The local T3 connection is incomplete');
@@ -28,7 +32,7 @@ async function dispatchSaved(root, sessionId, requestId, transport) {
   const snapshotPath = path.join(directory,`${requestId}.json`);
   try {await writeFile(snapshotPath,JSON.stringify(request,null,2)+'\n',{flag:'wx'});} catch(error) {if(error.code !== 'EEXIST') throw error;}
   let command = {type:'thread.turn.start',commandId:requestId,threadId:config.threadId,
-    message:{messageId:requestId,role:'user',attachments:[],text:`Creator Desk: process saved request ${requestId}. Use the repo's create-short skill. Read the frozen request at ${snapshotPath}. Apply the reviewed changes together, resolve dependencies and create a local video when the saved state supports production. Leave inactive pickers without overrides. Preserve existing exports and video history. Use existing narration where it still matches. Follow the repo's API cost rules; do not publish or add paid services. Report any missing assets or recording instead of silently substituting them.`},
+    message:{messageId:requestId,role:'user',attachments:[],text:`Creator Desk: process saved request ${requestId} for project ${sessionId}. Use the repo's create-short skill. Read the frozen request at ${snapshotPath}. Work only in this project's files and use --project ${sessionId} for production. Apply the reviewed changes together, resolve dependencies and create a local video when the saved state supports production. Leave inactive pickers without overrides. Preserve existing exports and video history. Use existing narration where it still matches. Follow the repo's API cost rules; do not publish or add paid services. Report any missing assets or recording instead of silently substituting them.`},
     runtimeMode:config.runtimeMode ?? 'full-access',interactionMode:config.interactionMode ?? 'default',createdAt:new Date().toISOString()};
   const commandPath=path.join(directory,`${requestId}.command.json`);
   try {await writeFile(commandPath,JSON.stringify(command,null,2)+'\n',{flag:'wx'});} catch(error) {

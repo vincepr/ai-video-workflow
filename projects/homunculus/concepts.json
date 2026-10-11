@@ -1,0 +1,110 @@
+{
+  "topic": "Homunculus",
+  "author": "Hideo Yamamoto",
+  "description": "Three ways into a manga about seeing people differently.",
+  "language": "English",
+  "sources": [
+    {
+      "label": "Starting point: Wikipedia",
+      "url": "https://de.wikipedia.org/wiki/Homunculus_(Manga)"
+    },
+    {
+      "label": "Publisher synopsis: Seven Seas",
+      "url": "https://sevenseasentertainment.com/series/homunculus-omnibus/"
+    },
+    {
+      "label": "Premise and altered vision: Seven Seas",
+      "url": "https://sevenseasentertainment.com/2022/11/02/seven-seas-licenses-homunculus-manga-series-omnibus-format/"
+    },
+    {
+      "label": "German edition and reading sample: Egmont",
+      "url": "https://www.egmont-shop.de/homunculus-new-edition-01/"
+    }
+  ],
+  "concepts": [
+    {
+      "id": "perception",
+      "title": "What if seeing more made you less certain?",
+      "tag": "Best first test",
+      "angle": "A spoiler-light introduction built around the gap between seeing and understanding.",
+      "spoilers": "Premise only",
+      "motif": "eye",
+      "beats": [
+        "An eye opens against darkness",
+        "An ordinary silhouette becomes fragmented",
+        "The eye returns, with the question still open"
+      ],
+      "sources": [
+        "https://sevenseasentertainment.com/2022/11/02/seven-seas-licenses-homunculus-manga-series-omnibus-format/"
+      ],
+      "drafts": [
+        {
+          "label": "Analytical",
+          "text": "What if seeing more made you less certain? In Homunculus, Nakoshi undergoes an experiment, and his left eye begins to reveal strange forms inside other people. That premise makes perception itself unsettling. My reading is that the horror comes from the distance between seeing someone and understanding them. A new image does not give him a simple answer. It gives the reader another reason to question the person doing the looking."
+        },
+        {
+          "label": "Personal",
+          "text": "The hook in Homunculus is strange enough: a man accepts an experiment, then starts seeing people differently through one eye. But what interests me is the uncertainty it creates. I keep coming back to one question: if I could see something hidden in another person, would I understand them better, or just become more confident in my own assumptions? That is the angle I want to explore, without spoiling where the story goes."
+        }
+      ]
+    },
+    {
+      "id": "car",
+      "previousTitle": "The car that holds his life together",
+      "title": "A fever dream of the human psyche",
+      "tag": "Psychological horror",
+      "angle": "Losing everything is the hook. Then comes the descent into desperation, distorted perception and human motives.",
+      "spoilers": "Opening setup",
+      "motif": "mirror",
+      "beats": [
+        "Brief opening: a man and the car he sleeps in",
+        "Faces distort as hidden fears and desires surface",
+        "A fractured reflection turns the question back on the observer"
+      ],
+      "sources": [
+        "https://sevenseasentertainment.com/series/homunculus-omnibus/",
+        "https://sevenseasentertainment.com/2022/11/02/seven-seas-licenses-homunculus-manga-series-omnibus-format/"
+      ],
+      "drafts": [
+        {
+          "label": "Analytical",
+          "previousText": "Before the strange visions, there is a car. Nakoshi lives in it, and losing it helps push him toward an experiment he initially refuses. I read that detail as the opening's emotional anchor. The car gives a huge, unsettling premise a small and concrete stake: a place to sleep, a boundary, something still his. Start the video there, and the decision that follows feels rooted in his situation rather than just in the shock of the premise.",
+          "text": "Imagine losing your job, your home, your place in the world. All you have left is your car. That is where Homunculus begins. Then an experiment turns desperation into a psychological fever dream. Faces become distorted, buried fears take shape, and looking at another person starts to feel like looking into an open wound. It digs into why people hurt, what they want, and what they hide from themselves. The unsettling part is how much of it still feels human."
+        },
+        {
+          "label": "Personal",
+          "previousText": "I would introduce Homunculus with the car. Nakoshi has very little, but he still has a place he can close around himself. When that is taken away, an offer he refused becomes harder to dismiss. For me, that makes the opening uncomfortable before anything supernatural happens. You can understand wanting one small piece of your life back. The story turns that ordinary need into the starting point for something much stranger.",
+          "text": "Imagine losing everything except the car you sleep in. You take a desperate offer, and suddenly people don't look human anymore. Homunculus takes that setup somewhere deeply uncomfortable: shame, desire, cruelty, the need to be loved. It feels like a fever dream where every bizarre image pulls you further into someone's head. Sometimes you understand them. Sometimes you wish you didn't. And somewhere along the way, you start wondering how much of the ugliness belongs to the man doing the looking."
+        }
+      ]
+    },
+    {
+      "id": "observer",
+      "title": "Can you trust the person doing the looking?",
+      "tag": "Discussion starter",
+      "angle": "An interpretation-led question about perspective, with no ending or later character spoilers.",
+      "spoilers": "Premise only",
+      "motif": "mirror",
+      "beats": [
+        "Two faces share the same outline",
+        "A mirror splits the image",
+        "The reflection remains when the observer fades"
+      ],
+      "sources": [
+        "https://sevenseasentertainment.com/2022/11/02/seven-seas-licenses-homunculus-manga-series-omnibus-format/"
+      ],
+      "drafts": [
+        {
+          "label": "Analytical",
+          "text": "A strange vision can tell you as much about the observer as the person being observed. That is a useful way to approach Homunculus. Nakoshi's altered sight is the premise; whether we should trust his interpretation is the question I would put at the center of this video. This is a reading, not a claim that every image has one fixed meaning. Let the viewer sit with the uncertainty, then ask what they think he is actually seeing."
+        },
+        {
+          "label": "Personal",
+          "text": "Here is the question I would take into Homunculus: how much of what I see in someone else comes from me? Nakoshi's unusual sight makes that question visible. I would keep this short focused on the feeling of looking at a person, deciding what their expression means, and then wondering whether I invented half the answer. No ending explained, no list of symbols decoded. Just one uncomfortable question for anyone who has read it."
+        }
+      ]
+    }
+  ],
+  "projectId": "homunculus",
+  "selectedConcept": "perception"
+}

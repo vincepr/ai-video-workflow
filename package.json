@@ -8,6 +8,8 @@
   },
   "scripts": {
     "desk": "node scripts/serve-desk.mjs",
+    "project": "node scripts/project.mjs",
+    "files": "node scripts/repository-files.mjs",
     "produce": "tsx scripts/produce.ts",
     "dev": "remotion studio src/index.tsx",
     "render": "tsx scripts/render.ts",

@@ -5,6 +5,32 @@ import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 
+test('each project sends only to its own configured T3 thread', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'project-t3-'));
+  const requestId = '9a4fec5b-d5d4-4fc6-ae92-df73acd109be';
+  const commands: any[] = [];
+  const transport: typeof fetch = async (_url, options) => {commands.push(JSON.parse(String(options?.body))); return new Response(JSON.stringify({sequence: 1}));};
+  try {
+    await mkdir(path.join(root, 'credentials', 't3'), {recursive: true});
+    for (const id of ['alpha', 'beta']) {
+      await mkdir(path.join(root, 'projects', id, 'work'), {recursive: true});
+      await writeFile(path.join(root, 'projects', id, 'project.json'), JSON.stringify({id, title: id}));
+      await writeFile(path.join(root, 'projects', id, 'work', 'session.json'), JSON.stringify({rebuildRequest: {id: requestId, state: {script: id}}}));
+      await writeFile(path.join(root, 'credentials', 't3', `${id}.json`), JSON.stringify({origin: 'http://localhost:3773', cookie: 'local-test', threadId: `${id}-thread`}));
+    }
+    await Promise.all(['alpha', 'beta'].map(id => bridge.sendSavedRequest(root, id, requestId, {transport})));
+    assert.deepEqual(commands.map(command => command.threadId).sort(), ['alpha-thread', 'beta-thread']);
+    const alpha = JSON.parse(await readFile(path.join(root, 'projects', 'alpha', 'work', 'requests', `${requestId}.json`), 'utf8'));
+    assert.equal(alpha.state.script, 'alpha');
+    await rm(path.join(root, 'credentials', 't3', 'beta.json'));
+    await writeFile(path.join(root, 'credentials', 't3.json'), JSON.stringify({origin: 'http://localhost:3773', cookie: 'wrong', threadId: 'wrong-thread'}));
+    const freshId = 'e7d60911-3dcb-47a1-96d1-1bbccf5920da';
+    await writeFile(path.join(root, 'projects', 'beta', 'work', 'session.json'), JSON.stringify({rebuildRequest: {id: freshId, state: {script: 'beta'}}}));
+    await assert.rejects(() => bridge.sendSavedRequest(root, 'beta', freshId, {transport}), /not configured/);
+    assert.equal(commands.length, 2);
+  } finally {await rm(root, {recursive: true, force: true});}
+});
+
 test('sends the frozen saved request to the configured T3 thread once, with credentials kept server-side', async () => {
   assert.equal(typeof bridge.sendSavedRequest, 'function');
   const root = await mkdtemp(path.join(tmpdir(), 'desk-t3-'));

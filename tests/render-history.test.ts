@@ -5,6 +5,24 @@ import path from 'node:path';
 import test from 'node:test';
 import {recordRender, readRenderHistory} from '../scripts/render-history.mjs';
 
+test('project render history accepts numbered exports and rejects another project\'s video', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'project-history-'));
+  try {
+    for (const id of ['alpha', 'beta']) {
+      await mkdir(path.join(root, 'projects', id, 'videos', '000001'), {recursive: true});
+      await writeFile(path.join(root, 'projects', id, 'project.json'), JSON.stringify({id, title: id}));
+      await writeFile(path.join(root, 'projects', id, 'videos', '000001', 'video.mp4'), id);
+    }
+    const output = path.join(root, 'projects', 'alpha', 'videos', '000001', 'video.mp4');
+    const record = await recordRender(root, {output, sessionId: 'alpha', episode: {title: 'Alpha', shots: []}});
+    assert.equal(record.iteration, '000001');
+    assert.equal((await readRenderHistory(root, 'alpha'))[0].status, 'available');
+    assert.deepEqual(await readRenderHistory(root, 'beta'), []);
+    await assert.rejects(() => recordRender(root, {output, sessionId: 'beta', episode: {title: 'Wrong', shots: []}}), /project/i);
+    assert.equal((await readRenderHistory(root, 'alpha'))[0].id, record.id);
+  } finally {await rm(root, {recursive: true, force: true});}
+});
+
 test('music attribution stays with the exact video, sidecars and deleted-video history', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'creator-credits-'));
   try {

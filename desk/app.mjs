@@ -2,7 +2,7 @@ import {createDraft, reviseDraft, approveDraft, approvedBrief, refreshExamples} 
 import {art} from './art.mjs';
 
 const data = await fetch('./concepts.json').then((r) => r.json());
-const storageKey = 'creator-desk:homunculus:v1';
+const storageKey = `creator-desk:concepts:${data.projectId ?? data.topic}:v1`;
 const $ = (id) => document.getElementById(id);
 let drafts = {};
 let selection = data.concepts[0].id;
@@ -93,7 +93,7 @@ $('download').onclick = () => {
   try {
     const brief = approvedBrief(draft());
     const url = URL.createObjectURL(new Blob([JSON.stringify(brief, null, 2) + '\n'], {type: 'application/json'}));
-    const link = document.createElement('a'); link.href = url; link.download = `homunculus-${selection}.brief.json`; link.click();
+    const link = document.createElement('a'); link.href = url; link.download = `${data.projectId ?? 'project'}-${selection}.brief.json`; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   } catch (error) {$('feedback').textContent = error.message;}
 };
