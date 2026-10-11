@@ -8,7 +8,8 @@ import {fileURLToPath} from 'node:url';
 export async function uploadPrivate({file, metadata, token, receipt, request = fetch}) {
   const size = (await stat(file)).size;
   const sha256 = createHash('sha256').update(await readFile(file)).digest('hex');
-  const record = {file, sha256, bytes: size, metadata, startedAt: new Date().toISOString(), state: 'started'};
+  const requestedStatus = {privacyStatus: 'private', selfDeclaredMadeForKids: false, containsSyntheticMedia: true};
+  const record = {file, sha256, bytes: size, metadata, requestedStatus, startedAt: new Date().toISOString(), state: 'started'};
   await writeFile(receipt, JSON.stringify(record, null, 2) + '\n', {flag: 'wx', mode: 0o600});
   const save = async () => writeFile(receipt, JSON.stringify(record, null, 2) + '\n', {mode: 0o600});
   const url = new URL('https://www.googleapis.com/upload/youtube/v3/videos');
@@ -17,7 +18,7 @@ export async function uploadPrivate({file, metadata, token, receipt, request = f
     const init = await request(url.toString(), {method: 'POST', headers: {
       Authorization: `Bearer ${token}`, 'Content-Type': 'application/json',
       'X-Upload-Content-Type': 'video/mp4', 'X-Upload-Content-Length': String(size)},
-    body: JSON.stringify({snippet: metadata, status: {privacyStatus: 'private', selfDeclaredMadeForKids: false}}),
+    body: JSON.stringify({snippet: metadata, status: requestedStatus}),
     signal: AbortSignal.timeout(30_000)});
     if (!init.ok) throw new Error(`Upload initialization failed (HTTP ${init.status}).`);
     const sessionUrl = init.headers.get('location');

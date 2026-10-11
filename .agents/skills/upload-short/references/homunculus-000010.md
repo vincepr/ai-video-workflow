@@ -7,6 +7,7 @@ User requested the selected finished version, metadata and tags, without release
 - Connected channel returned by YouTube: WorthyALook, ID `UCPhAz1QPh5hfk6wrL9WBp2g`. The local creative context calls the brand HiddenPicks; do not assume that is the live channel name.
 - Current title: He Sees What Everyone Hides. It’s a Curse. | Homunculus.
 - Category: Entertainment (`24`). Video and audio language: English (`en`). Audience: not made for kids.
+- AI disclosure: Yes (`status.containsSyntheticMedia: true`), explicitly required by the user. The initial upload omitted it; this was corrected in Studio and in the API helper for future uploads.
 - Source: `projects/homunculus/videos/000010-homunculus-the-day-we-met-by-aeris/video.mp4`.
 - Exact metadata: `projects/homunculus/work/uploads/000010-youtube.metadata.json`.
 - Local receipt: `projects/homunculus/work/uploads/000010-youtube.receipt.json`, including file hash, returned metadata and the upload session. Never print its sessionUrl or commit the receipt.

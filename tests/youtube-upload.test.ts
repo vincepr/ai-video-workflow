@@ -23,6 +23,7 @@ test('upload sends the selected bytes privately with metadata and saves a confir
         const body = JSON.parse(String(options?.body));
         assert.equal(body.status.privacyStatus, 'private');
         assert.equal(body.status.selfDeclaredMadeForKids, false);
+        assert.equal(body.status.containsSyntheticMedia, true);
         assert.equal(body.status.publishAt, undefined);
         assert.deepEqual(body.snippet, metadata);
         return new Response(null, {status: 200, headers: {Location: 'https://www.googleapis.com/upload/youtube/v3/videos?upload_id=test'}});
@@ -39,6 +40,7 @@ test('upload sends the selected bytes privately with metadata and saves a confir
     assert.equal(result.videoId, 'video-id');
     assert.equal(result.privacyStatus, 'private');
     const saved = JSON.parse(await readFile(receipt, 'utf8'));
+    assert.equal(saved.requestedStatus.containsSyntheticMedia, true);
     assert.equal(saved.channelId, 'channel-id');
     assert.equal(saved.metadata.description, metadata.description);
     assert.ok(!JSON.stringify(saved).includes('local-token'));

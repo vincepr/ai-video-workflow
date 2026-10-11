@@ -2,6 +2,8 @@
 
 Use only after the user identifies the selected finished video and requests an upload. "Without releasing" means private, with no publication schedule. The helper fixes private visibility, not-made-for-kids status and no subscriber notification; it is intended for this adult manga commentary workflow. Review audience suitability before using it for a different type of video.
 
+The user explicitly requires AI disclosure to be Yes for this workflow. The helper includes `status.containsSyntheticMedia: true` in the initial videos.insert request and records it under requestedStatus in the receipt. This is a status field, not a snippet tag or a description disclaimer. Verify Yes under Studio's Verwendung von KI section. For existing videos, use Studio with the current upload-only authorization; a status API update requires broader OAuth permission. Preserve privacy when making the correction. See [videos.insert](https://developers.google.com/youtube/v3/docs/videos/insert).
+
 Read the numbered export's context.md, video.mp4.description.txt, video.mp4.release.json and frozen episode. Build a viewer-facing title, synopsis, author credit, relevant tags and a few hashtags. Preserve required music attribution exactly. Keep private production notes out of the description. Check music restrictions against the requested use; attribution does not establish panel or narration rights.
 
 Save snippet metadata as `projects/<id>/work/uploads/<iteration>-youtube.metadata.json`: title, description, tags, categoryId, defaultLanguage and optional defaultAudioLanguage. English entertainment commentary currently uses categoryId `24` and language `en`; choose values for the actual content.
