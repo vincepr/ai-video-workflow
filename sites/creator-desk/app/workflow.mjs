@@ -21,6 +21,21 @@ export function reviseDraft(draft, changes) {
   return {...draft, ...changes, approval: null};
 }
 
+export function refreshExamples(drafts, concepts) {
+  const refreshed = {...drafts};
+  for (const concept of concepts) {
+    concept.drafts.forEach((example, variant) => {
+      const key = `${concept.id}:${variant}`;
+      const saved = refreshed[key];
+      if (saved && !saved.approval && !saved.notes && saved.title === concept.previousTitle &&
+          example.previousText && saved.script === example.previousText) {
+        refreshed[key] = {...createDraft(concept, variant), seconds: saved.seconds};
+      }
+    });
+  }
+  return refreshed;
+}
+
 function snapshot(draft) {
   const {approval, ...content} = draft;
   return JSON.stringify(content);

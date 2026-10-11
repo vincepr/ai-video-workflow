@@ -1,4 +1,4 @@
-import {createDraft, reviseDraft, approveDraft, approvedBrief} from './workflow.mjs';
+import {createDraft, reviseDraft, approveDraft, approvedBrief, refreshExamples} from './workflow.mjs';
 import {art} from './art.mjs';
 
 const data = await fetch('./concepts.json').then((r) => r.json());
@@ -14,6 +14,7 @@ try {
     if (![0, 1].includes(variant) || !drafts || typeof drafts !== 'object') throw new Error('Invalid saved draft');
   }
 } catch {drafts = {}; selection = data.concepts[0].id; variant = 0;}
+drafts = refreshExamples(drafts, data.concepts);
 
 const concept = () => data.concepts.find((c) => c.id === selection);
 const draftKey = () => `${selection}:${variant}`;
