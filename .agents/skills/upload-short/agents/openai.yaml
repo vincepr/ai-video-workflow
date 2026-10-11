@@ -1,0 +1,5 @@
+interface:
+  display_name: "Upload a short"
+  short_description: "Set up access and upload an explicitly selected video"
+policy:
+  allow_implicit_invocation: false
