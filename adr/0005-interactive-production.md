@@ -11,7 +11,7 @@ Research the relevant plot arc before proposing concepts. A publisher synopsis a
 
 Store drafts in browser storage, with separate drafts per concept and commentary option. The static private Site has no API key and makes no model requests. The agent reads the current draft through the shared browser. Downloads are an optional fallback. Drafts do not sync across devices or origins.
 
-Refine the selected angle using browser draft updates and local checkpoints. Deployments are for Site changes or requested updates to published examples. Do not rewrite the page, regenerate every option or reread all research for each wording change.
+Refine the selected angle using local browser draft updates and checkpoints. Do not rewrite the page, regenerate every option or reread all research for each wording change. ADR 0007 replaces hosted review with the local desk.
 
 Require approval of the exact draft before production. Changes to the draft clear approval. Validate the approval snapshot again in the production command. Approval in the desk does not start a background render; the agent starts production when asked.
 
@@ -21,7 +21,7 @@ Review images in Creator Desk with three candidates per visual beat and source, 
 
 ## Reason
 
-An interactive review makes editorial decisions visible before generating media or spending credit. The local renderer can remain simple while the desk is hosted privately.
+An interactive review makes editorial decisions visible before generating media or spending credit. Keeping review and rendering local gives the desk access to saved state and media.
 
 ## Validation
 

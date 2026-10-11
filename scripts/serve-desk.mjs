@@ -4,7 +4,7 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 import {handleSessionRequest} from './desk-session.mjs';
 
 const files = new Map([
-  ['/', ['index.html', 'text/html']], ['/index.html', ['index.html', 'text/html']],
+  ['/', ['session.html', 'text/html']], ['/index.html', ['index.html', 'text/html']],
   ['/app.mjs', ['app.mjs', 'text/javascript']], ['/workflow.mjs', ['workflow.mjs', 'text/javascript']],
   ['/art.mjs', ['art.mjs', 'text/javascript']], ['/style.css', ['style.css', 'text/css']],
   ['/concepts.json', ['concepts.json', 'application/json']],

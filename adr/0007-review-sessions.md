@@ -15,7 +15,7 @@ Save review versions as independent copies of draft state. Restore a version wit
 
 Browser previews demonstrate style without rendering. Verify that production implements the reviewed settings; a saved preference is not proof that a renderer used it. Word captions require timings from the selected recording.
 
-Keep the hosted desk static. The local desk saves `out/<session>/session.json`, serves registered videos and checks file availability. Keep media local and ignored. Hosted history cannot check local deletions and must say so.
+Use the local desk at localhost:4173 for review. It saves `out/<session>/session.json`, serves registered videos and checks file availability. Keep media and versions local and ignored. Stop deploying desk updates; the previous hosted copy is outside the workflow.
 
 After successful rendering, save an immutable record under `out/render-history/<session>/` with the episode, supplied picker snapshot, renderer identity and file fingerprint. Later picker edits never change that record. Deleted or replaced videos remain listed and greyed out. Older imports retain their episode data without inventing missing picker state.
 
@@ -25,4 +25,4 @@ One review loop avoids separate workflows for every creative choice. Saved rende
 
 ## Validation
 
-Check inactive defaults, change and dependency indicators, reset, rebuild snapshots, version restoration and unchanged video history. Check choice persistence, added comparisons, image enlargement and unchanged narration after rearrangement. Verify deletion, replacement, range playback and snapshot immutability. Confirm the hosted page distinguishes local-only files. Inspect effective render settings before production.
+Check that the local root opens the session and the skill starts it without deployment. Check inactive defaults, change and dependency indicators, reset, rebuild snapshots, version restoration and unchanged video history. Check choice persistence, added comparisons, image enlargement and unchanged narration after rearrangement. Verify deletion, replacement, range playback and snapshot immutability. Inspect effective render settings before production.

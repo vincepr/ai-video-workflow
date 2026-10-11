@@ -37,13 +37,13 @@ The sample is a silent, 9-second motion test using an original SVG. Anime footag
 
 Ask the agent to use `create-short` with a topic or link. It researches the topic and opens Creator Desk with three video concepts and two commentary drafts each. Choose an angle, edit or leave notes, and ask the agent to revise. Approve the final draft, then say “Make the approved draft.” The repo's `source-images` skill finds and inspects real panels; speech-bubble cleanup is optional after the first draft.
 
-The [Homunculus desk](https://homunculus-creator-desk.muddytitan6.chatgpt.site) is private. `npm run desk` opens the same tool locally at localhost:4173. Drafts stay in that browser and origin; they do not sync between the local and hosted pages.
+Run `npm run desk` and open [Creator Desk](http://localhost:4173/). Review stays local, including versions, picker state, video playback and file availability. The agent starts the server and opens the page for you. The previous hosted page is no longer part of the workflow; do not deploy desk updates.
 
-Use `session.html` for review and video history. Add optional pickers only when needed; inactive pickers have no effect. Tabs indicate pending changes and dependencies. Reset discards a tab's pending choices. Save or restore review versions at the top right without changing Videos. Browser previews do not render a video. Local sessions save under `out/homunculus/session.json`; hosted choices stay in that browser.
+Add optional pickers only when needed; inactive pickers have no effect. Tabs indicate pending changes and dependencies. Reset discards a tab's pending choices. Save or restore review versions at the top right without changing Videos. Browser previews do not render a video. Sessions save under `out/homunculus/session.json` and in the local browser.
 
 “Rebuild with changes” saves a frozen request for the agent. It cannot start an agent turn; ask the agent to process it. The applied state changes only after a matching video has been rendered and inspected.
 
-The local Videos tab plays registered renders and greys out deleted or replaced files while preserving their snapshots. The hosted list contains metadata only. For a reviewed render, pass `--session out/homunculus/session.json` after the output path to save the picker snapshot alongside the actual episode. See ADR 0007.
+The Videos tab plays registered renders and greys out deleted or replaced files while preserving their snapshots. For a reviewed render, pass `--session out/homunculus/session.json` after the output path to save the picker snapshot alongside the actual episode. See ADR 0007.
 
 `npm run produce -- out/approved-brief.json --assets out/homunculus/images.json` uses selected panels, a local Windows English scratch voice and writes an MP4 under `out/homunculus-<concept>/`. The skill reads the approved brief from the shared browser. Use `--silent` for a visual-only draft, `--prepare-only` to prepare files or `--symbolic` instead of `--assets` for a smoke test. Narration determines duration; captions use approximate timing.
 

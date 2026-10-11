@@ -15,7 +15,9 @@ test('the desk serves its page and modules without exposing repository files', a
   try {
     const page = await fetch(origin);
     assert.equal(page.status, 200);
-    assert.match(await page.text(), /Creator Desk/);
+    const html = await page.text();
+    assert.match(html, /Creator Desk/);
+    assert.match(html, /id="review-version"/);
     assert.equal((await fetch(origin + '/workflow.mjs')).status, 200);
     assert.equal((await fetch(origin + '/images.html')).status, 200);
     assert.equal((await fetch(origin + '/image-selection.mjs')).status, 200);
