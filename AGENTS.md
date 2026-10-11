@@ -8,4 +8,5 @@
 - Run `npm run check`. Render and inspect a sample when visuals change.
 - Record important decisions in adr/ with a validation method.
 - Keep credentials, source media and rendered output out of Git.
-- Publishing and paid services require an explicit request.
+- Use OpenRouter sparingly. Follow adr/0004-api-costs.md before making requests.
+- Publishing and adding other paid services require an explicit request.
