@@ -39,7 +39,9 @@ Ask the agent to use `create-short` with a topic or link. It researches the topi
 
 The [Homunculus desk](https://homunculus-creator-desk.muddytitan6.chatgpt.site) is private. `npm run desk` opens the same tool locally at localhost:4173. Drafts stay in that browser and origin; they do not sync between the local and hosted pages.
 
-Use `session.html` for commentary, images, motion, captions, voice and video history. Add tabs for other comparisons. Browser previews do not render a video. Local sessions also save under `out/homunculus/session.json`; hosted choices stay in that browser.
+Use `session.html` for review and video history. Add optional pickers only when needed; inactive pickers have no effect. Tabs indicate pending changes and dependencies. Reset discards a tab's pending choices. Save or restore review versions at the top right without changing Videos. Browser previews do not render a video. Local sessions save under `out/homunculus/session.json`; hosted choices stay in that browser.
+
+“Rebuild with changes” saves a frozen request for the agent. It cannot start an agent turn; ask the agent to process it. The applied state changes only after a matching video has been rendered and inspected.
 
 The local Videos tab plays registered renders and greys out deleted or replaced files while preserving their snapshots. The hosted list contains metadata only. For a reviewed render, pass `--session out/homunculus/session.json` after the output path to save the picker snapshot alongside the actual episode. See ADR 0007.
 

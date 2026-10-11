@@ -7,7 +7,11 @@ Date: 2026-10-11
 
 Use `create-short` as the shared workflow. Keep picker details in short references and load only the relevant one. Iterate by reading current choices, offering options, revising one picker and saving a checkpoint before production.
 
-Use a session page with tabs for commentary, images, motion, captions, voice and videos. Extra comparisons can be added as named tabs with options and notes. Preserve choices across reloads. Image arrangement changes image placement, not narration order.
+Videos comes first and has a distinct style. Commentary and images form the core review. Add optional pickers only on request, with no initial choice. Grey placeholders may advertise inactive pickers; they have no effect on production. Reset an optional picker to no override, or a core picker to its applied state.
+
+Compare draft choices with the last applied state and show changes per tab. Commentary changes flag images and voice for review. A global rebuild request freezes all pending choices together. Saving a request never marks it applied or starts an agent turn. Mark applied only after inspecting the matching rendered video.
+
+Save review versions as independent copies of draft state. Restore a version without replacing the applied baseline or video history. Preserve the working draft before restoring. Video records contain their own snapshots and do not depend on review versions. Image arrangement changes image placement, not narration order.
 
 Browser previews demonstrate style without rendering. Verify that production implements the reviewed settings; a saved preference is not proof that a renderer used it. Word captions require timings from the selected recording.
 
@@ -21,4 +25,4 @@ One review loop avoids separate workflows for every creative choice. Saved rende
 
 ## Validation
 
-Check tab and choice persistence, added comparisons, image enlargement and unchanged narration after rearrangement. Verify file deletion and replacement status, range playback and snapshot immutability. Confirm the hosted page distinguishes local-only files from deleted files. Inspect effective render settings before production.
+Check inactive defaults, change and dependency indicators, reset, rebuild snapshots, version restoration and unchanged video history. Check choice persistence, added comparisons, image enlargement and unchanged narration after rearrangement. Verify deletion, replacement, range playback and snapshot immutability. Confirm the hosted page distinguishes local-only files. Inspect effective render settings before production.

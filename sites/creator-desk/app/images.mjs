@@ -93,6 +93,9 @@ $('download-images').onclick = () => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 $('close-image').onclick = () => $('image-dialog').close();
-window.creatorDesk = {getImageSelection: () => exportSelection(selection, catalog)};
+window.creatorDesk = {
+  getImageSelection: () => exportSelection(selection, catalog),
+  setImageSelection: (value) => {selection = createSelection(catalog, value?.selection ?? value); $('image-notes').value = selection.notes; render(); save();},
+};
 if (new URLSearchParams(location.search).has('embedded')) document.body.classList.add('embedded');
 render(); save();

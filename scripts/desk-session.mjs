@@ -30,7 +30,7 @@ export async function handleSessionRequest(request, response, {root, sessionId})
         const chunks = []; let bytes = 0;
         for await (const chunk of request) {
           bytes += chunk.length;
-          if (bytes > 256 * 1024) {json(response, 413, {error: 'Session is too large'}); return true;}
+          if (bytes > 2 * 1024 * 1024) {json(response, 413, {error: 'Session is too large'}); return true;}
           chunks.push(chunk);
         }
         let session;

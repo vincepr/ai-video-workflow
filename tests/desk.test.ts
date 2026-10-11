@@ -51,6 +51,10 @@ test('the local session persists choices and serves only registered videos with 
     assert.equal((await fetch(origin + '/api/renders/unknown/video')).status, 404);
     const crossOrigin = await fetch(origin + '/api/session', {method: 'POST', headers: {'Content-Type': 'application/json', Origin: 'https://example.com'}, body: JSON.stringify(session)});
     assert.equal(crossOrigin.status, 403);
+    const withVersions = {...session, versions: [{state: {script: 'x'.repeat(300 * 1024)}}]};
+    const versionSave = await fetch(origin + '/api/session', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(withVersions)});
+    assert.equal(versionSave.status, 200);
+    assert.deepEqual((await fetch(origin + '/api/session').then(response => response.json())).session, withVersions);
     await rm(output);
     const updated = await fetch(origin + '/api/session').then((response) => response.json());
     assert.equal(updated.history[0].status, 'deleted');
