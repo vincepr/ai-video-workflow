@@ -1,0 +1,28 @@
+{
+  "name": "ai-video-workflow",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "remotion studio src/index.tsx",
+    "render": "tsx scripts/render.ts",
+    "test": "tsx --test tests/*.test.ts",
+    "check": "tsc --noEmit && npm test && node scripts/check-repo.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.534",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "remotion": "4.0.534"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
+  }
+}

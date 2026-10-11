@@ -1,0 +1,32 @@
+{
+  "title": "A moment between panels",
+  "shots": [
+    {
+      "image": "sample/panel.svg",
+      "seconds": 3,
+      "text": "Start with the whole scene.",
+      "from": [50, 0, 1],
+      "to": [50, 35, 1.08],
+      "source": "Original geometric artwork in public/sample/panel.svg",
+      "rights": "Created for this repository; no third-party source material."
+    },
+    {
+      "image": "sample/panel.svg",
+      "seconds": 3,
+      "text": "Let the eye find a detail.",
+      "from": [40, 40, 1.15],
+      "to": [60, 65, 1.3],
+      "source": "Original geometric artwork in public/sample/panel.svg",
+      "rights": "Created for this repository; no third-party source material."
+    },
+    {
+      "image": "sample/panel.svg",
+      "seconds": 3,
+      "text": "Leave room for the next beat.",
+      "from": [50, 75, 1.2],
+      "to": [50, 100, 1],
+      "source": "Original geometric artwork in public/sample/panel.svg",
+      "rights": "Created for this repository; no third-party source material."
+    }
+  ]
+}
