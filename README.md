@@ -50,6 +50,8 @@ Shared media includes music, effects, images, fonts and brand assets. Every libr
 
 Optional episode music contains audio, volume, title, artist, source, license and exact attribution. Narration stays separate. Music fades at both ends, and its credits stay with the numbered video as .description.txt and .release.json and in render history.
 
+Finished versions also include context.md for a later upload session: topic, commentary, creative choices, asset paths and open questions. The adjacent .description.txt contains a public synopsis and required credits. Keep it consistent with release metadata and history; private context stays separate. See ADR 0013.
+
 ## Interactive workflow and parallel work
 
 Ask the agent to use create-short with a topic or link. It handles project setup, research and review choices. Refine commentary and images before production. Add optional pickers only on request; inactive pickers have no effect. Save creates a review version. Save & send to T3 also requests production of that frozen version. Changes become applied only after a matching render is inspected.
