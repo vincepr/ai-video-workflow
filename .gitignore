@@ -46,6 +46,7 @@ credentials/
 *.png
 *.PNG
 !/hiddenpicks-profile.png
+!/hiddenpicks-banner.png
 *.jpg
 *.JPG
 *.jpeg
