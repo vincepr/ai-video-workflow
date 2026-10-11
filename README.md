@@ -39,7 +39,9 @@ Ask the agent to use `create-short` with a topic or link. It researches the topi
 
 The [Homunculus desk](https://homunculus-creator-desk.muddytitan6.chatgpt.site) is private. `npm run desk` opens the same tool locally at localhost:4173. Drafts stay in that browser and origin; they do not sync between the local and hosted pages.
 
-Use `images.html` in the desk to compare three panels per visual beat, enlarge them, save choices and reorder images over the existing narration. Image choices stay separate from production; tell the agent when to use them.
+Use `session.html` for commentary, images, motion, captions, voice and video history. Add tabs for other comparisons. Browser previews do not render a video. Local sessions also save under `out/homunculus/session.json`; hosted choices stay in that browser.
+
+The local Videos tab plays registered renders and greys out deleted or replaced files while preserving their snapshots. The hosted list contains metadata only. For a reviewed render, pass `--session out/homunculus/session.json` after the output path to save the picker snapshot alongside the actual episode. See ADR 0007.
 
 `npm run produce -- out/approved-brief.json --assets out/homunculus/images.json` uses selected panels, a local Windows English scratch voice and writes an MP4 under `out/homunculus-<concept>/`. The skill reads the approved brief from the shared browser. Use `--silent` for a visual-only draft, `--prepare-only` to prepare files or `--symbolic` instead of `--assets` for a smoke test. Narration determines duration; captions use approximate timing.
 

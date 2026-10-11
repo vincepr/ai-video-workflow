@@ -68,3 +68,6 @@ credentials/
 *.log
 .DS_Store
 Thumbs.db
+
+# Exported local render history for the hosted desk
+/sites/creator-desk/app/session-history.json

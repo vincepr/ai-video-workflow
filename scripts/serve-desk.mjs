@@ -1,6 +1,7 @@
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
-import {pathToFileURL} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
+import {handleSessionRequest} from './desk-session.mjs';
 
 const files = new Map([
   ['/', ['index.html', 'text/html']], ['/index.html', ['index.html', 'text/html']],
@@ -10,10 +11,14 @@ const files = new Map([
   ['/images.html', ['images.html', 'text/html']], ['/images.css', ['images.css', 'text/css']],
   ['/images.mjs', ['images.mjs', 'text/javascript']], ['/image-selection.mjs', ['image-selection.mjs', 'text/javascript']],
   ['/image-options.json', ['image-options.json', 'application/json']],
+  ['/session.html', ['session.html', 'text/html']], ['/session.css', ['session.css', 'text/css']],
+  ['/session.mjs', ['session.mjs', 'text/javascript']], ['/review-session.mjs', ['review-session.mjs', 'text/javascript']],
+  ['/session-history.json', ['session-history.json', 'application/json']],
 ]);
 
-export function createDeskServer() {
+export function createDeskServer({root = fileURLToPath(new URL('../', import.meta.url)), sessionId = 'homunculus'} = {}) {
   return createServer(async (request, response) => {
+    if (await handleSessionRequest(request, response, {root, sessionId})) return;
     if (!['GET', 'HEAD'].includes(request.method)) {response.writeHead(405); response.end(); return;}
     const pathname = new URL(request.url, 'http://localhost').pathname;
     const entry = files.get(pathname) ?? (/^\/panel-options\/[a-z-]+\.jpg$/.test(pathname)

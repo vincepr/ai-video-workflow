@@ -10,6 +10,10 @@ try {saved = JSON.parse(localStorage.getItem(storageKey));} catch {}
 let selection = createSelection(catalog, saved);
 let draggedIndex;
 const selectedOption = (beat) => beat.options.find((option) => option.id === selection.choices[beat.id]);
+function enlarge(option) {
+  $('large-image').src = option.preview; $('large-image').alt = option.title;
+  $('large-image-title').textContent = option.title; $('image-dialog').showModal();
+}
 function save() {
   try {localStorage.setItem(storageKey, JSON.stringify(selection));}
   catch {$('image-feedback').textContent = 'Browser storage is unavailable. Download the selection to keep it.';}
@@ -33,13 +37,17 @@ function render() {
     const option = selectedOption(beat);
     const li = element('li', '', 'sequence-item'); li.draggable = true;
     const image = element('img'); image.src = option.preview; image.alt = option.title;
+    image.draggable = false;
+    const enlargeImage = button('', () => enlarge(option), 'sequence-enlarge');
+    enlargeImage.setAttribute('aria-label', `Enlarge sequence image ${index + 1}`);
+    enlargeImage.append(image);
     const controls = element('div', '', 'sequence-controls');
     const up = button('←', () => changeOrder(index, index - 1)); up.disabled = index === 0;
     up.setAttribute('aria-label', `Move image ${index + 1} earlier`);
     const down = button('→', () => changeOrder(index, index + 1)); down.disabled = index === selection.order.length - 1;
     down.setAttribute('aria-label', `Move image ${index + 1} later`);
     controls.append(up, down);
-    li.append(image, element('strong', `${index + 1}. ${option.title}`), controls, element('p', catalog.beats[index].commentary));
+    li.append(enlargeImage, element('strong', `${index + 1}. ${option.title}`), controls, element('p', catalog.beats[index].commentary));
     li.ondragstart = (event) => {draggedIndex = index; event.dataTransfer.setData('text/plain', String(index));};
     li.ondragover = (event) => event.preventDefault();
     li.ondrop = (event) => {event.preventDefault(); if (Number.isInteger(draggedIndex)) changeOrder(draggedIndex, index); draggedIndex = undefined;};
@@ -54,12 +62,9 @@ function render() {
     options.append(...beat.options.map((option, optionIndex) => {
       const chosen = selection.choices[beat.id] === option.id;
       const card = element('article', '', `image-option${chosen ? ' selected' : ''}`);
-      const enlarge = button('', () => {
-        $('large-image').src = option.preview; $('large-image').alt = option.title;
-        $('large-image-title').textContent = option.title; $('image-dialog').showModal();
-      }, 'option-image');
-      enlarge.setAttribute('aria-label', `Enlarge ${option.title}`);
-      const image = element('img'); image.src = option.preview; image.alt = option.title; image.loading = 'lazy'; enlarge.append(image);
+      const enlargeButton = button('', () => enlarge(option), 'option-image');
+      enlargeButton.setAttribute('aria-label', `Enlarge ${option.title}`);
+      const image = element('img'); image.src = option.preview; image.alt = option.title; image.loading = 'lazy'; enlargeButton.append(image);
       const copy = element('div', '', 'option-copy');
       const link = element('a', 'Source ↗'); link.href = option.source; link.target = '_blank'; link.rel = 'noopener noreferrer';
       const pick = button(chosen ? 'Selected ✓' : 'Choose this image', () => {
@@ -69,7 +74,7 @@ function render() {
       pick.setAttribute('aria-pressed', String(chosen)); pick.setAttribute('aria-label', `Choose ${option.title}`);
       copy.append(element('h3', `${String.fromCharCode(65 + optionIndex)} / ${option.title}`), element('p', option.fit),
         element('p', `${option.language}. ${option.note}`, 'option-meta'), link, pick);
-      card.append(enlarge, copy); return card;
+      card.append(enlargeButton, copy); return card;
     }));
     section.append(options); return section;
   }));
@@ -89,4 +94,5 @@ $('download-images').onclick = () => {
 };
 $('close-image').onclick = () => $('image-dialog').close();
 window.creatorDesk = {getImageSelection: () => exportSelection(selection, catalog)};
+if (new URLSearchParams(location.search).has('embedded')) document.body.classList.add('embedded');
 render(); save();
