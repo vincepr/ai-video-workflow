@@ -3,6 +3,7 @@ import {mkdir, readFile, rename, stat, writeFile} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
 import path from 'node:path';
 import {readRenderHistory, resolveRenderPath} from './render-history.mjs';
+import {sendSavedRequest} from './t3-bridge.mjs';
 
 function json(response, status, value) {
   response.writeHead(status, {'Content-Type': 'application/json', 'Cache-Control': 'no-store'});
@@ -12,6 +13,19 @@ function json(response, status, value) {
 export async function handleSessionRequest(request, response, {root, sessionId}) {
   const pathname = new URL(request.url, 'http://localhost').pathname;
   if (!pathname.startsWith('/api/')) return false;
+  if (pathname === '/api/session/send') {
+    if (request.method !== 'POST') {json(response,405,{error:'Expected POST'});return true;}
+    if (request.headers.origin && request.headers.origin !== `http://${request.headers.host}`) {json(response,403,{error:'Origin does not match the local desk'});return true;}
+    if (!request.headers['content-type']?.startsWith('application/json')) {json(response,415,{error:'Expected JSON'});return true;}
+    const chunks=[];let bytes=0;
+    for await(const chunk of request) {bytes+=chunk.length;if(bytes>1024){json(response,413,{error:'Send request is too large'});return true;}chunks.push(chunk);}
+    let body;
+    try {body=JSON.parse(Buffer.concat(chunks).toString('utf8'));} catch {json(response,400,{error:'Invalid JSON'});return true;}
+    if(typeof body?.requestId!=='string'){json(response,400,{error:'Missing saved request ID'});return true;}
+    try {json(response,200,await sendSavedRequest(root,sessionId,body.requestId));}
+    catch(error){json(response,502,{error:error.message});}
+    return true;
+  }
   try {
     const history = await readRenderHistory(root, sessionId);
     const sessionPath = path.join(root, 'out', sessionId, 'session.json');

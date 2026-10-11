@@ -70,7 +70,8 @@ export function initializeReview(session) {
 export function pendingChanges(session) {
   const applied = session.applied ?? draftState(session);
   const changed = [];
-  if (session.script !== applied.script) changed.push('commentary');
+  const scriptChanged=session.script !== applied.script;
+  if (scriptChanged || session.notes !== applied.notes) changed.push('commentary');
   for (const key of ['images', 'motion', 'captions', 'voice']) {
     if (JSON.stringify(session[key]) !== JSON.stringify(applied[key])) changed.push(key);
   }
@@ -78,7 +79,7 @@ export function pendingChanges(session) {
     if (tab.choice === null && !applied.extraTabs.find((item) => item.id === tab.id)?.choice) continue;
     if (JSON.stringify(tab) !== JSON.stringify(applied.extraTabs.find((item) => item.id === tab.id))) changed.push(tab.id);
   }
-  return {changed, review: changed.includes('commentary') ? ['images', 'voice'] : []};
+  return {changed, review: scriptChanged ? ['images', 'voice'] : []};
 }
 export function resetPicker(session, id) {
   const next = {...session, rebuildRequest: null};

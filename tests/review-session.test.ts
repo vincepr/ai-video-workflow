@@ -90,3 +90,12 @@ test('finishing a rebuild applies its frozen state and preserves edits made afte
   assert.deepEqual(review.pendingChanges(session).changed, ['commentary']);
   assert.equal(session.lastAppliedRender, 'render-id');
 });
+
+test('commentary notes can be saved and sent without inventing a changed script', () => {
+  let session=review.initializeReview(createReviewSession({id:'test',title:'Test',script:'Original'}));
+  session.notes='Make the opening shorter';
+  assert.deepEqual(review.pendingChanges(session),{changed:['commentary'],review:[]});
+  const request=review.requestRebuild(session);
+  assert.equal(request.rebuildRequest.state.notes,'Make the opening shorter');
+  assert.equal(request.rebuildRequest.state.script,'Original');
+});

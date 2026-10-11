@@ -12,7 +12,7 @@
   <header class="topbar"><a href="session.html" class="brand"><span class="brand-mark">◒</span> Creator Desk</a><span class="project-label">HOMUNCULUS / SESSION</span><span id="save-status" class="quiet" role="status">Loading choices</span></header>
   <main class="session-main">
     <div class="session-heading"><div><p class="eyebrow">ONE SESSION, SEPARATE CHOICES</p><h1>Nakoshi's descent</h1><p class="lede">Stage changes together. Videos keep their own snapshots.</p></div><div class="version-controls"><label for="review-version">Review version</label><select id="review-version"><option value="">Working draft</option></select><button id="download-session" class="secondary" type="button">Download session</button></div></div>
-    <div class="session-tab-bar"><button id="rebuild-session" class="primary" type="button">Generate</button><nav id="session-tabs" class="session-tabs" role="tablist" aria-label="Session pickers"></nav></div>
+    <div class="session-tab-bar"><div class="session-save-actions"><button id="save-session" class="secondary" type="button">Save</button><button id="rebuild-session" class="primary" type="button">Save &amp; send to T3</button></div><nav id="session-tabs" class="session-tabs" role="tablist" aria-label="Session pickers"></nav></div>
     <div class="review-toolbar"><p id="change-summary" role="status"></p></div>
     <p id="rebuild-status" class="hint" role="status"></p>
     <section id="panel-inactive" class="session-panel" role="tabpanel" hidden><h2 id="inactive-title"></h2><p class="hint">No choices made. This picker does not change the current video.</p><button id="enable-picker" class="secondary" type="button">Add this picker</button></section>
@@ -24,7 +24,7 @@
     <section id="panel-videos" class="session-panel" role="tabpanel" hidden><div class="section-heading"><h2>Generated videos</h2><button id="refresh-history" class="secondary" type="button">Refresh files</button></div><p id="history-note" class="hint"></p><div id="render-history" class="render-history"></div></section>
     <section id="panel-extra" class="session-panel" role="tabpanel" hidden></section>
     <section id="panel-add" class="session-panel" role="tabpanel" hidden><h2>Add a comparison</h2><p class="hint">Add only the choices you want to explore. No option is selected automatically.</p><div id="optional-pickers" class="picker-cards"></div><form id="add-comparison"><label for="comparison-label">Tab name</label><input id="comparison-label" maxlength="60" required><label for="comparison-options">Options, one per line</label><textarea id="comparison-options" rows="4" required placeholder="Silence&#10;Quiet ambience"></textarea><button class="primary" type="submit">Add tab</button><p id="comparison-error" role="status"></p></form></section>
-    <p class="session-footer">Choices save as you work. Tell the agent when to render a reviewed version; these controls do not start production.</p>
+    <p class="session-footer">Edits autosave the working draft. Save creates a version. Save &amp; send to T3 also asks the connected thread to process that version.</p>
   </main>
   <script type="module" src="session.mjs"></script>
 </body>

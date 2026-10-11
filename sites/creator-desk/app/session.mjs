@@ -2,7 +2,7 @@ import {createReviewSession, updatePicker, addComparison, pickerOptions, session
 const [catalog, concepts] = await Promise.all(['image-options.json', 'concepts.json'].map((file) => fetch(file).then((response) => response.json())));
 const $ = (id) => document.getElementById(id);
 const storageKey = `creator-desk:session:${catalog.id}`;
-let local = false, saved, history = [], saveTimer, sampleTick = 0, paused = false;
+let local = false, saved, history = [], saveTimer, sampleTick = 0, paused = false, submitting = false;
 try {saved = JSON.parse(localStorage.getItem(storageKey));} catch {}
 try {
   const response = await fetch('/api/session');
@@ -23,7 +23,7 @@ function node(tag, text, className) {
 }
 function button(text, action, className) {const element = node('button', text, className); element.type = 'button'; element.onclick = action; return element;}
 function save(edited = true) {
-  if (edited) {session.selectedVersion = null; session.workingDraft = null;}
+  if (edited) {session.selectedVersion = null; session.workingDraft = null; session.lastAction = null;}
   if (session.rebuildRequest && JSON.stringify(session.rebuildRequest.state) !== JSON.stringify(draftState(session))) session.rebuildRequest = null;
   session.updatedAt = new Date().toISOString();
   try {localStorage.setItem(storageKey, JSON.stringify(session)); $('save-status').textContent = local ? 'Saved in browser; saving locally' : 'Saved in this browser';}
@@ -151,8 +151,9 @@ function renderChanges() {
   const {changed, review} = pendingChanges(session);
   const label = (id) => tabs.find(([key]) => key === id)?.[1] ?? session.extraTabs.find((tab) => tab.id === id)?.label ?? id;
   $('change-summary').textContent = changed.length ? `Pending: ${changed.map(label).join(', ')}.${review.length ? ` Review ${review.map(label).join(' and ')} against the changed narration.` : ''}` : 'No pending changes. Inactive pickers leave the current video as it is.';
-  $('rebuild-session').disabled = !changed.length;
-  $('rebuild-status').textContent = session.rebuildRequest?.status === 'requested' ? 'Rebuild request saved with all changes. Tell the agent to process it; this page cannot start an agent turn.' : '';
+  $('rebuild-session').disabled = submitting || !local || !changed.length;
+  $('save-session').disabled = submitting;
+  $('rebuild-status').textContent = session.lastAction?.message ?? '';
 }
 function renderVersions() {
   const current = node('option', 'Working draft'); current.value = '';
@@ -174,9 +175,25 @@ $('review-version').onchange = () => {
   if (!session.selectedVersion) session = saveReviewVersion(session, 'Before restore');
   session = restoreReviewVersion(session, id); save(false); refreshDraft();
 };
-$('rebuild-session').onclick = () => {
+$('save-session').onclick = () => {
+  syncImages(); session = saveReviewVersion(session,`Saved ${session.versions.length + 1}`);
+  session.lastAction = {status:'saved',message:'Version saved. Nothing sent to T3.'}; save(false);
+};
+$('rebuild-session').onclick = async () => {
+  if(submitting) return;
   syncImages();
-  session = requestRebuild(session); save(false);
+  if (!session.rebuildRequest || JSON.stringify(session.rebuildRequest.state) !== JSON.stringify(draftState(session))) session = requestRebuild(session);
+  const requestId=session.rebuildRequest.id;submitting=true;
+  session.lastAction={status:'sending',requestId,message:'Saving version and sending to T3...'};save(false);
+  clearTimeout(saveTimer);
+  try {
+    const saved=await fetch('/api/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(sessionSnapshot(session))});
+    if(!saved.ok)throw new Error('Could not save locally. Nothing was sent to T3.');
+    const response=await fetch('/api/session/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requestId})});
+    const result=await response.json();if(!response.ok)throw new Error(result.error ?? 'T3 did not confirm delivery');
+    session.lastAction={status:'sent',requestId,sequence:result.sequence,message:session.rebuildRequest?.id === requestId ? 'Version saved and accepted by T3. Follow the turn in the chat.' : 'The earlier saved version was accepted by T3. Newer draft edits were not sent.'};
+  } catch(error) {session.lastAction={status:'failed',requestId,message:`Saved version kept. ${error.message}`};}
+  finally {submitting=false;save(false);}
 };
 function download(value, name) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2) + '\n'], {type: 'application/json'}));

@@ -5,6 +5,7 @@ import {mkdtemp, mkdir, writeFile, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {recordRender} from '../scripts/render-history.mjs';
+import {createServer} from 'node:http';
 
 test('the desk serves its page and modules without exposing repository files', async () => {
   const server = createDeskServer();
@@ -19,7 +20,8 @@ test('the desk serves its page and modules without exposing repository files', a
     assert.match(html, /Creator Desk/);
     assert.match(html, /id="review-version"/);
     assert.match(html, /id="rebuild-session"/);
-    assert.match(html, /id="rebuild-session"[^>]*>Generate<\/button>/);
+    assert.match(html, /id="save-session"[^>]*>Save<\/button>/);
+    assert.match(html, /id="rebuild-session"[^>]*>Save &amp; send to T3<\/button>/);
     assert.doesNotMatch(html, /id="reset-tab"/);
     assert.doesNotMatch(html, /id="save-version"/);
     assert.equal((await fetch(origin + '/workflow.mjs')).status, 200);
@@ -33,6 +35,40 @@ test('the desk serves its page and modules without exposing repository files', a
     assert.equal((await fetch(origin + '/package.json')).status, 404);
     assert.equal((await fetch(origin, {method: 'POST'})).status, 405);
   } finally {await new Promise<void>((resolve) => server.close(() => resolve()));}
+});
+
+test('the send endpoint dispatches a saved request and rejects cross-origin sends', async () => {
+  const root = await mkdtemp(path.join(tmpdir(),'desk-send-'));
+  let dispatches = 0;
+  const t3 = createServer(async (request,response) => {
+    assert.equal(request.url,'/api/orchestration/dispatch');
+    assert.equal(request.headers.cookie,'session=local-test');
+    let body = '';for await(const chunk of request) body += chunk;
+    assert.equal(JSON.parse(body).threadId,'current-thread');dispatches++;
+    response.writeHead(200,{'Content-Type':'application/json'});response.end(JSON.stringify({sequence:5}));
+  });
+  const desk = createDeskServer({root,sessionId:'test'});
+  await new Promise<void>(r=>t3.listen(0,'127.0.0.1',r));
+  await new Promise<void>(r=>desk.listen(0,'127.0.0.1',r));
+  const t3Address = t3.address(),deskAddress=desk.address();
+  assert.ok(t3Address && typeof t3Address !== 'string' && deskAddress && typeof deskAddress !== 'string');
+  const origin=`http://127.0.0.1:${deskAddress.port}`;
+  const id='e41ecf16-af81-4e3d-8dfb-c9be3b0f6a5b';
+  try {
+    await mkdir(path.join(root,'credentials'));
+    await writeFile(path.join(root,'credentials','t3.json'),JSON.stringify({origin:`http://127.0.0.1:${t3Address.port}`,cookie:'session=local-test',threadId:'current-thread'}));
+    await fetch(origin+'/api/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({version:1,sessionId:'test',rebuildRequest:{id,state:{script:'Draft'}}})});
+    const send = (headers = {}) => fetch(origin+'/api/session/send',{method:'POST',headers:{'Content-Type':'application/json',...headers},body:JSON.stringify({requestId:id})});
+    assert.equal((await send({Origin:'https://example.com'})).status,403);
+    assert.equal(dispatches,0);
+    const result=await send();assert.equal(result.status,200);
+    assert.equal((await result.json()).status,'sent');assert.equal(dispatches,1);
+    assert.equal((await send()).status,200);assert.equal(dispatches,1);
+    assert.equal((await fetch(origin+'/credentials/t3.json')).status,404);
+  } finally {
+    await new Promise<void>(r=>desk.close(()=>r()));await new Promise<void>(r=>t3.close(()=>r()));
+    assert.equal(path.dirname(root),tmpdir());await rm(root,{recursive:true,force:true});
+  }
 });
 
 test('the local session persists choices and serves only registered videos with live file status', async () => {

@@ -41,7 +41,9 @@ Run `npm run desk` and open [Creator Desk](http://localhost:4173/). Review stays
 
 Add optional pickers only when needed; inactive pickers have no effect. Tabs indicate pending changes and dependencies. Reset discards a tab's pending choices. Restore review versions at the top right without changing Videos. Browser previews do not render a video. Sessions save under `out/homunculus/session.json` and in the local browser.
 
-“Generate” creates a review version and saves a frozen request for all pending changes together. It stays left of Videos in the sticky tab bar. Reset icons on individual tabs discard that tab's changes. Generate does not yet dispatch an agent turn; ask the agent to process the request. The applied state changes only after a matching video has been rendered and inspected.
+“Save” creates a local review version. “Save & send to T3” also saves a frozen request and sends it to the connected T3 thread. Both stay left of Videos in the sticky tab bar. Reset icons discard one tab's changes. Sending starts or steers a T3 turn; the page confirms delivery only after T3 accepts it. The applied state changes only after a matching video has been rendered and inspected.
+
+T3 client credentials and the target thread live in ignored `credentials/t3.json`, used only by the local server. Frozen requests and delivery receipts stay under `out/<session>/requests/`. Failed sends keep the version; retry uses the same command ID. The agent can reconnect an expired pairing using the skill's T3 reference.
 
 The Videos tab plays registered renders and greys out deleted or replaced files while preserving their snapshots. For a reviewed render, pass `--session out/homunculus/session.json` after the output path to save the picker snapshot alongside the actual episode. See ADR 0007.
 

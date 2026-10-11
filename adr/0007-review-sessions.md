@@ -9,11 +9,11 @@ Use `create-short` as the shared workflow. Keep picker details in short referenc
 
 Videos comes first and has a distinct style. Commentary and images form the core review. Add optional pickers only on request, with no initial choice. Grey placeholders may advertise inactive pickers; they have no effect on production. Reset an optional picker to no override, or a core picker to its applied state.
 
-Compare draft choices with the last applied state and show changes per tab. Commentary changes flag images and voice for review. A global rebuild request freezes all pending choices together. Saving a request never marks it applied or starts an agent turn. Mark applied only after inspecting the matching rendered video.
+Compare draft choices with the last applied state and show changes per tab. Commentary changes flag images and voice for review. A global rebuild request freezes all pending choices together. Saving never marks it applied. Mark applied only after inspecting the matching rendered video.
 
 Save review versions as independent copies of draft state. Restore a version without replacing the applied baseline or video history. Preserve the working draft before restoring. Video records contain their own snapshots and do not depend on review versions. Image arrangement changes image placement, not narration order.
 
-Use one global Generate action, left of Videos in the sticky tab bar, to create a full review version and its rebuild request together. Put reset icons beside individual tab labels. No picker-specific save or export buttons, and no separate Save version button. Autosave updates the working draft without adding versions. Version restoration remains separate from production.
+Put global Save and Save & send to T3 actions left of Videos in the sticky tab bar. Both create a full review version; only the second dispatches a frozen request to T3. Put reset icons beside tab labels. No picker-specific save or export buttons. Autosave updates the working draft without adding versions. Version restoration remains separate from production. See ADR 0008 for delivery.
 
 Browser previews demonstrate style without rendering. Verify that production implements the reviewed settings; a saved preference is not proof that a renderer used it. Word captions require timings from the selected recording.
 
