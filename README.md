@@ -21,6 +21,8 @@ Copy `.env.example` to `.env` and set `OPENROUTER_API_KEY` there. `.env` stays l
 
 Git ignores media files, model weights, archives, credentials, caches and output folders by default. Put source assets in `public/media/` and exports in `out/`. The original SVG sample stays tracked. Check `git status --short` before committing. Do not force-add ignored files.
 
+Keep reusable downloads under ignored `media/`, such as `media/music/kyoto.mp3`. Every asset needs a same-basename sidecar, such as `kyoto.attribution.json`, with its title, creator, source URL, license URL or permission basis, usage restrictions, whether attribution is required, where to put it and the exact credit text. Record unknown terms as unknown. Both files stay local. Copy assets into `public/media/` when needed for a render, and carry their credits into the video metadata.
+
 ## Make an episode
 
 1. Copy `episodes/sample.json` to `episodes/your-episode.json`.
