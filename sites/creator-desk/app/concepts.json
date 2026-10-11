@@ -26,16 +26,16 @@
     },
     {
       "id": "car",
-      "title": "The car that holds his life together",
-      "tag": "Character study",
-      "angle": "A small physical detail gives the opening its emotional stakes.",
+      "title": "A fever dream of the human psyche",
+      "tag": "Psychological horror",
+      "angle": "Losing everything is the hook. Then comes the descent into desperation, distorted perception and human motives.",
       "spoilers": "Opening setup",
-      "motif": "car",
-      "beats": ["A small car sits between tall city blocks", "The empty space left by the car", "A single light stays on inside a dark window"],
-      "sources": ["https://sevenseasentertainment.com/series/homunculus-omnibus/"],
+      "motif": "mirror",
+      "beats": ["Brief opening: a man and the car he sleeps in", "Faces distort as hidden fears and desires surface", "A fractured reflection turns the question back on the observer"],
+      "sources": ["https://sevenseasentertainment.com/series/homunculus-omnibus/", "https://sevenseasentertainment.com/2022/11/02/seven-seas-licenses-homunculus-manga-series-omnibus-format/"],
       "drafts": [
-        {"label": "Analytical", "text": "Before the strange visions, there is a car. Nakoshi lives in it, and losing it helps push him toward an experiment he initially refuses. I read that detail as the opening's emotional anchor. The car gives a huge, unsettling premise a small and concrete stake: a place to sleep, a boundary, something still his. Start the video there, and the decision that follows feels rooted in his situation rather than just in the shock of the premise."},
-        {"label": "Personal", "text": "I would introduce Homunculus with the car. Nakoshi has very little, but he still has a place he can close around himself. When that is taken away, an offer he refused becomes harder to dismiss. For me, that makes the opening uncomfortable before anything supernatural happens. You can understand wanting one small piece of your life back. The story turns that ordinary need into the starting point for something much stranger."}
+        {"label": "Analytical", "text": "Imagine losing your job, your home, your place in the world. All you have left is your car. That is where Homunculus begins. Then an experiment turns desperation into a psychological fever dream. Faces become distorted, buried fears take shape, and looking at another person starts to feel like looking into an open wound. It digs into why people hurt, what they want, and what they hide from themselves. The unsettling part is how much of it still feels human."},
+        {"label": "Personal", "text": "Imagine losing everything except the car you sleep in. You take a desperate offer, and suddenly people don't look human anymore. Homunculus takes that setup somewhere deeply uncomfortable: shame, desire, cruelty, the need to be loved. It feels like a fever dream where every bizarre image pulls you further into someone's head. Sometimes you understand them. Sometimes you wish you didn't. And somewhere along the way, you start wondering how much of the ugliness belongs to the man doing the looking."}
       ]
     },
     {
