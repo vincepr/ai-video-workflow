@@ -1,0 +1,429 @@
+{
+  "id": "homunculus-panels-v1",
+  "title": "Homunculus: Nakoshi's descent",
+  "script": "Susumu Nakoshi has lost almost everything.\n\nHe sleeps in his car and washes his suit in the park, clinging to the appearance of a life that has fallen apart.\n\nA desperate bargain pulls him into a fever dream of the human psyche. People's fears and desires become grotesque, impossible to ignore.\n\nHe sees what others have spent a lifetime learning to look away from.\n\nShame. Cruelty. Desperation. The need to be loved.\n\nAnd with every encounter, he is drawn further in, until looking deeper into other people becomes a descent into his own madness.",
+  "note": "Matches the supplied ElevenLabs narration, including Desperation. First choices are suggestions, not approval. Source bubbles remain intact.",
+  "beats": [
+    {
+      "id": "loss",
+      "title": "Almost everything is gone",
+      "commentary": "Susumu Nakoshi has lost almost everything.",
+      "options": [
+        {
+          "id": "portrait",
+          "title": "A worn face",
+          "fit": "Keeps the opening on Nakoshi before introducing the horror.",
+          "note": "Portrait crop from German publisher sample, PDF page 12. Sound effect only.",
+          "language": "No dialogue",
+          "source": "https://www.manga-passion.de/news/8474/leseprobe-zu-homunculus-veroeffentlicht",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/real/portrait.jpg",
+          "preview": "panel-options/portrait.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        },
+        {
+          "id": "street",
+          "title": "Alone on the street",
+          "fit": "His bowed posture and suit show a life reduced to isolation.",
+          "note": "Chapter and page unverified.",
+          "language": "No dialogue",
+          "source": "https://www.pinterest.com/pin/746401338264244966/",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/options/street.jpg",
+          "preview": "panel-options/street.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        },
+        {
+          "id": "stagnation",
+          "title": "Nothing moves forward",
+          "fit": "An alternative focused on being trapped in an old identity.",
+          "note": "Later scene used for mood, not a literal opening event; chapter unverified.",
+          "language": "English",
+          "source": "https://www.pinterest.com/blackreaperxxr/nakoshi/",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/options/stagnation.jpg",
+          "preview": "panel-options/stagnation.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        }
+      ]
+    },
+    {
+      "id": "suit",
+      "title": "Holding onto the old life",
+      "commentary": "He sleeps in his car and washes his suit in the park, clinging to the appearance of a life that has fallen apart.",
+      "gap": "The exact suit-washing scene is still missing. These match the car, suit and desperation, not the washing action.",
+      "options": [
+        {
+          "id": "sleeping",
+          "title": "His car is his bedroom",
+          "fit": "The most literal match for sleeping in his car; his suit is visible.",
+          "note": "Official English retail preview, internal image 1. Contains a PAGE NOT FINAL watermark.",
+          "language": "English",
+          "source": "https://www.booktopia.com.au/homunculus-omnibus-vol-1-2-hideo-yamamoto/book/9781685797294.html",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/options/sleeping.jpg",
+          "preview": "panel-options/sleeping.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        },
+        {
+          "id": "car-hood",
+          "title": "Still dressed for another life",
+          "fit": "His full suit beside the car connects his appearance to his precarious living situation.",
+          "note": "Scene shows an open car hood, not washing clothes; chapter unverified.",
+          "language": "No dialogue",
+          "source": "https://www.pinterest.com/pin/688347124321484352/",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/options/car-hood.jpg",
+          "preview": "panel-options/car-hood.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        },
+        {
+          "id": "anguish",
+          "title": "Collapsed inside the car",
+          "fit": "His suit, cramped car and body language emphasize desperation.",
+          "note": "Printed page 194; chapter unverified. Scene is used for mood, not the washing action.",
+          "language": "No dialogue",
+          "source": "https://www.pinterest.com/pin/683562049676654375/",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/options/anguish.jpg",
+          "preview": "panel-options/anguish.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fever",
+      "title": "The bargain becomes a fever dream",
+      "commentary": "A desperate bargain pulls him into a fever dream of the human psyche. People's fears and desires become grotesque, impossible to ignore.",
+      "options": [
+        {
+          "id": "wobble",
+          "title": "A person comes apart",
+          "fit": "Ordinary people turning into impossible shapes makes the fever dream visible.",
+          "note": "Official English retail preview, internal image 4. Contains a PAGE NOT FINAL watermark.",
+          "language": "English",
+          "source": "https://www.booktopia.com.au/homunculus-omnibus-vol-1-2-hideo-yamamoto/book/9781685797294.html",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/options/wobble.jpg",
+          "preview": "panel-options/wobble.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        },
+        {
+          "id": "distorted",
+          "title": "The distorted body",
+          "fit": "Shows the shock of perceiving someone as a grotesque form.",
+          "note": "Source labels chapter 5; printed page 109.",
+          "language": "English",
+          "source": "https://www.homunculusmangafree.com/manga/homunculus-chapter-5/index.html",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/real/distorted.jpg",
+          "preview": "panel-options/distorted.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        },
+        {
+          "id": "surgery",
+          "title": "The price of the bargain",
+          "fit": "Makes the medical experiment concrete before the hallucinations.",
+          "note": "Official English retail preview, internal image 2. Contains a PAGE NOT FINAL watermark.",
+          "language": "English",
+          "source": "https://www.booktopia.com.au/homunculus-omnibus-vol-1-2-hideo-yamamoto/book/9781685797294.html",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/options/surgery.jpg",
+          "preview": "panel-options/surgery.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seeing",
+      "title": "He cannot look away",
+      "commentary": "He sees what others have spent a lifetime learning to look away from.",
+      "options": [
+        {
+          "id": "eye",
+          "title": "The eye",
+          "fit": "A tight crop makes the forced act of seeing the focus.",
+          "note": "Chapter and page unverified.",
+          "language": "No text",
+          "source": "https://www.pinterest.com/pin/531354456050713635/",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/real/eye.jpg",
+          "preview": "panel-options/eye.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        },
+        {
+          "id": "crowd",
+          "title": "Alone among other people",
+          "fit": "Nakoshi covers one eye while the crowd surrounds him; seeing others isolates him.",
+          "note": "Chapter and page unverified.",
+          "language": "No dialogue",
+          "source": "https://www.pinterest.com/pin/1120763057263511417/",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/options/crowd.jpg",
+          "preview": "panel-options/crowd.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        },
+        {
+          "id": "card-eye",
+          "title": "Trying to control his sight",
+          "fit": "The covered eye directly connects perception to distress.",
+          "note": "Only AH in the bubble; chapter and page unverified.",
+          "language": "English",
+          "source": "https://www.pinterest.com/pin/177118197838950027/",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/options/card-eye.jpg",
+          "preview": "panel-options/card-eye.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        }
+      ]
+    },
+    {
+      "id": "buried",
+      "title": "What people hide",
+      "commentary": "Shame. Cruelty. Desperation. The need to be loved.",
+      "options": [
+        {
+          "id": "descent",
+          "title": "Lies and distorted perception",
+          "fit": "The divided face and dialogue connect outward appearance to what lies beneath.",
+          "note": "This is a woman, not Nakoshi. Source labels volume 15; printed page 98.",
+          "language": "English",
+          "source": "https://x.com/anime_panels/status/1342389133797449728",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/real/descent.jpg",
+          "preview": "panel-options/descent.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        },
+        {
+          "id": "identity",
+          "title": "Who are you?",
+          "fit": "A confrontation about identity supports the psychological reading.",
+          "note": "Source labels volume 4, page 31; not independently verified.",
+          "language": "English",
+          "source": "https://www.pinterest.com/pin/295971006780677742/",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/options/identity.jpg",
+          "preview": "panel-options/identity.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        },
+        {
+          "id": "tears",
+          "title": "The need to be seen",
+          "fit": "A tearful exchange expresses vulnerability and longing for recognition.",
+          "note": "Source labels chapter 19; printed page 138. Relationship context is not explained in the narration.",
+          "language": "English",
+          "source": "https://www.homunculusmangafree.com/manga/homunculus-chapter-19/index.html",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/options/tears.jpg",
+          "preview": "panel-options/tears.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        }
+      ]
+    },
+    {
+      "id": "madness",
+      "title": "His own descent",
+      "commentary": "And with every encounter, he is drawn further in, until looking deeper into other people becomes a descent into his own madness.",
+      "options": [
+        {
+          "id": "crying",
+          "title": "Breaking down",
+          "fit": "Nakoshi crying and shouting gives the ending an explicit emotional collapse.",
+          "note": "A multi-panel page with a scan mark. Chapter unverified; no outcome spoilers explained.",
+          "language": "No dialogue",
+          "source": "https://www.pinterest.com/pin/668503138473626160/",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/options/crying.jpg",
+          "preview": "panel-options/crying.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        },
+        {
+          "id": "isolation",
+          "title": "Nothing left",
+          "fit": "A quieter ending: his bowed head and NOTHING leave the descent unresolved.",
+          "note": "Chapter and page unverified.",
+          "language": "English",
+          "source": "https://www.pinterest.com/pin/798544577694556196/",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/real/isolation.jpg",
+          "preview": "panel-options/isolation.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        },
+        {
+          "id": "human",
+          "title": "What does it mean to be human?",
+          "fit": "A reflective ending that lands on the question of human nature.",
+          "note": "Later scene used as a thematic ending; chapter unverified.",
+          "language": "English",
+          "source": "https://x.com/MikJaslol/status/1412968363278540807",
+          "rights": "Copyright Hideo Yamamoto / Shogakukan. Review draft; redistribution permission not established.",
+          "image": "media/homunculus/options/human.jpg",
+          "preview": "panel-options/human.jpg",
+          "from": [
+            50,
+            30,
+            1
+          ],
+          "to": [
+            50,
+            55,
+            1.05
+          ]
+        }
+      ]
+    }
+  ]
+}

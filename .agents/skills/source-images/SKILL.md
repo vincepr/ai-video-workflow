@@ -13,6 +13,7 @@ Use the approved visual beats and existing research. Keep downloaded files under
 - Match visible panel text to the commentary language unless the user requests otherwise, and record the verified language in `sources.json`.
 - Save `sources.json` with local path, source page, direct image or sample URL, work, available chapter/page, visual beat, crop and usage notes. A public preview is not a redistribution license. Keep review renders local unless publishing is requested.
 - Save `images.json` as an array in caption order. Each item has `image` relative to `public/`, `from` and `to` camera triples, `source` and `rights`. Use one entry per caption; repeat a source deliberately when needed. Crops and camera movement should follow the narrative.
+- For image review, populate Creator Desk's `image-options.json` with three inspected candidates per visual beat, scene fit and any gaps. Read `window.creatorDesk.getImageSelection()` from `images.html`; save a local checkpoint. Let the user choose and reorder before updating production files or rendering.
 - Run `npm run produce -- out/approved-brief.json --assets out/<topic>/images.json`. The command reports the required image count if the manifest and captions differ. No model request is needed for sourcing.
 
 ## Optional speech-bubble cleanup

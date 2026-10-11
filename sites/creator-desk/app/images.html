@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Choose and arrange manga panels for the Homunculus commentary.">
+  <title>Choose images | Creator Desk</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="images.css">
+</head>
+<body>
+  <header class="topbar"><a href="index.html" class="brand"><span class="brand-mark">◒</span> Creator Desk</a><span class="project-label">HOMUNCULUS / IMAGES</span><a class="quiet" href="index.html">Back to commentary</a></header>
+  <main>
+    <div class="intro"><div><p class="eyebrow">PANEL SELECTION</p><h1>Find the right images.</h1><p class="lede">Three options for each part of Nakoshi's descent.</p></div><span class="status">Review only</span></div>
+    <p id="catalog-note" class="hint"></p>
+    <nav id="beat-links" class="beat-links" aria-label="Jump to visual beat"></nav>
+    <section class="arrangement" aria-labelledby="arrangement-heading">
+      <div class="section-heading"><div><span class="eyebrow">THE SEQUENCE</span><h2 id="arrangement-heading">Choose, then arrange</h2></div><button id="reset-order" class="secondary" type="button">Reset image order</button></div>
+      <p class="hint">Drag images or use the arrows. Narration stays in its original order; the quote under each image shows where it will appear.</p>
+      <ol id="sequence" class="image-sequence"></ol>
+    </section>
+    <div id="image-beats"></div>
+    <section class="selection-actions">
+      <label for="image-notes">What should change?</label>
+      <textarea id="image-notes" rows="3" maxlength="2000" placeholder="A different panel for beat 2, a tighter crop, a quieter ending..."></textarea>
+      <div class="actions"><button id="save-images" class="primary" type="button">Save choices</button><button id="download-images" class="secondary" type="button">Download selection</button></div>
+      <p id="image-feedback" role="status" aria-live="polite">Choices stay in this browser. No video is being generated.</p>
+      <p class="hint">When ready, tell the agent to use these images. Saving here does not start production.</p>
+    </section>
+  </main>
+  <dialog id="image-dialog"><button id="close-image" class="secondary" type="button">Close</button><img id="large-image" alt=""><p id="large-image-title"></p></dialog>
+  <footer><span>Creator Desk / Homunculus study</span><span>Panel selection before production.</span></footer>
+  <script type="module" src="images.mjs"></script>
+</body>
+</html>

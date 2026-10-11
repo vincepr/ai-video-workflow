@@ -17,6 +17,8 @@ Require approval of the exact draft before production. Changes to the draft clea
 
 Use actual source panels for manga commentary through `.agents/skills/source-images/`. Report missing scenes rather than substituting artwork. Original symbolic graphics require an explicit smoke-test option. Keep speech bubbles in the first draft; cleanup is optional and preserves originals. Use a free local English scratch voice. Derive duration from narration; captions initially use approximate timing.
 
+Review images in Creator Desk with three candidates per visual beat and source, language and scene-fit notes. Save choices separately from the script. Reordering moves images over the unchanged narration; review the new pairing before production. Picking or saving images does not render a video.
+
 ## Reason
 
 An interactive review makes editorial decisions visible before generating media or spending credit. The local renderer can remain simple while the desk is hosted privately.
@@ -26,3 +28,5 @@ An interactive review makes editorial decisions visible before generating media 
 Tests reject unapproved or edited briefs, missing source images and invalid media paths. Confirm selected panels and camera paths survive production. Browser checks cover selection, editing, persistence and approval. Check the exported video and audio metadata.
 
 Before proposing concepts, review plot coverage and scene support. During refinement, check that the selected draft and visual beats follow the editorial brief and that existing research is reused.
+
+Check image selection persistence and reordering without changing commentary order. Inspect candidate images and disclose missing literal scene matches.
