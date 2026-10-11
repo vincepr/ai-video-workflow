@@ -23,4 +23,12 @@ Confirm the API returned private visibility and the intended metadata. Use the r
 
 Save concrete upload details in the project receipt. Maintain a short skill reference when the user requests durable recall of a particular upload, but keep credentials, session URLs, media and the raw receipt out of Git. Do not rewrite immutable render snapshots.
 
+## Title and thumbnail revisions
+
+When requested, research comparable titles and propose a hook that the selected commentary supports. For Homunculus, the user's preference is the curse of seeing too much, rather than a generic descent-into-madness label. Update an existing video through Studio; upload-only OAuth does not grant videos.update. Verify the saved title after reload and preserve privacy.
+
+Keep revised metadata and a dated revision in the project's upload records, preserving the original API upload response. Save thumbnail files and attribution under project media/thumbnails/. For a source-panel edit, inspect the actual panel and preserve the character, pose and source artwork; use the imagegen skill for raster editing.
+
+Current [YouTube thumbnail guidance](https://support.google.com/youtube/answer/72431?hl=en) supports custom Shorts thumbnails in desktop Studio for verified accounts, recommends 9:16 and allows desktop files up to 50 MB. Recheck the live guidance rather than repeating older mobile-frame-only rules. `setThumbnail` in scripts/youtube-upload.mjs uses the existing upload scope; a 403 stops the API attempt. It does not establish whether verification, Shorts access or another permission caused rejection. Inspect Studio for the next action and stop if the user needs to verify or choose a file.
+
 API references: [videos.insert](https://developers.google.com/youtube/v3/docs/videos/insert), [resumable uploads](https://developers.google.com/youtube/v3/guides/using_resumable_upload_protocol).

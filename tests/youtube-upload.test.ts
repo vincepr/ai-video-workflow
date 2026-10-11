@@ -4,7 +4,7 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {execFileSync} from 'node:child_process';
 import test from 'node:test';
-import {accessToken, uploadPrivate} from '../scripts/youtube-upload.mjs';
+import {accessToken, setThumbnail, uploadPrivate} from '../scripts/youtube-upload.mjs';
 
 test('upload sends the selected bytes privately with metadata and saves a confirmed receipt', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'youtube-upload-'));
@@ -113,4 +113,27 @@ test('an expired token is refreshed without losing its refresh token', async () 
 test('the upload command requires an explicit file, metadata and receipt before accessing credentials', () => {
   assert.throws(() => execFileSync(process.execPath, ['scripts/youtube-upload.mjs'], {encoding: 'utf8', stdio: 'pipe'}),
     (error: any) => {assert.match(error.stderr, /Usage.*upload-private/); return true;});
+});
+
+test('a thumbnail update sends the selected image to the existing video without creating another upload', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'youtube-thumbnail-'));
+  try {
+    const file = join(directory, 'thumbnail.png');
+    await writeFile(file, 'selected-thumbnail');
+    let calls = 0;
+    const request: typeof fetch = async (input, options) => {
+      calls++;
+      const url = new URL(String(input));
+      assert.equal(url.pathname, '/upload/youtube/v3/thumbnails/set');
+      assert.equal(url.searchParams.get('videoId'), 'existing-video');
+      assert.equal(url.searchParams.get('uploadType'), 'media');
+      assert.equal(options?.method, 'POST');
+      assert.equal(Buffer.from(options?.body as Uint8Array).toString(), 'selected-thumbnail');
+      return Response.json({kind: 'youtube#thumbnailSetResponse', items: [{high: {url: 'https://i.ytimg.com/thumbnail.jpg'}}]});
+    };
+    const result = await setThumbnail({videoId: 'existing-video', file, token: 'token', request});
+    assert.ok(result, 'thumbnail update must return the saved thumbnail');
+    assert.equal(result.items[0].high.url, 'https://i.ytimg.com/thumbnail.jpg');
+    assert.equal(calls, 1);
+  } finally {await rm(directory, {recursive: true, force: true});}
 });

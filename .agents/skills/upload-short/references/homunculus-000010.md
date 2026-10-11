@@ -5,7 +5,7 @@ User requested the selected finished version, metadata and tags, without release
 - Uploaded Short: [on5a0K05jkg](https://www.youtube.com/shorts/on5a0K05jkg), 41 seconds.
 - API confirmed visibility: private. No publication schedule or subscriber notification.
 - Connected channel returned by YouTube: WorthyALook, ID `UCPhAz1QPh5hfk6wrL9WBp2g`. The local creative context calls the brand HiddenPicks; do not assume that is the live channel name.
-- Title: Homunculus: Nakoshi’s Descent into Madness.
+- Current title: He Sees What Everyone Hides. It’s a Curse. | Homunculus.
 - Category: Entertainment (`24`). Video and audio language: English (`en`). Audience: not made for kids.
 - Source: `projects/homunculus/videos/000010-homunculus-the-day-we-met-by-aeris/video.mp4`.
 - Exact metadata: `projects/homunculus/work/uploads/000010-youtube.metadata.json`.
@@ -33,3 +33,13 @@ Manga: Homunculus by Hideo Yamamoto. Commentary by HiddenPicks.
 Tags: Homunculus, Hideo Yamamoto, Susumu Nakoshi, manga, manga commentary, psychological horror, psychological thriller, HiddenPicks, YouTube Shorts.
 
 Music: The Day We Met by Aeris, mixed at 0.06598. The frozen release record states attribution is required and commercial or sponsored use is excluded. Keep the exact credit above. Panel redistribution permission and narration recording usage terms are not established in the export; private uploading does not establish them.
+
+## Title and thumbnail direction
+
+The user rejected the original descriptive title and requested a stronger curiosity hook, then specified that seeing too much is a curse. Lead with his ability and its psychological cost; retain Homunculus for context. Do not turn this into a promised plot explanation or invent spoilers that the 41-second commentary does not cover.
+
+Comparable researched titles leaned on disturbing-reading claims: [The Most Disturbing Story I've Read in Years](https://www.youtube.com/watch?v=yS6QDg9vm-0) and [Homunculus Explained: The Most Disturbing Manga I've Read](https://www.youtube.com/watch?v=Wa36wRlNyfk). The user's selected direction is more specific than those broad shock claims. These examples do not prove which title will perform best.
+
+Use pic 2, Nakoshi curled up in the car: `projects/homunculus/media/homunculus/options/anguish.jpg`. Thumbnail draft: `projects/homunculus/media/thumbnails/000010-he-saw-too-much.png`, with a matching attribution sidecar. It keeps the black-and-white manga composition, a small HOMUNCULUS label and the large headline HE SAW / TOO MUCH, with red on TOO MUCH. Keep his face, hands and hunched posture readable at phone size.
+
+The thumbnail was prepared locally. The `thumbnails.set` API attempt returned HTTP 403; installation is not confirmed. Use Studio's custom-thumbnail workflow and verify the saved preview. Keep the existing MP4 and private visibility.

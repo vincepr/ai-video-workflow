@@ -15,6 +15,8 @@ Use the user's OAuth-selected channel and upload-only scope. Refresh expired acc
 
 Update the upload skill with reusable steps and any concrete metadata the user requests it to remember. Stop the turn when the user needs to sign in, leaving the shared preview intact.
 
+For requested title or thumbnail revisions, retain the original upload response and add dated local revision records. Keep thumbnail files and source attribution in project media/. Verify title changes in Studio; thumbnail API failures stop without retrying. Neither operation releases the private video.
+
 ## Validation
 
 Run npm run check. Test private metadata, exact file bytes, exclusive receipts, trusted session hosts, transfer failures and token refresh without real uploads. For an authorized upload, confirm private visibility and returned metadata, preserve its receipt, verify the MP4 hash is unchanged and inspect processing in YouTube Studio when available. Check credential and receipt Git exclusion before committing.

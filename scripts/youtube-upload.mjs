@@ -60,6 +60,19 @@ export async function accessToken(client, token, request = fetch) {
   return {...token, ...fresh, expires_at: Date.now() + Number(fresh.expires_in) * 1000};
 }
 
+export async function setThumbnail({videoId, file, token, request = fetch}) {
+  const image = await readFile(file);
+  const url = new URL('https://www.googleapis.com/upload/youtube/v3/thumbnails/set');
+  url.search = new URLSearchParams({videoId, uploadType: 'media'}).toString();
+  const response = await request(url.toString(), {method: 'POST', headers: {
+    Authorization: `Bearer ${token}`, 'Content-Type': file.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg'},
+  body: image, signal: AbortSignal.timeout(30_000)});
+  if (!response.ok) throw new Error(`Thumbnail update failed (HTTP ${response.status}). Check channel verification and Shorts thumbnail access.`);
+  const result = await response.json();
+  if (!result.items?.length) throw new Error('YouTube did not confirm a saved thumbnail.');
+  return result;
+}
+
 async function main() {
   const [command, fileArg, metadataArg, receiptArg, extra] = process.argv.slice(2);
   if (command !== 'upload-private' || !fileArg || !metadataArg || !receiptArg || extra) {
