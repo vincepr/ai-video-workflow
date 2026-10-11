@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Choose, refine and approve a Homunculus video concept before production.">
+  <title>Creator Desk | Homunculus</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar"><a href="#" class="brand"><span class="brand-mark">◒</span> Creator Desk</a><span class="project-label">PROJECT 001 <span>/</span> HOMUNCULUS</span><span class="quiet">A short starts with a point of view.</span></header>
+  <main>
+    <div class="intro">
+      <div><p class="eyebrow">MANGA / PSYCHOLOGICAL HORROR</p><h1>Before the first frame.</h1><p class="lede">Find the idea. Make it yours. Then make the video.</p></div>
+      <div class="process" aria-label="Workflow"><span class="current">01 <b>Choose</b></span><i>→</i><span>02 <b>Refine</b></span><i>→</i><span>03 <b>Approve</b></span></div>
+    </div>
+    <section aria-labelledby="concept-heading">
+      <div class="section-heading"><div><span class="eyebrow">THE STARTING POINT</span><h2 id="concept-heading">Three angles on Homunculus</h2></div><p>Hideo Yamamoto <span>·</span> English drafts <span>·</span> No later plot spoilers</p></div>
+      <div id="concepts" class="concept-grid"></div>
+    </section>
+    <section id="workspace" class="workspace" aria-labelledby="draft-heading">
+      <div class="editor">
+        <div class="section-heading"><div><span class="eyebrow">YOUR DRAFT</span><h2 id="draft-heading">Choose a starting voice</h2></div><span id="status" class="status">Draft</span></div>
+        <div id="variants" class="variant-tabs" role="group" aria-label="Commentary version"></div>
+        <div class="compare"><details><summary>Compare both commentary drafts</summary><div id="comparison" class="comparison-grid"></div></details></div>
+        <label for="title">Video title</label><input id="title" maxlength="80">
+        <div class="script-label"><label for="script">Commentary</label><span id="word-count"></span></div>
+        <textarea id="script" rows="9" maxlength="4000" spellcheck="true"></textarea>
+        <div class="editor-tools"><button id="listen" class="text-button" type="button">▷ Read aloud</button><span>Device voice preview</span><label for="seconds">Target length</label><select id="seconds"><option value="20">20 seconds</option><option value="30" selected>30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option></select></div>
+        <label for="notes">What should change?</label><textarea id="notes" rows="3" maxlength="2000" placeholder="More personal, a quieter opening, less explanation…"></textarea>
+        <p class="hint">Edit directly, or leave notes and ask the agent to revise. Any edit clears approval.</p>
+        <div class="actions"><button id="approve" class="primary" type="button">Approve this draft <span>↗</span></button><button id="download" class="secondary" type="button" disabled>Download brief</button></div>
+        <p id="feedback" role="status" aria-live="polite">Saved in this browser. Nothing is being generated.</p>
+      </div>
+      <aside class="preview-column">
+        <div class="preview-label"><span class="eyebrow">VISUAL DIRECTION</span><span>9:16</span></div>
+        <div class="phone-preview"><div id="preview-art" class="preview-art"></div><div class="frame-lines"></div><div class="preview-top">HOMUNCULUS <span>HIDEO YAMAMOTO</span></div><div class="preview-bottom"><span>CONCEPT PREVIEW</span><h3 id="preview-hook"></h3></div></div>
+        <p class="preview-note">Original symbolic artwork. A visual direction, not a finished video or manga panel.</p>
+        <div class="beat-heading"><h3>Three visual beats</h3><span>OPEN / DEVELOP / LAND</span></div><ol id="beats" class="beats"></ol>
+        <div class="next-step"><span class="eyebrow">AFTER APPROVAL</span><p>Tell the agent: <strong>“Make the approved draft.”</strong> It reads your selection here, prepares the assets and renders a local video. The first pass uses original graphics and a local scratch voice.</p></div>
+      </aside>
+    </section>
+    <section class="source-section"><div><span class="eyebrow">RESEARCH NOTES</span><h2>Premise first. Interpretation second.</h2><p>Plot setup is checked against publisher descriptions. Opinions in these scripts are proposed readings for you to refine. No exact panel or chapter claims are being made.</p></div><div id="sources" class="source-links"></div></section>
+  </main>
+  <footer><span>Creator Desk / Homunculus study</span><span>No model requests. No generation charges. Drafts stay in this browser.</span></footer>
+  <script type="module" src="app.mjs"></script>
+</body>
+</html>

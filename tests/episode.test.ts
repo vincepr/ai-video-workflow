@@ -11,6 +11,12 @@ test('preserves a valid episode', () => {
   assert.deepEqual(validateEpisode(sample), sample);
 });
 
+test('optional narration accepts local audio paths and rejects remote or traversing paths', () => {
+  assert.throws(() => validateEpisode({...sample, audio: '../secret.wav'}), /audio/i);
+  assert.throws(() => validateEpisode({...sample, audio: 'https://example.com/voice.wav'}), /audio/i);
+  assert.deepEqual(validateEpisode({...sample, audio: 'media/voice.wav'}), {...sample, audio: 'media/voice.wav'});
+});
+
 test('rejects invalid timing, camera positions, asset paths and provenance', () => {
   for (const patch of [
     {seconds: 0}, {seconds: Number.NaN}, {seconds: 121},

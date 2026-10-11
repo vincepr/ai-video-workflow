@@ -1,0 +1,6 @@
+{
+  "name": "creator-desk",
+  "private": true,
+  "type": "module",
+  "scripts": {"build": "node build.mjs"}
+}

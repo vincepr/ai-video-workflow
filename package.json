@@ -7,6 +7,8 @@
     "node": ">=24"
   },
   "scripts": {
+    "desk": "node scripts/serve-desk.mjs",
+    "produce": "tsx scripts/produce.ts",
     "dev": "remotion studio src/index.tsx",
     "render": "tsx scripts/render.ts",
     "test": "tsx --test tests/*.test.ts",

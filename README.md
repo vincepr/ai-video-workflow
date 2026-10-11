@@ -31,7 +31,15 @@ Git ignores media files, model weights, archives, credentials, caches and output
 
 Each shot has `image`, `seconds`, `text`, `from`, `to`, `source` and `rights`. Camera positions use `[x, y, zoom]`: x and y are object-position percentages from 0 to 100; zoom is 1 to 2. Text is a scene caption, not speech-aligned subtitles. Duration is rounded to whole frames per shot.
 
-The sample is a silent, 9-second motion test using an original SVG. Voiceover, anime footage, generated video and posting are not implemented yet.
+The sample is a silent, 9-second motion test using an original SVG. Anime footage, model-generated video and posting are not implemented yet.
+
+## Interactive creation
+
+Ask the agent to use `create-short` with a topic or link. It researches the topic and opens Creator Desk with three video concepts and two commentary drafts each. Choose an angle, edit or leave notes, and ask the agent to revise. Approve the final draft, then say “Make the approved draft.” No manual asset collection is needed for the original-graphics test.
+
+The [Homunculus desk](https://homunculus-creator-desk.muddytitan6.chatgpt.site) is private. `npm run desk` opens the same tool locally at localhost:4173. Drafts stay in that browser and origin; they do not sync between the local and hosted pages.
+
+`npm run produce -- out/approved-brief.json` creates original graphics, a local Windows English scratch voice and an MP4 under `out/homunculus-<concept>/`. The skill reads the approved brief from the shared browser. Use `--silent` for a visual-only draft or `--prepare-only` to prepare files without rendering. Narration determines actual duration; captions use approximate timing. Later formats need their own production adapter.
 
 ## Agent workflow
 

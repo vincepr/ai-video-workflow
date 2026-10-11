@@ -6,6 +6,7 @@
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
     "strict": true,
+    "allowJs": true,
     "types": ["node", "react", "react-dom"],
     "noEmit": true,
     "resolveJsonModule": true,
