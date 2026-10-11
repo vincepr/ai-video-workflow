@@ -44,6 +44,7 @@ credentials/
 *.flac
 *.ogg
 *.png
+!/hiddenpicks-profile.png
 *.PNG
 *.jpg
 *.JPG
