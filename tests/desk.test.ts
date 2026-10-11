@@ -19,6 +19,8 @@ test('the desk serves its page and modules without exposing repository files', a
     assert.match(html, /Creator Desk/);
     assert.match(html, /id="review-version"/);
     assert.match(html, /id="rebuild-session"/);
+    assert.match(html, /id="rebuild-session"[^>]*>Generate<\/button>/);
+    assert.doesNotMatch(html, /id="reset-tab"/);
     assert.doesNotMatch(html, /id="save-version"/);
     assert.equal((await fetch(origin + '/workflow.mjs')).status, 200);
     assert.equal((await fetch(origin + '/images.html')).status, 200);

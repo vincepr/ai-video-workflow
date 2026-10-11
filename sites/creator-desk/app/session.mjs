@@ -63,7 +63,13 @@ function renderTabs() {
     tab.className = id === 'videos' ? 'video-tab' : inactive(id) || id === 'music' ? 'inactive-tab' : '';
     const status = changes.changed.includes(id) ? 'Changed' : changes.review.includes(id) ? 'Review' : null;
     if (status) tab.append(node('span', status, 'tab-status'));
-    tab.setAttribute('aria-selected', String(session.activeTab === id)); tab.setAttribute('aria-controls', `panel-${session.extraTabs.some((item) => item.id === id) ? 'extra' : id}`); return tab;
+    tab.setAttribute('aria-selected', String(session.activeTab === id)); tab.setAttribute('aria-controls', `panel-${session.extraTabs.some((item) => item.id === id) ? 'extra' : id}`);
+    const item = node('div', '', 'session-tab-item'); item.append(tab);
+    if (!['videos', 'add', 'music'].includes(id) && !inactive(id)) {
+      const reset = button('↺', (event) => {event.stopPropagation(); resetTab(id);}, 'tab-reset');
+      reset.setAttribute('aria-label', `Reset ${label}`); reset.title = `Reset ${label}`; item.append(reset);
+    }
+    return item;
   }));
 }
 function openTab(id) {
@@ -146,7 +152,6 @@ function renderChanges() {
   const label = (id) => tabs.find(([key]) => key === id)?.[1] ?? session.extraTabs.find((tab) => tab.id === id)?.label ?? id;
   $('change-summary').textContent = changed.length ? `Pending: ${changed.map(label).join(', ')}.${review.length ? ` Review ${review.map(label).join(' and ')} against the changed narration.` : ''}` : 'No pending changes. Inactive pickers leave the current video as it is.';
   $('rebuild-session').disabled = !changed.length;
-  $('reset-tab').hidden = ['videos', 'add', 'music'].includes(session.activeTab) || inactive(session.activeTab);
   $('rebuild-status').textContent = session.rebuildRequest?.status === 'requested' ? 'Rebuild request saved with all changes. Tell the agent to process it; this page cannot start an agent turn.' : '';
 }
 function renderVersions() {
@@ -161,7 +166,7 @@ function refreshDraft() {
   $('voice-notes').value = session.voice?.notes ?? '';
   renderPickers(); renderCommentary(); updatePreviews(); openTab(session.activeTab);
 }
-$('reset-tab').onclick = () => {syncImages(); session = resetPicker(session, session.activeTab); save(); refreshDraft();};
+function resetTab(id) {syncImages(); session = resetPicker(session, id); save(); refreshDraft();}
 $('review-version').onchange = () => {
   const id = $('review-version').value;
   if (!id) {session = restoreWorkingDraft(session); save(false); refreshDraft(); return;}
