@@ -11,6 +11,8 @@ Store reusable assets under ignored media/, using media/music/ for songs. Pair e
 
 Record the effective music settings in the immutable video snapshot. Save the exact upload credit in the history record and beside the MP4 as .description.txt and .release.json. Show and download it from Videos. Keep credits available when media is deleted.
 
+Copy the selected export and its credit sidecars into ignored final/<episode>/. Keep the original render and history. Verify the copy's hash and Git exclusion before handing it over.
+
 An arbitrary comparison tab is a review note, not an audio implementation. Never imply that a named choice adds music without an actual track and render settings. Keep source recordings local and do not publish or buy licenses without a request.
 
 ## Validation

@@ -35,6 +35,8 @@ Each shot has `image`, `seconds`, `text`, `from`, `to`, `source` and `rights`. C
 
 Optional `music` contains `audio`, `volume` (0 to 1), `title`, `artist`, `source`, `license` and exact `attribution`. Narration stays separate; music fades at both ends. Each music render saves .description.txt and .release.json beside its MP4, plus credits in history. Videos offers a description download.
 
+Keep the chosen export in ignored `final/<episode>/`, with its .description.txt and .release.json sidecars. Copy it from render history so playback and snapshots stay intact. Put only the selected version here.
+
 The sample is a silent, 9-second motion test using an original SVG. Anime footage, model-generated video and posting are not implemented yet.
 
 ## Interactive creation
