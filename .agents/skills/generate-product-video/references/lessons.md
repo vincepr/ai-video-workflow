@@ -20,6 +20,8 @@ For a new interaction test, use one visible action and a restrained camera. An a
 
 Probe an original image's pixel dimensions before cropping a product reference. Displayed previews may be resized, so their coordinates cannot be applied directly to the original. Inspect each prepared crop in a separate step before submitting a paid request, and retain the source dimensions and crop rectangle with its attribution.
 
+An independently edited ending image can change apparent product size, pose or placement despite numeric instructions. Compare both endpoints before using them as anchors. Reject mismatched endings; a starting-frame-only route may be a better test than forcing the video to interpolate into an inaccurate frame. Record this change in control strategy and inspect the resulting motion for drift.
+
 ## Evidence and learning
 
 Record provider errors separately from creative failures. Keep model/route capabilities, actual output size, unexpected audio and reported charges with the attempt. Account totals may lag individual receipts, so use recorded costs and outstanding request estimates when enforcing the budget.

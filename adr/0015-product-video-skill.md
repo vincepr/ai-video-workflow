@@ -33,4 +33,5 @@ Verify all linked references exist. Check that project research records actual
 provider controls and costs, and that media stays ignored by Git.
 Review source axis order, product versus packaging dimensions and scale-reference use.
 Verify prepared crops against original pixel dimensions and inspect their contents before paid submission.
+Compare starting and ending product bounds and pose before using both as frame anchors.
 Verify rejected results remain discoverable without changing frozen export snapshots.
