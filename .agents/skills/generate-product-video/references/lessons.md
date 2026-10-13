@@ -16,8 +16,12 @@ Generating a complete multi-part bundle can introduce missing, merged or substit
 
 Leave room for every product element throughout the planned camera move. An object close to the starting-frame edge may be cropped during a push or slide. Evaluate ending composition as well as the starting image. If the framing cannot be verified, limit the move or widen the scene.
 
+For a new interaction test, use one visible action and a restrained camera. An accurate source packshot can carry the full-bundle claim while generated detail footage shows a smaller subset. Keep product-identity references distinct from lighting or style references. Use an explicit ending frame when the route supports it and a specific ending is important.
+
 ## Evidence and learning
 
 Record provider errors separately from creative failures. Keep model/route capabilities, actual output size, unexpected audio and reported charges with the attempt. Account totals may lag individual receipts, so use recorded costs and outstanding request estimates when enforcing the budget.
+
+Inspect the actual audio and canvas even when the catalog advertises a different behavior. Track both technical success and creative acceptance, plus the cost of all attempts. A failed creative has zero accepted advertising seconds; retain its total cost instead of computing a misleading successful-output rate.
 
 Separate observations from inferred causes. A single rejected clip does not prove a model is universally poor. Save what the next attempt should change and what would count as improvement, then inspect the next result against those criteria. Preserve failed assets as evidence without marking them selected for a later advertisement.
