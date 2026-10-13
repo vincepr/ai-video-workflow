@@ -8,6 +8,8 @@ Date: 2026-10-14
 Integrate the extracted Atlas agent workflow as a reusable creative engine.
 Keep workflow families, creative recipes and provider execution separate.
 Retain existing project intake, review, numbered exports and release records.
+Default to configure, generate the planned stages automatically, then refine.
+Intermediate human checkpoints are optional; use a fixed run budget upfront.
 Start with the tested direct-ad path and its full format/hook/setting catalog.
 Then add skit, drama and reference-remake pipelines when their required
 provider capabilities are verified. Preserve explicit unsupported states.

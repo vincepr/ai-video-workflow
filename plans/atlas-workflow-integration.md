@@ -37,6 +37,12 @@ The upstream README declares MIT, but the inspected revision has no standalone l
 
 Destination is a separate release choice: private experiment, organic social, paid advertising or shop page. Creative style does not establish destination eligibility.
 
+## User interaction and automation
+
+The inspected UI separates internal stages from user checkpoints. Direct ads run first-frame generation, video generation and saving from one Generate click; AI Expand is optional. Reference remakes chain selected editing and voice/lip-sync stages from one click. Skits expose Generate script followed by Generate video, which handles product images and video automatically. Drama exposes script generation followed by Generate all, which creates missing references, generates the shots and stitches the result automatically. Individual reference, shot and stitch controls are optional alternatives.
+
+Our default should be **configure once, Generate, then review and refine**. Freeze the configured run and its spending ceiling upfront. Execute its planned stages without requesting human confirmation between them. The agent may inspect intermediate artifacts internally; expose stage-by-stage review only as an optional advanced mode. Stop for an unresolved failure, missing required input/capability or an action outside the configured budget, without silently purchasing repairs or changing providers.
+
 ## Workflow families and rollout
 
 | Family | Pipeline to integrate | Priority and prerequisite |
@@ -92,7 +98,7 @@ Generalize finishing into an explicit frame-based edit plan: source clips and ra
 
 Connect the engine to numbered export reservation, render history, attribution, release metadata and context.md. Add shared video-shot support through a separately scoped change to the current still-image renderer. Initially a local finishing adapter can record exports in existing history; avoid product-specific component forks.
 
-Done when stage review blocks rejected inputs, an interrupted run resumes safely, no numbered file is overwritten, and the actual final export passes frame, text, geometry and encoded-audio inspection.
+Done when internal inspection handles rejected inputs without mandatory human checkpoints, an interrupted run resumes safely, no numbered file is overwritten, and the actual final export passes frame, text, geometry and encoded-audio inspection.
 
 ### 4. Add skit, drama and reference-remake strategies
 
@@ -106,7 +112,7 @@ Done when each available family completes its own documented pipeline, unsupport
 
 Add workflow, format/style, hook, setting and presenter choices to the existing review session. Show only relevant controls and provider-supported settings. Save recipe/model versions with each review so later catalog changes do not alter a frozen result.
 
-Offer separate actions for planning, dry run, generating the selected stage, reviewing and finishing. Do not make changing a picker trigger paid calls. Changing captions should require only a local render; changing movement may reuse or regenerate footage, depending on the request. Keep comparison choices narrow and user-directed.
+Make Generate run the configured pipeline automatically, followed by result review and refinement. Offer planning, dry run and individual-stage actions as advanced controls. Do not make changing a picker trigger paid calls. Changing captions should require only a local render; changing movement may reuse or regenerate footage, depending on the request. Keep comparison choices narrow and user-directed.
 
 Done when a creator can refine one saved ad without leaving the project or repeating unrelated generation stages.
 
