@@ -17,6 +17,9 @@ Source intake includes descriptions, specifications, gallery images and availabl
 product videos from supplied material or web sources, with inspection and source records.
 Save component measurements, units, materials and bundle quantities in local product
 facts. Use them in scene preparation and scale inspection before generating motion.
+Save rejected attempts in local project reviews with feedback, cost and evidence.
+Load those reviews before another paid attempt; keep transferable lessons in the skill.
+Distinguish technical completion from a successful creative result.
 
 Do not extend the still-image renderer as part of research. Provider connections
 and shared video-shot support have separate implementation scope. Production and
@@ -29,3 +32,4 @@ against a private test, organic brand post, paid campaign and merchant product p
 Verify all linked references exist. Check that project research records actual
 provider controls and costs, and that media stays ignored by Git.
 Review source axis order, product versus packaging dimensions and scale-reference use.
+Verify rejected results remain discoverable without changing frozen export snapshots.

@@ -14,6 +14,8 @@ Read [generation](references/generation.md) for model research, reference prepar
 - [Paid advertising](references/paid.md): campaign creative, including boosted posts.
 - [Shop and brand pages](references/shop.md): Relaxdays or another merchant's product pages and owned channels.
 
+Before paid generation, read [lessons](references/lessons.md) and any existing reviews under the assigned project's reviews/ folder. Use the recorded outcome and user feedback to decide what the next attempt should change.
+
 If several destinations are requested, prepare a shared footage plan and separate release requirements. Do not assume one destination's eligibility applies elsewhere. Preserve the selected product and merchant.
 
 In this repository, read README.md and relevant ADRs. Keep product research, prompts, sources and settings in projects/<id>/; media, job receipts and exports follow its ignored folder boundaries. Shared renderer work needs its own scope. Use create-short only for its supported review and rendering capabilities; it currently handles still-image episodes.

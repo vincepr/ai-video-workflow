@@ -23,6 +23,8 @@ Keep exact captions, prices, brand marks and calls to action in the edit. Add na
 
 Before paid requests, confirm existing authorization and a spending ceiling. Follow ADR 0004 for OpenRouter. For video providers, estimate by generated duration, resolution, references and attempts. Submit once, save the job ID and recover that job after an interrupted wait; do not submit a duplicate or retry failed jobs automatically. Keep API keys server-side and out of logs.
 
+State the intended creative improvement before spending: the hook, visible action and why generated motion is useful. Check the starting image against that purpose as well as product fidelity. A successful API response alone is not a successful advertisement. Follow [lessons](lessons.md) and keep a product-specific review under projects/<id>/reviews/ when a result fails or the user rejects it. Record the verdict, feedback, artifacts, costs, observed defects, inferred causes and changes needed for another attempt. Link the review from current project settings; preserve frozen exports and receipts.
+
 Save a generation manifest with model/endpoint, date, prompt, parameters, input files and hashes, output file, job ID, estimated/reported cost and inspection result. Preserve raw output and assemble accepted clips into a numbered export. Use frame-based trims, inspect audio and safe areas, and record the release context and credits.
 
 Check the repository's actual renderer before promising integration. If it accepts only stills, report the gap and plan separately scoped video-shot support or a local editing step. Do not silently substitute animated stills for requested generated footage.
