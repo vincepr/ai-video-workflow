@@ -3,6 +3,8 @@
 Status: Proposed. Research and planning only.
 Date: 2026-10-14
 
+Implementation steps and orchestration gates: [migration runbook](atlas-migration/README.md).
+
 ## Recommendation
 
 Bring the extracted agent workflow into this repository as a reusable creative engine. Start with its working direct-ad path, then add the other workflow families. Keep product intake, local project storage, OpenRouter, review sessions and numbered exports here. Preserve the creative recipes and finishing behavior that produced the preferred result.

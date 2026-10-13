@@ -25,6 +25,7 @@ Planning does not authorize generation, publication or another paid service.
 Source: AtlasCloudAI/atlas-marketing-studio at
 18ec178052f6f97612813997613d88ce34b02fc5. Verify reuse terms before porting.
 See [the phased plan](../plans/atlas-workflow-integration.md).
+Execution tasks: [migration runbook](../plans/atlas-migration/README.md).
 Product-specific evidence stays local and is not part of this proposal.
 
 ## Validation
