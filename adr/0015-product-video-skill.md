@@ -15,6 +15,8 @@ project with dated sources. The skill requires refreshed provider and destinatio
 checks rather than embedding a permanent model ranking or platform permission.
 Source intake includes descriptions, specifications, gallery images and available
 product videos from supplied material or web sources, with inspection and source records.
+Save component measurements, units, materials and bundle quantities in local product
+facts. Use them in scene preparation and scale inspection before generating motion.
 
 Do not extend the still-image renderer as part of research. Provider connections
 and shared video-shot support have separate implementation scope. Production and
@@ -26,3 +28,4 @@ Run the skill-creator validator and npm run check. Review each destination's rou
 against a private test, organic brand post, paid campaign and merchant product page.
 Verify all linked references exist. Check that project research records actual
 provider controls and costs, and that media stays ignored by Git.
+Review source axis order, product versus packaging dimensions and scale-reference use.
