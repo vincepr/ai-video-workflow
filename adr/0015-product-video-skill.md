@@ -20,6 +20,8 @@ facts. Use them in scene preparation and scale inspection before generating moti
 Save rejected attempts in local project reviews with feedback, cost and evidence.
 Load those reviews before another paid attempt; keep transferable lessons in the skill.
 Distinguish technical completion from a successful creative result.
+Include reference corrections in the attempt budget and evaluate advertising impact
+separately from successful motion. Exercise actual video layering during local review.
 
 Do not extend the still-image renderer as part of research. Provider connections
 and shared video-shot support have separate implementation scope. Production and
@@ -34,4 +36,5 @@ provider controls and costs, and that media stays ignored by Git.
 Review source axis order, product versus packaging dimensions and scale-reference use.
 Verify prepared crops against original pixel dimensions and inspect their contents before paid submission.
 Compare starting and ending product bounds and pose before using both as frame anchors.
+Check the opening hook and late-shot caption clearance with a real clip, not only still placeholders.
 Verify rejected results remain discoverable without changing frozen export snapshots.
