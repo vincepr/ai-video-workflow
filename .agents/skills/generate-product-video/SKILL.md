@@ -15,6 +15,7 @@ Read [generation](references/generation.md) for model research, reference prepar
 - [Shop and brand pages](references/shop.md): Relaxdays or another merchant's product pages and owned channels.
 
 Before paid generation, read [lessons](references/lessons.md) and any existing reviews under the assigned project's reviews/ folder. Use the recorded outcome and user feedback to decide what the next attempt should change.
+For deeper workflow research, use [workflow resources](references/workflow-resources.md). Refresh their availability and terms before adopting code or services.
 
 If several destinations are requested, prepare a shared footage plan and separate release requirements. Do not assume one destination's eligibility applies elsewhere. Preserve the selected product and merchant.
 

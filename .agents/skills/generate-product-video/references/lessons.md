@@ -8,6 +8,8 @@ Identify what the generated clip contributes to the advertisement. A gentle came
 
 Evaluate the hook and intended action before polishing atmosphere. Attractive lighting and an API returning a playable clip do not establish a useful result. If the user rejects the quality or value, record the attempt as failed even when generation completed technically. Stop further paid work until the next attempt has a specific improvement or a newly requested test.
 
+Review a complete inexpensive ad draft using source images, temporary captions and sound before buying new footage. Assign each beat its purpose and medium. Use [workflow resources](workflow-resources.md) when designing that review or selecting reference and frame controls.
+
 ## Product layout and camera movement
 
 Generating a complete multi-part bundle can introduce missing, merged or substituted items. Consider preserving the source arrangement with background editing or compositing, or using a focused detail shot when appropriate. Do not spend repeated requests fixing inventory without checking whether the shot itself improves the ad. Inspect the start image before video generation.
