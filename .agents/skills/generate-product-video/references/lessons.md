@@ -18,6 +18,8 @@ Leave room for every product element throughout the planned camera move. An obje
 
 For a new interaction test, use one visible action and a restrained camera. An accurate source packshot can carry the full-bundle claim while generated detail footage shows a smaller subset. Keep product-identity references distinct from lighting or style references. Use an explicit ending frame when the route supports it and a specific ending is important.
 
+Probe an original image's pixel dimensions before cropping a product reference. Displayed previews may be resized, so their coordinates cannot be applied directly to the original. Inspect each prepared crop in a separate step before submitting a paid request, and retain the source dimensions and crop rectangle with its attribution.
+
 ## Evidence and learning
 
 Record provider errors separately from creative failures. Keep model/route capabilities, actual output size, unexpected audio and reported charges with the attempt. Account totals may lag individual receipts, so use recorded costs and outstanding request estimates when enforcing the budget.
