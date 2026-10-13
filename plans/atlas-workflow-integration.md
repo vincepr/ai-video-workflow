@@ -7,7 +7,7 @@ Date: 2026-10-14
 
 Bring the extracted agent workflow into this repository as a reusable creative engine. Start with its working direct-ad path, then add the other workflow families. Keep product intake, local project storage, OpenRouter, review sessions and numbered exports here. Preserve the creative recipes and finishing behavior that produced the preferred result.
 
-Use a small provider adapter and declarative recipe catalog. Running the complete Atlas web application is optional future work; login, payments, site credits and hosted storage are not prerequisites for the agent workflow.
+Make this agent-driven: skills define the workflow, selected context files enrich it, and Python utilities perform generation and finishing. Both a direct agent request and the browser submit the same frozen configuration. Use a small provider adapter and declarative recipe catalog. Running the complete Atlas web application is optional future work; login, payments, site credits and hosted storage are not prerequisites for the agent workflow.
 
 ## Evidence and boundaries
 
@@ -36,6 +36,20 @@ The upstream README declares MIT, but the inspected revision has no standalone l
 3. **Execution configuration:** provider, stage-specific models, duration, aspect ratio, resolution, audio and budget.
 
 Destination is a separate release choice: private experiment, organic social, paid advertising or shop page. Creative style does not establish destination eligibility.
+
+## Agent launch and selected context
+
+Use one routing skill with a workflow guide per family. Keep shared execution instructions separate from creative configuration. A direct-ad run selecting Hyper Motion and Bizarre & Curious should read only the direct workflow, those two recipe files, any selected setting/style/destination guide, relevant product facts and references, and relevant saved lessons. Do not load the full catalog, other family guides or complete provider discovery dumps into the production context.
+
+The browser may load a compact catalog index containing IDs, labels, descriptions and applicable controls. Recipe bodies are loaded only after selection. Resolve an agent's natural-language choices to the same IDs and validate the same configuration; do not maintain separate browser and agent prompt-building paths.
+
+The launcher validates required inputs, provider capabilities and budget, then freezes the request with project/run ID, selections, recipe versions, asset paths and requested action. The skill resolves a precise context-file list from that request. The agent expands the creative direction, executes the configured workflow through Python, inspects intermediate results internally and records outputs for the tabs. Generation mechanics belong in scripts; creative interpretation belongs to the agent.
+
+Progressive file loading reduces new context; it cannot remove history already present in an agent conversation. Strictly limited production context requires a fresh execution session seeded with the frozen request and selected files. The existing T3 bridge targets the project's paired thread, so fresh-session launching needs explicit support rather than an assumption that invoking a skill clears context. Both entry points should remain project-bound and retain the same request identity for recovery.
+
+Reuse the tab system before building another frontend: configuration tabs for relevant format/hook/setting/presenter controls, then optional prompt/asset review and result/refinement tabs. These tabs edit structured fields in the frozen-run contract, not independent prompt fragments. A later simple picker is another view over that same data. Saving or changing a choice does not itself call a paid API.
+
+Example path: agent or browser selection, frozen request, routing skill plus selected guides, agent execution through Python, saved result in review tabs. New configurations usually add recipe data; genuinely different generation stages still need a family guide and a supported provider operation.
 
 ## User interaction and automation
 
@@ -78,6 +92,8 @@ Correct the upstream conflicts when translating recipes: a no-presenter commerci
 
 Freeze the extracted source mapping and generic scripts, excluding product data, credentials, discoveries and existing runs. Reuse saved media to reproduce the preferred edit without paid calls. Parameterize copy, brand styling, resolution, file locations and the edit plan. Keep the sample-specific mask repair outside the reusable engine.
 
+Define the common frozen request and selected-context resolver first, so the initial agent launch already uses the contract that the browser will later submit.
+
 Start with the existing Python executor behind the repository's commands rather than rewriting the proven API path immediately. Identify its actual dependencies and make font/FFmpeg discovery portable when implementation needs them.
 
 Done when the existing result can be reconstructed with matching segment timing and equivalent captions/audio, and a second product can be configured without editing a script.
@@ -85,6 +101,8 @@ Done when the existing result can be reconstructed with matching segment timing 
 ### 2. Add recipe-driven direct ads
 
 Introduce a shared creative brief and the complete direct format/hook/setting catalog. Compose separate image and video prompts from selected recipes, inspected references and product facts. Support agent-authored expansion first; a separate paid planner remains optional and subject to ADR 0004's output and spend limits.
+
+Store recipe bodies in separate context files and keep only routing/metadata in the catalog index. The agent loads the selected files through the skill and writes the actual prompts; the picker and Python executor do not become a second creative planner.
 
 Use live provider capabilities to determine available model/settings combinations. A model ID alone does not establish first-frame, reference-to-video, native speech, motion-control or editing support. Refresh capability and pricing evidence before paid work; never forward Atlas-specific payloads to OpenRouter unchanged.
 
@@ -110,7 +128,7 @@ Done when each available family completes its own documented pipeline, unsupport
 
 ### 5. Expose choices in Creator Desk
 
-Add workflow, format/style, hook, setting and presenter choices to the existing review session. Show only relevant controls and provider-supported settings. Save recipe/model versions with each review so later catalog changes do not alter a frozen result.
+Add workflow, format/style, hook, setting and presenter choices to the existing review session and tab system. Show only relevant controls and provider-supported settings. Browser Generate dispatches the same frozen skill request as an agent-triggered run. Save recipe/model versions with each review so later catalog changes do not alter a frozen result.
 
 Make Generate run the configured pipeline automatically, followed by result review and refinement. Offer planning, dry run and individual-stage actions as advanced controls. Do not make changing a picker trigger paid calls. Changing captions should require only a local render; changing movement may reuse or regenerate footage, depending on the request. Keep comparison choices narrow and user-directed.
 
@@ -118,7 +136,7 @@ Done when a creator can refine one saved ad without leaving the project or repea
 
 ## Validation and release sequence
 
-First validate offline using the existing extraction's media and recorded API responses. Cover recipe routing, presenter conflicts, reference ordering, setting support, budget reservations, ambiguous submissions, resume behavior and project isolation. Then verify a small user-authorized sample for each supported family; do not run the whole preset matrix as a paid batch.
+First validate offline using the existing extraction's media and recorded API responses. Cover recipe routing, selected-context file lists, equivalent browser/agent requests, presenter conflicts, reference ordering, setting support, budget reservations, ambiguous submissions, resume behavior and project isolation. Verify fresh execution does not inherit unrelated catalog or conversation context. Then verify a small user-authorized sample for each supported family; do not run the whole preset matrix as a paid batch.
 
 Use the preferred existing result as the creative baseline. Assess opening impact, product truth, motion, pacing, spoken-language quality where applicable, caption clearance, final audio and total cost. Treat user preference as the creative verdict. Measure failures in raw footage as well as the final edit; an attractive salvage is not proof of uninterrupted faithful generation.
 

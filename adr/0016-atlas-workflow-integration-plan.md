@@ -7,6 +7,9 @@ Date: 2026-10-14
 
 Integrate the extracted Atlas agent workflow as a reusable creative engine.
 Keep workflow families, creative recipes and provider execution separate.
+Use skills for agent workflow instructions and Python for execution utilities.
+Agent and browser entry points submit the same frozen configuration.
+Load only selected recipe/context files; use fresh sessions for strict isolation.
 Retain existing project intake, review, numbered exports and release records.
 Default to configure, generate the planned stages automatically, then refine.
 Intermediate human checkpoints are optional; use a fixed run budget upfront.
@@ -28,6 +31,7 @@ Product-specific evidence stays local and is not part of this proposal.
 
 Reproduce the existing edited baseline from saved media without paid calls.
 Check distinct recipe plans, reference roles, presenter rules and capabilities.
+Check selected context and equivalent agent/browser requests in the tab system.
 Verify project isolation, global key budget reservations and job recovery.
 Preserve raw output and inspect final typography, product detail and audio.
 Validate one user-authorized example per supported workflow family.
