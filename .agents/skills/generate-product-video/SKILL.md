@@ -7,7 +7,9 @@ description: Research current video models and create product videos from refere
 
 Use actual product references to plan, generate and inspect footage, then assemble a channel-specific export. Research alone does not request generation or publication.
 
-Read [generation](references/generation.md) for model research, reference preparation and clip production. Load only the requested destination guide:
+For a frozen product-video request, read its `request.json` and the ordered context snapshot recorded there. Load [common execution](references/common.md), the single selected [family guide](references/workflows/direct.md) (or the corresponding skit, drama or reference-remake guide), and only the recipe files named in that snapshot. The catalog at `references/configuration/catalog.json` supports configuration and path resolution; its metadata is not a production prompt. The same normalized request is used by agent and browser. Execute the selected plan from the frozen inputs, using the local product-video Python utilities when available; do not silently replace an unsupported provider operation with another route. A plan action can stop before paid submission. A generate action still requires its explicit budget and provider checks.
+
+For research or older project work without a frozen request, read [generation](references/generation.md) for model research, reference preparation and clip production. Load only the requested destination guide:
 
 - [Private experiment](references/private.md): assess generation quality without a public release.
 - [Organic social](references/organic.md): posts on a channel, including commercial or sponsored posts.

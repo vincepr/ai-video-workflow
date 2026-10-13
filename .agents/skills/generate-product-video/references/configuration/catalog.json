@@ -1,0 +1,989 @@
+{
+  "version": 1,
+  "files": {
+    "router": ".agents/skills/generate-product-video/SKILL.md",
+    "common": ".agents/skills/generate-product-video/references/common.md",
+    "workflows": {
+      "direct": ".agents/skills/generate-product-video/references/workflows/direct.md",
+      "skit": ".agents/skills/generate-product-video/references/workflows/skit.md",
+      "drama": ".agents/skills/generate-product-video/references/workflows/drama.md",
+      "reference-remake": ".agents/skills/generate-product-video/references/workflows/reference-remake.md"
+    },
+    "formats": {
+      "ugc": ".agents/skills/generate-product-video/references/configuration/formats/ugc.md",
+      "direct-to-camera": ".agents/skills/generate-product-video/references/configuration/formats/direct-to-camera.md",
+      "selfie-testimonial": ".agents/skills/generate-product-video/references/configuration/formats/selfie-testimonial.md",
+      "gadget-saved-me": ".agents/skills/generate-product-video/references/configuration/formats/gadget-saved-me.md",
+      "secret-hack": ".agents/skills/generate-product-video/references/configuration/formats/secret-hack.md",
+      "review": ".agents/skills/generate-product-video/references/configuration/formats/review.md",
+      "unboxing": ".agents/skills/generate-product-video/references/configuration/formats/unboxing.md",
+      "unboxing-asmr": ".agents/skills/generate-product-video/references/configuration/formats/unboxing-asmr.md",
+      "try-on": ".agents/skills/generate-product-video/references/configuration/formats/try-on.md",
+      "couple-sharing": ".agents/skills/generate-product-video/references/configuration/formats/couple-sharing.md",
+      "tvspot": ".agents/skills/generate-product-video/references/configuration/formats/tvspot.md",
+      "hypermotion": ".agents/skills/generate-product-video/references/configuration/formats/hypermotion.md",
+      "giant-product": ".agents/skills/generate-product-video/references/configuration/formats/giant-product.md",
+      "crush-test": ".agents/skills/generate-product-video/references/configuration/formats/crush-test.md",
+      "camera-pov": ".agents/skills/generate-product-video/references/configuration/formats/camera-pov.md",
+      "mess-to-fresh": ".agents/skills/generate-product-video/references/configuration/formats/mess-to-fresh.md"
+    },
+    "hooks": {
+      "conflict": ".agents/skills/generate-product-video/references/configuration/hooks/conflict.md",
+      "suspense": ".agents/skills/generate-product-video/references/configuration/hooks/suspense.md",
+      "painpoint": ".agents/skills/generate-product-video/references/configuration/hooks/painpoint.md",
+      "number": ".agents/skills/generate-product-video/references/configuration/hooks/number.md",
+      "contrast": ".agents/skills/generate-product-video/references/configuration/hooks/contrast.md",
+      "identity": ".agents/skills/generate-product-video/references/configuration/hooks/identity.md",
+      "bizarre": ".agents/skills/generate-product-video/references/configuration/hooks/bizarre.md",
+      "freebie": ".agents/skills/generate-product-video/references/configuration/hooks/freebie.md",
+      "pov": ".agents/skills/generate-product-video/references/configuration/hooks/pov.md",
+      "controversial": ".agents/skills/generate-product-video/references/configuration/hooks/controversial.md",
+      "authority": ".agents/skills/generate-product-video/references/configuration/hooks/authority.md"
+    },
+    "settings": {
+      "office": ".agents/skills/generate-product-video/references/configuration/settings/office.md",
+      "livingroom": ".agents/skills/generate-product-video/references/configuration/settings/livingroom.md",
+      "kitchen": ".agents/skills/generate-product-video/references/configuration/settings/kitchen.md",
+      "bedroom": ".agents/skills/generate-product-video/references/configuration/settings/bedroom.md",
+      "bathroom": ".agents/skills/generate-product-video/references/configuration/settings/bathroom.md",
+      "street": ".agents/skills/generate-product-video/references/configuration/settings/street.md",
+      "outdoor": ".agents/skills/generate-product-video/references/configuration/settings/outdoor.md",
+      "studio": ".agents/skills/generate-product-video/references/configuration/settings/studio.md",
+      "car": ".agents/skills/generate-product-video/references/configuration/settings/car.md",
+      "cafe": ".agents/skills/generate-product-video/references/configuration/settings/cafe.md",
+      "seamless": ".agents/skills/generate-product-video/references/configuration/settings/seamless.md"
+    },
+    "styles": {
+      "skit": {
+        "funny": ".agents/skills/generate-product-video/references/configuration/styles/skit/funny.md",
+        "reversal": ".agents/skills/generate-product-video/references/configuration/styles/skit/reversal.md",
+        "skit": ".agents/skills/generate-product-video/references/configuration/styles/skit/skit.md",
+        "warm": ".agents/skills/generate-product-video/references/configuration/styles/skit/warm.md",
+        "luxury": ".agents/skills/generate-product-video/references/configuration/styles/skit/luxury.md",
+        "urgent": ".agents/skills/generate-product-video/references/configuration/styles/skit/urgent.md"
+      },
+      "drama": {
+        "epic": ".agents/skills/generate-product-video/references/configuration/styles/drama/epic.md",
+        "palace": ".agents/skills/generate-product-video/references/configuration/styles/drama/palace.md",
+        "wuxia": ".agents/skills/generate-product-video/references/configuration/styles/drama/wuxia.md",
+        "family": ".agents/skills/generate-product-video/references/configuration/styles/drama/family.md",
+        "office": ".agents/skills/generate-product-video/references/configuration/styles/drama/office.md",
+        "hero": ".agents/skills/generate-product-video/references/configuration/styles/drama/hero.md"
+      },
+      "reference-remake": {}
+    },
+    "destinations": {
+      "private": ".agents/skills/generate-product-video/references/private.md",
+      "organic": ".agents/skills/generate-product-video/references/organic.md",
+      "paid": ".agents/skills/generate-product-video/references/paid.md",
+      "shop": ".agents/skills/generate-product-video/references/shop.md"
+    }
+  },
+  "choices": {
+    "direct": {
+      "formats": [
+        "ugc",
+        "direct-to-camera",
+        "selfie-testimonial",
+        "gadget-saved-me",
+        "secret-hack",
+        "review",
+        "unboxing",
+        "unboxing-asmr",
+        "try-on",
+        "couple-sharing",
+        "tvspot",
+        "hypermotion",
+        "giant-product",
+        "crush-test",
+        "camera-pov",
+        "mess-to-fresh"
+      ],
+      "hooks": [
+        "none",
+        "conflict",
+        "suspense",
+        "painpoint",
+        "number",
+        "contrast",
+        "identity",
+        "bizarre",
+        "freebie",
+        "pov",
+        "controversial",
+        "authority"
+      ],
+      "settings": [
+        "auto",
+        "office",
+        "livingroom",
+        "kitchen",
+        "bedroom",
+        "bathroom",
+        "street",
+        "outdoor",
+        "studio",
+        "car",
+        "cafe",
+        "seamless"
+      ]
+    },
+    "skit": {
+      "styles": [
+        "funny",
+        "reversal",
+        "skit",
+        "warm",
+        "luxury",
+        "urgent"
+      ]
+    },
+    "drama": {
+      "styles": [
+        "epic",
+        "palace",
+        "wuxia",
+        "family",
+        "office",
+        "hero"
+      ]
+    },
+    "reference-remake": {
+      "styles": []
+    }
+  },
+  "metadata": {
+    "formats": {
+      "ugc": {
+        "label": "UGC Testimonial",
+        "category": "ugc",
+        "needsPresenter": true,
+        "requiredInputs": [
+          "product",
+          "presenter"
+        ],
+        "planningBeats": 4,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "direct-to-camera": {
+        "label": "Direct-to-Camera",
+        "category": "ugc",
+        "needsPresenter": true,
+        "requiredInputs": [
+          "product",
+          "presenter"
+        ],
+        "planningBeats": 4,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "selfie-testimonial": {
+        "label": "Selfie Testimonial",
+        "category": "ugc",
+        "needsPresenter": true,
+        "requiredInputs": [
+          "product",
+          "presenter"
+        ],
+        "planningBeats": 4,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "gadget-saved-me": {
+        "label": "This Gadget Saved Me",
+        "category": "ugc",
+        "needsPresenter": true,
+        "requiredInputs": [
+          "product",
+          "presenter"
+        ],
+        "planningBeats": 4,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "secret-hack": {
+        "label": "Secret Hack Reveal",
+        "category": "ugc",
+        "needsPresenter": true,
+        "requiredInputs": [
+          "product",
+          "presenter"
+        ],
+        "planningBeats": 4,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "review": {
+        "label": "Product Review",
+        "category": "ugc",
+        "needsPresenter": true,
+        "requiredInputs": [
+          "product",
+          "presenter"
+        ],
+        "planningBeats": 4,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "unboxing": {
+        "label": "Unboxing Reveal",
+        "category": "ugc",
+        "needsPresenter": true,
+        "requiredInputs": [
+          "product",
+          "presenter"
+        ],
+        "planningBeats": 4,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "unboxing-asmr": {
+        "label": "Unboxing ASMR",
+        "category": "ugc",
+        "needsPresenter": false,
+        "requiredInputs": [
+          "product"
+        ],
+        "planningBeats": 3,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "try-on": {
+        "label": "Virtual Try-On",
+        "category": "ugc",
+        "needsPresenter": true,
+        "requiredInputs": [
+          "product",
+          "presenter"
+        ],
+        "planningBeats": 4,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "couple-sharing": {
+        "label": "Couple Sharing",
+        "category": "ugc",
+        "needsPresenter": true,
+        "requiredInputs": [
+          "product",
+          "presenter"
+        ],
+        "planningBeats": 4,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "tvspot": {
+        "label": "TV Spot",
+        "category": "commercial",
+        "needsPresenter": false,
+        "requiredInputs": [
+          "product"
+        ],
+        "planningBeats": 4,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "hypermotion": {
+        "label": "Hyper Motion",
+        "category": "commercial",
+        "needsPresenter": false,
+        "requiredInputs": [
+          "product"
+        ],
+        "planningBeats": 3,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "giant-product": {
+        "label": "Giant Product",
+        "category": "commercial",
+        "needsPresenter": true,
+        "requiredInputs": [
+          "product",
+          "presenter"
+        ],
+        "planningBeats": 3,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "crush-test": {
+        "label": "Crush Test",
+        "category": "commercial",
+        "needsPresenter": false,
+        "requiredInputs": [
+          "product"
+        ],
+        "planningBeats": 3,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "camera-pov": {
+        "label": "Camera POV",
+        "category": "tiktok",
+        "needsPresenter": false,
+        "requiredInputs": [
+          "product"
+        ],
+        "planningBeats": 3,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      },
+      "mess-to-fresh": {
+        "label": "Mess to Fresh",
+        "category": "tiktok",
+        "needsPresenter": true,
+        "requiredInputs": [
+          "product",
+          "presenter"
+        ],
+        "planningBeats": 3,
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/formats.ts"
+        }
+      }
+    },
+    "hooks": {
+      "none": {
+        "label": "None",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/hooks.ts"
+        }
+      },
+      "conflict": {
+        "label": "Open with Conflict",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/hooks.ts"
+        }
+      },
+      "suspense": {
+        "label": "Suspenseful Question",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/hooks.ts"
+        }
+      },
+      "painpoint": {
+        "label": "Hit a Pain Point",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/hooks.ts"
+        }
+      },
+      "number": {
+        "label": "Shock with a Number",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "verified-number"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/hooks.ts"
+        }
+      },
+      "contrast": {
+        "label": "Before & After Tease",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/hooks.ts"
+        }
+      },
+      "identity": {
+        "label": "Identity Twist",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/hooks.ts"
+        }
+      },
+      "bizarre": {
+        "label": "Bizarre & Curious",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/hooks.ts"
+        }
+      },
+      "freebie": {
+        "label": "Irresistible Freebie",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "verified-offer"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/hooks.ts"
+        }
+      },
+      "pov": {
+        "label": "First-Person POV",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/hooks.ts"
+        }
+      },
+      "controversial": {
+        "label": "Controversial Take",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/hooks.ts"
+        }
+      },
+      "authority": {
+        "label": "Expert Authority",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/hooks.ts"
+        }
+      }
+    },
+    "settings": {
+      "auto": {
+        "label": "Auto",
+        "upstreamId": "none",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/settings.ts"
+        }
+      },
+      "office": {
+        "label": "Office",
+        "upstreamId": "office",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/settings.ts"
+        }
+      },
+      "livingroom": {
+        "label": "Living Room",
+        "upstreamId": "livingroom",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/settings.ts"
+        }
+      },
+      "kitchen": {
+        "label": "Kitchen",
+        "upstreamId": "kitchen",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/settings.ts"
+        }
+      },
+      "bedroom": {
+        "label": "Bedroom",
+        "upstreamId": "bedroom",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/settings.ts"
+        }
+      },
+      "bathroom": {
+        "label": "Bathroom / Vanity",
+        "upstreamId": "bathroom",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/settings.ts"
+        }
+      },
+      "street": {
+        "label": "City Street",
+        "upstreamId": "street",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/settings.ts"
+        }
+      },
+      "outdoor": {
+        "label": "Outdoor",
+        "upstreamId": "outdoor",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/settings.ts"
+        }
+      },
+      "studio": {
+        "label": "Live Studio",
+        "upstreamId": "studio",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/settings.ts"
+        }
+      },
+      "car": {
+        "label": "In Car",
+        "upstreamId": "car",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/settings.ts"
+        }
+      },
+      "cafe": {
+        "label": "Cafe",
+        "upstreamId": "cafe",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/settings.ts"
+        }
+      },
+      "seamless": {
+        "label": "Studio Seamless",
+        "upstreamId": "seamless",
+        "appliesTo": [
+          "direct"
+        ],
+        "requiredInputs": [
+          "product"
+        ],
+        "version": 1,
+        "source": {
+          "repository": "AtlasCloudAI/atlas-marketing-studio",
+          "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+          "reuse": "independently-authored",
+          "path": "src/lib/marketing-studio/settings.ts"
+        }
+      }
+    },
+    "styles": {
+      "skit": {
+        "funny": {
+          "label": "Funny Meme",
+          "requiredInputs": [
+            "product"
+          ],
+          "version": 1,
+          "source": {
+            "repository": "AtlasCloudAI/atlas-marketing-studio",
+            "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+            "reuse": "independently-authored",
+            "path": "src/lib/ad-skit.ts"
+          }
+        },
+        "reversal": {
+          "label": "Exaggerated Reversal",
+          "requiredInputs": [
+            "product"
+          ],
+          "version": 1,
+          "source": {
+            "repository": "AtlasCloudAI/atlas-marketing-studio",
+            "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+            "reuse": "independently-authored",
+            "path": "src/lib/ad-skit.ts"
+          }
+        },
+        "skit": {
+          "label": "Situational Comedy",
+          "requiredInputs": [
+            "product"
+          ],
+          "version": 1,
+          "source": {
+            "repository": "AtlasCloudAI/atlas-marketing-studio",
+            "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+            "reuse": "independently-authored",
+            "path": "src/lib/ad-skit.ts"
+          }
+        },
+        "warm": {
+          "label": "Warm",
+          "requiredInputs": [
+            "product"
+          ],
+          "version": 1,
+          "source": {
+            "repository": "AtlasCloudAI/atlas-marketing-studio",
+            "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+            "reuse": "independently-authored",
+            "path": "src/lib/ad-skit.ts"
+          }
+        },
+        "luxury": {
+          "label": "Luxury",
+          "requiredInputs": [
+            "product"
+          ],
+          "version": 1,
+          "source": {
+            "repository": "AtlasCloudAI/atlas-marketing-studio",
+            "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+            "reuse": "independently-authored",
+            "path": "src/lib/ad-skit.ts"
+          }
+        },
+        "urgent": {
+          "label": "Urgent",
+          "requiredInputs": [
+            "product"
+          ],
+          "version": 1,
+          "source": {
+            "repository": "AtlasCloudAI/atlas-marketing-studio",
+            "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+            "reuse": "independently-authored",
+            "path": "src/lib/ad-skit.ts"
+          }
+        }
+      },
+      "drama": {
+        "epic": {
+          "label": "Epic Fantasy",
+          "requiredInputs": [
+            "product"
+          ],
+          "version": 1,
+          "source": {
+            "repository": "AtlasCloudAI/atlas-marketing-studio",
+            "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+            "reuse": "independently-authored",
+            "path": "src/lib/drama/prompt.ts"
+          }
+        },
+        "palace": {
+          "label": "Palace Intrigue",
+          "requiredInputs": [
+            "product"
+          ],
+          "version": 1,
+          "source": {
+            "repository": "AtlasCloudAI/atlas-marketing-studio",
+            "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+            "reuse": "independently-authored",
+            "path": "src/lib/drama/prompt.ts"
+          }
+        },
+        "wuxia": {
+          "label": "Martial Arts Wuxia",
+          "requiredInputs": [
+            "product"
+          ],
+          "version": 1,
+          "source": {
+            "repository": "AtlasCloudAI/atlas-marketing-studio",
+            "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+            "reuse": "independently-authored",
+            "path": "src/lib/drama/prompt.ts"
+          }
+        },
+        "family": {
+          "label": "Family Drama",
+          "requiredInputs": [
+            "product"
+          ],
+          "version": 1,
+          "source": {
+            "repository": "AtlasCloudAI/atlas-marketing-studio",
+            "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+            "reuse": "independently-authored",
+            "path": "src/lib/drama/prompt.ts"
+          }
+        },
+        "office": {
+          "label": "Office Politics",
+          "requiredInputs": [
+            "product"
+          ],
+          "version": 1,
+          "source": {
+            "repository": "AtlasCloudAI/atlas-marketing-studio",
+            "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+            "reuse": "independently-authored",
+            "path": "src/lib/drama/prompt.ts"
+          }
+        },
+        "hero": {
+          "label": "Superhero",
+          "requiredInputs": [
+            "product"
+          ],
+          "version": 1,
+          "source": {
+            "repository": "AtlasCloudAI/atlas-marketing-studio",
+            "commit": "18ec178052f6f97612813997613d88ce34b02fc5",
+            "reuse": "independently-authored",
+            "path": "src/lib/drama/prompt.ts"
+          }
+        }
+      },
+      "reference-remake": {}
+    }
+  }
+}
