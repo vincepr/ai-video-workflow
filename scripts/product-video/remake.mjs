@@ -22,15 +22,14 @@ export async function runReferenceRemake({root, projectId, requestId, capabiliti
     state.status = 'unsupported'; state.reason = 'Selected voice and lip-sync operations are unavailable';
     await save(stateFile, state); return state;
   }
-  const estimated = capabilities.estimatesUsd;
-  if (estimated) {
-    const stages = request.execution.voice?.mode === 'replace' ? ['edit', 'voice', 'lipSync'] : ['edit'];
-    if (stages.some(stage => !Number.isFinite(estimated[stage]) || estimated[stage] < 0) ||
-        stages.reduce((total, stage) => total + estimated[stage], 0) > request.execution.budget.maxUsd) {
-      state.status = 'unsupported'; state.reason = 'Required stage estimate is missing or exceeds the frozen budget';
-      await save(stateFile, state); return state;
-    }
+  const estimated = state.estimatesUsd ?? capabilities.estimatesUsd;
+  const stages = request.execution.voice?.mode === 'replace' ? ['edit', 'voice', 'lipSync'] : ['edit'];
+  if (stages.some(stage => !Number.isFinite(estimated?.[stage]) || estimated[stage] < 0) ||
+      stages.reduce((total, stage) => total + estimated[stage], 0) > request.execution.budget.maxUsd) {
+    state.status = 'unsupported'; state.reason = 'Required stage estimate is missing or exceeds the frozen budget';
+    await save(stateFile, state); return state;
   }
+  if (!state.estimatesUsd) {state.estimatesUsd = Object.fromEntries(stages.map(stage => [stage, estimated[stage]])); await save(stateFile, state);}
   if (typeof agent?.plan !== 'function' || typeof execute !== 'function') throw new Error('Remake requires an agent and execution adapter');
   const context = [];
   for (const entry of frozen.context.files) {
@@ -47,9 +46,26 @@ export async function runReferenceRemake({root, projectId, requestId, capabiliti
         plan.sourceRanges.some(range => !Number.isInteger(range.fromFrame) || !Number.isInteger(range.toFrame) || range.fromFrame < 0 || range.toFrame <= range.fromFrame)) throw new Error('Agent must supply an edit prompt and source ranges');
     state.plan = plan; state.status = 'planned'; await save(stateFile, state);
   }
+  async function submitOnce(stage, operation, payload, field) {
+    if (state[field]) return true;
+    const claim = path.join(run, `${stage}-submission.claim.json`);
+    const receipt = path.join(run, `${stage}-submission.receipt.json`);
+    const accepted = await optional(receipt);
+    if (accepted) {state[field] = accepted; await save(stateFile, state); return true;}
+    try {await writeFile(claim, JSON.stringify({operation, requestId, stage}) + '\n', {flag: 'wx'});}
+    catch (error) {
+      if (error.code === 'EEXIST') return false;
+      throw error;
+    }
+    const result = await execute(operation, payload);
+    if (!result?.jobId) throw new Error(`${stage} submission has no accepted job ID; reconcile before retrying`);
+    await writeFile(receipt, JSON.stringify(result, null, 2) + '\n', {flag: 'wx'});
+    state[field] = result; await save(stateFile, state);
+    return true;
+  }
   if (!state.editSubmission) {
-    state.editSubmission = await execute('submit-edit', {run, request, references, prompt: state.plan.editPrompt, sourceRanges: state.plan.sourceRanges});
-    if (!state.editSubmission?.jobId) throw new Error('Edit submission has no accepted job ID');
+    if (!await submitOnce('edit', 'submit-edit', {run, request, references, prompt: state.plan.editPrompt, sourceRanges: state.plan.sourceRanges}, 'editSubmission'))
+      return {...state, status: 'reconciliation-required', reason: 'Edit submission was attempted without a confirmed receipt'};
     state.status = 'accepted'; await save(stateFile, state);
   }
   if (state.editStatus?.status !== 'completed') {
@@ -67,8 +83,8 @@ export async function runReferenceRemake({root, projectId, requestId, capabiliti
   let source = 'remake-raw.mp4';
   if (request.execution.voice?.mode === 'replace') {
     if (!state.voiceSubmission) {
-      state.voiceSubmission = await execute('submit-voice', {run, request, text: request.execution.voice.text});
-      if (!state.voiceSubmission?.jobId) throw new Error('Voice submission has no accepted job ID');
+      if (!await submitOnce('voice', 'submit-voice', {run, request, text: request.execution.voice.text}, 'voiceSubmission'))
+        return {...state, status: 'reconciliation-required', reason: 'Voice submission was attempted without a confirmed receipt'};
       state.status = 'voice-accepted'; await save(stateFile, state);
     }
     if (state.voiceStatus?.status !== 'completed') {
@@ -77,8 +93,8 @@ export async function runReferenceRemake({root, projectId, requestId, capabiliti
       await save(stateFile, state); if (state.status !== 'voice-completed') return state;
     }
     if (!state.lipSyncSubmission) {
-      state.lipSyncSubmission = await execute('submit-lipsync', {run, request, videoJobId: state.editSubmission.jobId, voiceJobId: state.voiceSubmission.jobId});
-      if (!state.lipSyncSubmission?.jobId) throw new Error('Lip-sync submission has no accepted job ID');
+      if (!await submitOnce('lipsync', 'submit-lipsync', {run, request, videoJobId: state.editSubmission.jobId, voiceJobId: state.voiceSubmission.jobId}, 'lipSyncSubmission'))
+        return {...state, status: 'reconciliation-required', reason: 'Lip-sync submission was attempted without a confirmed receipt'};
       state.status = 'lipsync-accepted'; await save(stateFile, state);
     }
     if (state.lipSyncStatus?.status !== 'completed') {

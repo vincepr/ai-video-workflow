@@ -5,7 +5,7 @@ Date: 2026-10-14
 
 ## Decision
 
-Agent and Creator Desk submit one version 1 request. Normalize it before launch and copy only selected skill instructions, recipes and project references into an immutable run folder. A changed configuration gets a new request ID. Mutable stage receipts and edits stay beside the frozen request.
+Agent and Creator Desk submit one version 1 request. Normalize it before launch and copy only selected skill instructions, recipes and project references into an immutable run folder. Reference attribution sidecars, when present, are frozen alongside their media so later edits cannot change release credits. A changed configuration gets a new request ID. Mutable stage receipts and edits stay beside the frozen request.
 
 The direct, skit, drama and reference-remake strategies are distinct. Python performs OpenRouter operations and local finishing; agent callbacks plan and inspect creative results. Provider capabilities, current prices and a shared USD ceiling gate paid submissions. Ambiguous submissions stop until reconciled.
 

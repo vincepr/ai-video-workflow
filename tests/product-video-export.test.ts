@@ -14,12 +14,16 @@ test('registration reserves a numbered video and persists frozen plan, release a
   try {
     await createProject(root, 'demo', 'Demo');
     await writeFile(path.join(root, 'projects/demo/media/block.png'), 'product bytes');
-    await writeFile(path.join(root, 'projects/demo/media/block.attribution.json'), JSON.stringify({title: 'Synthetic block photo', creator: 'Test artist', source: 'local test', license: 'test permission', restrictions: '', attributionRequired: true, exactCredit: 'Photo: Test artist'}));
+    const attribution = JSON.stringify({title: 'Synthetic block photo', creator: 'Test artist', source: 'local test', license: 'test permission', restrictions: '', attributionRequired: true, exactCredit: 'Photo: Test artist'});
+    await writeFile(path.join(root, 'projects/demo/media/block.attribution.json'), attribution);
     const run = path.join(root, 'projects/demo/work/product-video', id);
     await mkdir(run, {recursive: true});
     const request = {id, projectId: 'demo', brief: {product: 'Synthetic block', cta: 'See details'}, references: [{role: 'product', path: 'projects/demo/media/block.png'}]};
     const plan = {version: 1, fps: 30, segments: [{source: 'video-raw.mp4', fromFrame: 0, toFrame: 30, kind: 'motion'}], captions: [], audio: {source: 'none'}};
-    await writeFile(path.join(run, 'request.json'), JSON.stringify({request, context: {files: []}}));
+    await mkdir(path.join(run, 'inputs'), {recursive: true});
+    await writeFile(path.join(run, 'inputs/000'), attribution);
+    await writeFile(path.join(run, 'request.json'), JSON.stringify({request, context: {files: [{role: 'reference-attribution:product', path: 'projects/demo/media/block.attribution.json', snapshotPath: 'inputs/000', sha256: createHash('sha256').update(attribution).digest('hex')}]}}));
+    await writeFile(path.join(root, 'projects/demo/media/block.attribution.json'), JSON.stringify({...JSON.parse(attribution), exactCredit: 'Changed after freeze'}));
     await writeFile(path.join(run, 'direct-state.json'), JSON.stringify({status: 'finishing-ready', finishPlan: plan}));
     await writeFile(path.join(run, 'video-raw.mp4'), 'raw bytes');
     await writeFile(path.join(run, 'finished.mp4'), 'finished bytes');

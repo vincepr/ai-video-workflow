@@ -30,7 +30,14 @@ export async function resolveContext(root, request, catalog) {
   if (style) selected.push(['style', catalog.files.styles?.[request.workflow]?.[style]]);
   selected.push(['destination', catalog.files.destinations?.[request.destination]]);
   for (const [, file] of selected) relativeFile(file, skillPrefix);
-  for (const ref of request.references) selected.push([`reference:${ref.role}`, relativeFile(ref.path, `projects/${request.projectId}/media/`)]);
+  for (const ref of request.references) {
+    const media = relativeFile(ref.path, `projects/${request.projectId}/media/`);
+    selected.push([`reference:${ref.role}`, media]);
+    const parsed = path.posix.parse(media);
+    const sidecar = path.posix.join(parsed.dir, `${parsed.name}.attribution.json`);
+    try {await realpath(path.resolve(root, sidecar)); selected.push([`reference-attribution:${ref.role}`, sidecar]);}
+    catch (error) {if (error.code !== 'ENOENT') throw error;}
+  }
   selected.push(['project', `projects/${request.projectId}/project.json`]);
   const files = [];
   for (const [role, file] of selected) files.push(await hashEntry(root, file, role));

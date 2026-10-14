@@ -56,6 +56,32 @@ test('remake refuses a planned edit above the frozen USD ceiling', async () => {
   } finally {await rm(root, {recursive: true, force: true});}
 });
 
+test('remake stops before planning when a required stage estimate is missing', async () => {
+  const {root} = await fixture();
+  let calls = 0;
+  try {
+    const result = await runReferenceRemake({root, projectId: 'demo', requestId: id,
+      capabilities: {videoEdit: true}, agent: {plan: async () => {calls++;}}, execute: async () => {calls++;}});
+    assert.equal(result.status, 'unsupported');
+    assert.match(result.reason, /estimate/i);
+    assert.equal(calls, 0);
+  } finally {await rm(root, {recursive: true, force: true});}
+});
+
+test('an uncertain edit submission cannot be repeated on resume', async () => {
+  const {root} = await fixture();
+  let submits = 0;
+  const options = {root, projectId: 'demo', requestId: id, capabilities: {videoEdit: true, estimatesUsd: {edit: 1}},
+    agent: {plan: async () => ({editPrompt: 'Replace the object', sourceRanges: [{fromFrame: 0, toFrame: 30}]})},
+    execute: async (operation: string) => {if (operation === 'submit-edit') {submits++; throw new Error('Connection lost after submission');} throw new Error('Unexpected operation');}};
+  try {
+    await assert.rejects(() => runReferenceRemake(options), /Connection lost/);
+    const resumed = await runReferenceRemake(options);
+    assert.equal(resumed.status, 'reconciliation-required');
+    assert.equal(submits, 1);
+  } finally {await rm(root, {recursive: true, force: true});}
+});
+
 test('selected voice replacement adds voice and lip-sync stages without changing the edit job', async () => {
   const {root, run} = await fixture({mode: 'replace', text: 'A new spoken line'});
   const calls: string[] = [];
@@ -73,7 +99,7 @@ test('selected voice replacement adds voice and lip-sync stages without changing
   };
   try {
     const result = await runReferenceRemake({root, projectId: 'demo', requestId: id,
-      capabilities: {videoEdit: true, voice: true, lipSync: true}, agent, execute});
+      capabilities: {videoEdit: true, voice: true, lipSync: true, estimatesUsd: {edit: 0.5, voice: 0.5, lipSync: 0.5}}, agent, execute});
     assert.equal(result.status, 'finishing-ready');
     assert.deepEqual(calls, ['submit-edit', 'poll-edit', 'download-edit', 'submit-voice', 'poll-voice', 'submit-lipsync', 'poll-lipsync', 'download-lipsync']);
     assert.equal(result.finishPlan.segments[0].source, 'remake-lipsync-raw.mp4');
@@ -93,9 +119,9 @@ test('remake uses source video and ordered references, then resumes the accepted
     throw Error('Unexpected operation');
   };
   try {
-    const first = await runReferenceRemake({root, projectId: 'demo', requestId: id, capabilities: {videoEdit: true}, agent, execute});
+    const first = await runReferenceRemake({root, projectId: 'demo', requestId: id, capabilities: {videoEdit: true, estimatesUsd: {edit: 1}}, agent, execute});
     assert.equal(first.status, 'pending');
-    const second = await runReferenceRemake({root, projectId: 'demo', requestId: id, capabilities: {videoEdit: true}, agent, execute});
+    const second = await runReferenceRemake({root, projectId: 'demo', requestId: id, capabilities: {videoEdit: true, estimatesUsd: {edit: 1}}, agent, execute});
     assert.equal(second.status, 'finishing-ready');
     assert.deepEqual(calls, ['plan', 'submit-edit', 'poll-edit', 'poll-edit', 'download-edit']);
     assert.equal(second.finishPlan.segments[0].source, 'remake-raw.mp4');

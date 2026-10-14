@@ -33,7 +33,9 @@ test('CTA refinement renders a new numbered export once from accepted raw footag
     const revised = {...draft, brief: {...draft.brief, cta: 'New CTA'}};
     const options = {root, projectId: 'demo', requestId: id, refinementId, draft: revised, catalog,
       ffmpeg: process.env.FFMPEG_PATH!, ffprobe: process.env.FFPROBE_PATH!};
+    await assert.rejects(() => refineProductVideo({...options, registerExport: async () => {throw new Error('Transient registration failure');}}), /Transient registration failure/);
     const first = await refineProductVideo(options);
+    await rm(path.join(run, 'refinements', refinementId, 'export.json'));
     const second = await refineProductVideo(options);
     if (process.env.REFINEMENT_SAMPLE_DIR) {
       await mkdir(process.env.REFINEMENT_SAMPLE_DIR, {recursive: true});

@@ -60,10 +60,13 @@ test('selected context contains only the chosen recipes and hashed project input
   try {
     const paths = [catalog.files.router, catalog.files.common, catalog.files.workflows.direct, catalog.files.formats.hypermotion,
       catalog.files.hooks.bizarre, catalog.files.settings.seamless, catalog.files.destinations.organic,
-      'projects/alpha/media/product.png', 'projects/alpha/project.json'];
+      'projects/alpha/media/product.png', 'projects/alpha/media/product.attribution.json', 'projects/alpha/project.json'];
     for (const file of paths) {await mkdir(path.dirname(path.join(root, file)), {recursive: true}); await writeFile(path.join(root, file), file);}
     const manifest = await resolveContext(root, normalizeRequest(draft, catalog), catalog);
     assert.deepEqual(manifest.files.map((entry: any) => entry.path), paths);
+    const frozenAttribution = manifest.files.find((entry: any) => entry.path.endsWith('.attribution.json'));
+    assert.ok(frozenAttribution);
+    assert.equal(frozenAttribution.role, 'reference-attribution:product');
     assert.ok(manifest.files.every((entry: any) => /^[0-9a-f]{64}$/.test(entry.sha256)));
     const auto = await resolveContext(root, normalizeRequest({...draft, choices: {format: 'hypermotion', hook: 'none', setting: 'auto'}}, catalog), catalog);
     assert.equal(auto.files.some((entry: any) => entry.path.includes('/hooks/') || entry.path.includes('/settings/')), false);

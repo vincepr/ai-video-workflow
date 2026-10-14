@@ -1,6 +1,8 @@
-import {readFile, writeFile} from 'node:fs/promises';
+import {readFile, rename, stat, writeFile} from 'node:fs/promises';
 import path from 'node:path';
+import {createHash, randomUUID} from 'node:crypto';
 import {projectPaths} from '../projects.mjs';
+import {readRenderHistory} from '../render-history.mjs';
 import {normalizeRequest, readFrozenRequest} from './request.mjs';
 import {renderLocalRefinement} from './refine.mjs';
 import {registerFinishedExport} from './export.mjs';
@@ -11,7 +13,7 @@ function frames(plan) {
 }
 
 /** Refinish accepted direct footage using only local caption/CTA changes. */
-export async function refineProductVideo({root, projectId, requestId, refinementId, draft, catalog, ffmpeg, ffprobe, python = 'python'}) {
+export async function refineProductVideo({root, projectId, requestId, refinementId, draft, catalog, ffmpeg, ffprobe, python = 'python', registerExport = registerFinishedExport}) {
   const frozen = await readFrozenRequest(root, projectId, requestId);
   const request = frozen.request;
   if (request.workflow !== 'direct' || request.action !== 'generate') throw new Error('Only accepted direct requests support local refinement');
@@ -31,12 +33,47 @@ export async function refineProductVideo({root, projectId, requestId, refinement
   const rendered = await renderLocalRefinement({root, projectId, requestId, refinementId, plan, ffmpeg, ffprobe, python});
   const receiptFile = path.join(rendered.directory, 'export.json');
   try {return await json(receiptFile);} catch (error) {if (error.code !== 'ENOENT') throw error;}
+  async function recoverCompletedExport() {
+    const matches = (await readRenderHistory(root, projectId)).filter(record =>
+      record.snapshot?.episode?.productVideo?.requestId === requestId && record.snapshot.episode.productVideo.refinementId === refinementId);
+    if (matches.length > 1) throw new Error('Multiple exports claim this refinement; inspect history before retrying');
+    if (!matches.length) return null;
+    const record = matches[0];
+    const output = path.resolve(root, record.file);
+    const release = await json(`${output}.release.json`);
+    await stat(path.join(path.dirname(output), 'finish-plan.json'));
+    if (record.status !== 'available' || release.renderId !== record.id ||
+        createHash('sha256').update(await readFile(output)).digest('hex') !== record.snapshot.episode.productVideo.outputSha256)
+      throw new Error('Incomplete or changed refinement export; inspect history before retrying');
+    const result = {status: 'finished', id: path.basename(path.dirname(output)), output, file: record.file,
+      renderId: record.id, sha256: record.snapshot.episode.productVideo.outputSha256};
+    try {await writeFile(receiptFile, JSON.stringify(result, null, 2) + '\n', {flag: 'wx'});}
+    catch (error) {if (error.code === 'EEXIST') return await json(receiptFile); throw error;}
+    return result;
+  }
+  const recovered = await recoverCompletedExport();
+  if (recovered) return recovered;
   const claimFile = path.join(rendered.directory, 'export.claim.json');
-  try {await writeFile(claimFile, JSON.stringify({requestId, refinementId, caption}) + '\n', {flag: 'wx'});}
-  catch (error) {if (error.code === 'EEXIST') throw new Error('Export registration is already claimed; inspect the variant before retrying'); throw error;}
-  const exported = await registerFinishedExport({root, projectId, requestId, finishedFile: rendered.finishedFile, variantDirectory: rendered.directory,
-    label: candidate.brief.product, releaseBrief: candidate.brief});
-  const result = {status: 'finished', ...exported};
-  await writeFile(receiptFile, JSON.stringify(result, null, 2) + '\n', {flag: 'wx'});
-  return result;
+  try {await writeFile(claimFile, JSON.stringify({requestId, refinementId, caption, pid: process.pid}) + '\n', {flag: 'wx'});}
+  catch (error) {
+    if (error.code !== 'EEXIST') throw error;
+    const completed = await recoverCompletedExport(); if (completed) return completed;
+    const claim = await json(claimFile);
+    let alive = false;
+    try {process.kill(claim.pid, 0); alive = true;} catch (probe) {if (probe.code !== 'ESRCH') throw probe;}
+    if (alive) throw new Error('Export registration is in progress or needs reconciliation');
+    await rename(claimFile, `${claimFile}.orphaned-${randomUUID()}`);
+    await writeFile(claimFile, JSON.stringify({requestId, refinementId, caption, pid: process.pid}) + '\n', {flag: 'wx'});
+  }
+  try {
+    const exported = await registerExport({root, projectId, requestId, finishedFile: rendered.finishedFile, variantDirectory: rendered.directory,
+      label: candidate.brief.product, releaseBrief: candidate.brief});
+    const result = {status: 'finished', ...exported};
+    await writeFile(receiptFile, JSON.stringify(result, null, 2) + '\n', {flag: 'wx'});
+    return result;
+  } catch (error) {
+    const completed = await recoverCompletedExport(); if (completed) return completed;
+    await rename(claimFile, `${claimFile}.failed-${randomUUID()}`);
+    throw error;
+  }
 }

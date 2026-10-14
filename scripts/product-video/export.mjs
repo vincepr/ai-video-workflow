@@ -6,7 +6,6 @@ import {recordRender} from '../render-history.mjs';
 import {readFrozenRequest} from './request.mjs';
 
 async function json(file) {return JSON.parse(await readFile(file, 'utf8'));}
-async function optionalJson(file) {try {return await json(file);} catch (error) {if (error.code === 'ENOENT') return null; throw error;}}
 async function writeJson(file, value) {await writeFile(file, JSON.stringify(value, null, 2) + '\n', {flag: 'wx'});}
 function relative(root, file) {return path.relative(root, file).split(path.sep).join('/');}
 
@@ -47,9 +46,15 @@ export async function registerFinishedExport({root, projectId, requestId, finish
   for (const reference of frozen.request.references ?? []) {
     const name = reference.path;
     if (typeof name !== 'string' || !name.startsWith(`projects/${projectId}/media/`) || name.includes('\\') || name.split('/').includes('..')) throw new Error('Invalid frozen reference path');
-    const file = path.resolve(root, name);
-    const sidecar = path.join(path.dirname(file), `${path.parse(file).name}.attribution.json`);
-    const attribution = await optionalJson(sidecar);
+    const sidecar = path.posix.join(path.posix.dirname(name), `${path.posix.parse(name).name}.attribution.json`);
+    const frozenSidecar = frozen.context.files.find(entry => entry.path === sidecar && entry.role === `reference-attribution:${reference.role}`);
+    let attribution = null;
+    if (frozenSidecar) {
+      if (!/^inputs\/\d{3}$/.test(frozenSidecar.snapshotPath) || !/^[a-f0-9]{64}$/.test(frozenSidecar.sha256)) throw new Error('Invalid frozen attribution snapshot');
+      const bytes = await readFile(path.join(run, frozenSidecar.snapshotPath));
+      if (createHash('sha256').update(bytes).digest('hex') !== frozenSidecar.sha256) throw new Error('Frozen attribution changed');
+      attribution = JSON.parse(bytes.toString('utf8'));
+    }
     if (attribution) sourceAttribution.push({reference: name, attribution});
   }
   await writeJson(path.join(iteration.directory, 'source-attribution.json'), sourceAttribution);
@@ -58,7 +63,7 @@ export async function registerFinishedExport({root, projectId, requestId, finish
   const sourceLines = (report.sources ?? []).map(source => `- ${source.path} (${source.sha256})`).join('\n');
   const context = `# Product-video export\n\nRequest: ${requestId}\nWorkflow: ${frozen.request.workflow ?? 'direct'}\nCreative choice: ${JSON.stringify(frozen.request.choices ?? {})}\n\n## Sources\n\n${sourceLines || 'Not recorded'}\n\nReference attribution is in source-attribution.json.\n\n## Edit\n\n${report.frames} frames at ${report.fps} fps. Segment ranges and caption windows are in finish-plan.json. Raw output remains in the frozen run.\n\n## Release questions\n\nCheck source rights, factual claims and destination eligibility before publication.\n`;
   await writeFile(path.join(iteration.directory, 'context.md'), context, {flag: 'wx'});
-  const episode = {title, shots: [], productVideo: {requestId, finishPlan, sourceSha256: report.sources ?? [], outputSha256: hash}};
+  const episode = {title, shots: [], productVideo: {requestId, ...(variantDirectory ? {refinementId: path.basename(variantDirectory)} : {}), finishPlan, sourceSha256: report.sources ?? [], outputSha256: hash}};
   const recorded = await recordRender(root, {output: iteration.output, episode, sessionId: projectId, label: title,
     renderer: {kind: 'product-video-ffmpeg', fps: report.fps, frames: report.frames, canvas: report.canvas}});
   const release = {description, music: null};
