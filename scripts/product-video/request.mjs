@@ -33,7 +33,7 @@ export function normalizeRequest(draft, catalog) {
   if (!allowed) throw new Error(`Workflow is unavailable: ${workflow}`);
   const choices = draft.choices ?? {};
   const primary = choiceField[workflow];
-  const normalizedChoices = {[primary]: listed(choices[primary], allowed[`${primary}s`], primary)};
+  const normalizedChoices = workflow === 'reference-remake' ? {} : {[primary]: listed(choices[primary], allowed[`${primary}s`], primary)};
   if (workflow === 'direct') {
     normalizedChoices.hook = listed(choices.hook ?? 'none', allowed.hooks, 'hook');
     normalizedChoices.setting = listed(choices.setting ?? 'auto', allowed.settings, 'setting');
@@ -44,16 +44,20 @@ export function normalizeRequest(draft, catalog) {
     path: projectFile(ref.path, projectId),
   }));
   if (!references.some(ref => ref.role === 'product')) throw new Error('Missing product reference');
+  if (workflow === 'reference-remake' && !references.some(ref => ref.role === 'reference-video')) throw new Error('Missing reference-video source');
   const brief = draft.brief ?? {};
+  if (workflow === 'reference-remake') required(brief.referenceRights, 'reference video rights');
   const execution = draft.execution ?? {};
+  const voice = execution.voice ?? {mode: 'none'};
+  if (!['none', 'replace'].includes(voice.mode) || (voice.mode === 'replace' && (workflow !== 'reference-remake' || !voice.text?.trim()))) throw new Error('Invalid voice replacement');
   const budget = execution.budget ?? {};
   if (budget.currency !== 'USD' || !Number.isFinite(budget.maxUsd) || budget.maxUsd < 0) throw new Error('Invalid USD budget');
   if (!Number.isFinite(execution.durationSec) || execution.durationSec <= 0) throw new Error('Invalid duration');
   return {
     schemaVersion: 1, id, projectId, action: listed(draft.action, actions, 'action'), workflow, choices: normalizedChoices,
     language: required(draft.language, 'language'), destination: listed(draft.destination, Object.keys(catalog.files?.destinations ?? {}), 'destination'),
-    references, brief: {product: required(brief.product, 'product'), facts: Array.isArray(brief.facts) ? brief.facts.map(fact => required(fact, 'fact')) : [], brand: brief.brand?.trim() ?? '', cta: brief.cta?.trim() ?? ''},
-    execution: {provider: required(execution.provider, 'provider'), models: execution.models ?? {}, durationSec: execution.durationSec, aspectRatio: required(execution.aspectRatio, 'aspect ratio'), resolution: required(execution.resolution, 'resolution'), audio: Boolean(execution.audio), budget: {currency: 'USD', maxUsd: budget.maxUsd}},
+    references, brief: {product: required(brief.product, 'product'), facts: Array.isArray(brief.facts) ? brief.facts.map(fact => required(fact, 'fact')) : [], brand: brief.brand?.trim() ?? '', cta: brief.cta?.trim() ?? '', referenceRights: brief.referenceRights?.trim() ?? ''},
+    execution: {provider: required(execution.provider, 'provider'), models: execution.models ?? {}, durationSec: execution.durationSec, aspectRatio: required(execution.aspectRatio, 'aspect ratio'), resolution: required(execution.resolution, 'resolution'), audio: Boolean(execution.audio), voice: {mode: voice.mode, ...(voice.mode === 'replace' ? {text: voice.text.trim()} : {})}, budget: {currency: 'USD', maxUsd: budget.maxUsd}},
   };
 }
 function requestDirectory(root, projectId, id) {

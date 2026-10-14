@@ -44,6 +44,17 @@ test('unknown choices and foreign or traversing media fail before launch', () =>
   assert.throws(() => normalizeRequest({...draft, references: []}, catalog), /Missing product/);
 });
 
+test('reference remake requires a source video and no invented style', () => {
+  const remake = {...draft, workflow: 'reference-remake', choices: {}, brief: {...draft.brief, referenceRights: 'Owned source footage'},
+    references: [...draft.references, {role: 'reference-video', path: 'projects/alpha/media/source.mp4'}]};
+  assert.deepEqual(normalizeRequest(remake, {...catalog, choices: {...catalog.choices, 'reference-remake': {styles: []}}}).choices, {});
+  assert.throws(() => normalizeRequest({...remake, references: draft.references}, {...catalog, choices: {...catalog.choices, 'reference-remake': {styles: []}}}), /reference.video/i);
+  assert.throws(() => normalizeRequest({...remake, choices: {style: 'direct'}}, {...catalog, choices: {...catalog.choices, 'reference-remake': {styles: []}}}), /Inapplicable/);
+  assert.throws(() => normalizeRequest({...remake, brief: draft.brief}, {...catalog, choices: {...catalog.choices, 'reference-remake': {styles: []}}}), /rights/i);
+  const voiced = normalizeRequest({...remake, execution: {...remake.execution, voice: {mode: 'replace', text: 'New line'}}}, {...catalog, choices: {...catalog.choices, 'reference-remake': {styles: []}}});
+  assert.deepEqual(voiced.execution.voice, {mode: 'replace', text: 'New line'});
+});
+
 test('selected context contains only the chosen recipes and hashed project inputs', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'pv-contract-'));
   try {
