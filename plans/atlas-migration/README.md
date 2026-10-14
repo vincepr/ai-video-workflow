@@ -1,6 +1,6 @@
 # Atlas workflow migration runbook
 
-Status: Ready for a future implementation request. No migration phase has been executed.
+Status: Offline implementation integrated through phase 08; phase 09 validation and runtime limitations are tracked in the assigned migration project's ignored work directory.
 Prepared: 2026-10-14
 
 ## Outcome

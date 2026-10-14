@@ -54,6 +54,10 @@ Finished versions also include context.md for a later upload session: topic, com
 
 ## Interactive workflow and parallel work
 
+Product-video configuration is available in the existing Creator Desk Product video tab. The agent and tab normalize the same version 1 request, stored under the project's ignored `work/product-video/<request-id>/` folder. Selected recipe files are snapshotted there. The tab can freeze Generate, but this host has no supported fresh agent-session launch operation, so it reports that limitation without spending credit. The existing T3 send still serves create-short requests. See [the migration contract](plans/atlas-migration/contract-v1.md) and [ADR 0017](adr/0017-product-video-runtime-boundary.md).
+
+Offline provider operations use `.agents/skills/generate-product-video/scripts/runtime.py <run-dir> <operation>` with recorded responses. Local editing uses that skill's `scripts/finish.py`; it requires explicit full FFmpeg and FFprobe paths. Live provider capabilities and costs must be refreshed before any separately authorized paid run. Skit, drama and reference-remake stages are offline strategies with explicit unsupported results when their required provider routes are absent.
+
 Ask the agent to use create-short with a topic or link. It handles project setup, research and review choices. Refine commentary and images before production. Add optional pickers only on request; inactive pickers have no effect. Save creates a review version. Save & send to T3 also requests production of that frozen version. Changes become applied only after a matching render is inspected.
 
 Assign a different project ID to each parallel agent. Normal video work edits only its project; shared renderer, editor and library changes have separate scope. Concurrent renders use separate numbered outputs and frozen props. Agents must not edit the same project's episode or review state concurrently. See ADR 0012.
