@@ -57,7 +57,7 @@ export function normalizeRequest(draft, catalog) {
     schemaVersion: 1, id, projectId, action: listed(draft.action, actions, 'action'), workflow, choices: normalizedChoices,
     language: required(draft.language, 'language'), destination: listed(draft.destination, Object.keys(catalog.files?.destinations ?? {}), 'destination'),
     references, brief: {product: required(brief.product, 'product'), facts: Array.isArray(brief.facts) ? brief.facts.map(fact => required(fact, 'fact')) : [], brand: brief.brand?.trim() ?? '', cta: brief.cta?.trim() ?? '', referenceRights: brief.referenceRights?.trim() ?? ''},
-    execution: {provider: required(execution.provider, 'provider'), models: execution.models ?? {}, durationSec: execution.durationSec, aspectRatio: required(execution.aspectRatio, 'aspect ratio'), resolution: required(execution.resolution, 'resolution'), audio: Boolean(execution.audio), voice: {mode: voice.mode, ...(voice.mode === 'replace' ? {text: voice.text.trim()} : {})}, budget: {currency: 'USD', maxUsd: budget.maxUsd}},
+    execution: {provider: required(execution.provider, 'provider'), models: execution.models ?? {}, durationSec: execution.durationSec, aspectRatio: required(execution.aspectRatio, 'aspect ratio'), imageResolution: required(execution.imageResolution ?? execution.resolution, 'image resolution'), resolution: required(execution.resolution, 'video resolution'), audio: Boolean(execution.audio), voice: {mode: voice.mode, ...(voice.mode === 'replace' ? {text: voice.text.trim()} : {})}, budget: {currency: 'USD', maxUsd: budget.maxUsd}},
   };
 }
 function requestDirectory(root, projectId, id) {

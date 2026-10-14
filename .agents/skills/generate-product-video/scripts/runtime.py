@@ -83,8 +83,9 @@ def payload_for(run, stage, envelope):
     prompt = prompt_file.read_text(encoding='utf-8').strip()
     if not prompt:
         raise ValueError('Empty prompt')
+    resolution = execution.get('imageResolution', execution['resolution']) if stage == 'image' else execution['resolution']
     common = {'model': execution['models'][stage], 'prompt': prompt,
-              'aspect_ratio': execution['aspectRatio'], 'resolution': execution['resolution']}
+              'aspect_ratio': execution['aspectRatio'], 'resolution': resolution}
     if stage == 'image':
         refs = []
         for ref in request['references']:
@@ -122,7 +123,8 @@ def model_for(stage, request, discovery):
     execution = request['execution']
     if stage == 'image':
         params = model.get('supported_parameters') or {}
-        for field, value in (('aspect_ratio', execution['aspectRatio']), ('resolution', execution['resolution'])):
+        for field, value in (('aspect_ratio', execution['aspectRatio']),
+                             ('resolution', execution.get('imageResolution', execution['resolution']))):
             if value not in (params.get(field) or {}).get('values', []):
                 raise ValueError('Image model does not advertise ' + field)
         refs = len(request['references'])

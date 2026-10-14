@@ -64,6 +64,7 @@ test('the desk serves its page and modules without exposing repository files', a
     assert.match(html, /id="review-version"/);
     assert.match(html, /id="panel-product-video"/);
     assert.match(html, /id="pv-generate"/);
+    assert.match(html, /id="pv-image-resolution"/);
     assert.match(html, /id="pv-refine"/);
     assert.match(html, /id="rebuild-session"/);
     assert.match(html, /id="save-session"[^>]*>Save<\/button>/);

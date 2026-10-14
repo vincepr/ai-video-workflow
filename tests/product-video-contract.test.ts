@@ -37,6 +37,12 @@ test('browser and agent inputs normalize to the same canonical request', () => {
   assert.deepEqual(browser.choices, {format: 'hypermotion', hook: 'bizarre', setting: 'seamless'});
 });
 
+test('image and video resolution can be configured independently', () => {
+  const request = normalizeRequest({...draft, execution: {...draft.execution, imageResolution: '1K', resolution: '480p'}}, catalog);
+  assert.equal(request.execution.imageResolution, '1K');
+  assert.equal(request.execution.resolution, '480p');
+});
+
 test('unknown choices and foreign or traversing media fail before launch', () => {
   assert.throws(() => normalizeRequest({...draft, choices: {...draft.choices, hook: 'mystery'}}, catalog), /hook/);
   assert.throws(() => normalizeRequest({...draft, references: [{role: 'product', path: 'projects/beta/media/product.png'}]}, catalog), /Foreign/);

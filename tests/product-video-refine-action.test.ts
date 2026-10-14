@@ -48,3 +48,23 @@ test('CTA refinement renders a new numbered export once from accepted raw footag
     assert.equal(JSON.parse(await readFile(path.join(run, 'direct-state.json'), 'utf8')).finishPlan.captions.length, 0);
   } finally {await rm(root, {recursive: true, force: true});}
 });
+
+test('a legacy frozen request passes the local refinement configuration check', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'pv-refine-legacy-'));
+  const id = '42f98010-7c0a-4fe5-9089-5e5a69b7a501';
+  const refinementId = 'b4e50ed0-8f3e-411b-814c-b12322ce49f0';
+  const catalog = {version: 1, files: {destinations: {private: ''}}, choices: {direct: {formats: ['hypermotion'], hooks: ['none'], settings: ['auto']}}};
+  const draft = {id, projectId: 'demo', action: 'generate', workflow: 'direct', choices: {format: 'hypermotion', hook: 'none', setting: 'auto'}, language: 'en', destination: 'private',
+    references: [{role: 'product', path: 'projects/demo/media/product.png'}], brief: {product: 'Synthetic block', facts: [], brand: '', cta: 'Old CTA'},
+    execution: {provider: 'openrouter', models: {image: 'test/image', video: 'test/video'}, durationSec: 1, aspectRatio: '16:9', resolution: '480p', audio: false, budget: {currency: 'USD', maxUsd: 1}}};
+  try {
+    await createProject(root, 'demo', 'Demo');
+    const run = path.join(root, 'projects/demo/work/product-video', id);
+    await mkdir(run, {recursive: true});
+    const frozen = normalizeRequest(draft, catalog);
+    delete (frozen.execution as {imageResolution?: string}).imageResolution;
+    await writeFile(path.join(run, 'request.json'), JSON.stringify({request: frozen, context: {files: []}}));
+    await assert.rejects(() => refineProductVideo({root, projectId: 'demo', requestId: id, refinementId,
+      draft: {...draft, brief: {...draft.brief, cta: 'New CTA'}}, catalog, ffmpeg: 'unused', ffprobe: 'unused'}), /ENOENT/);
+  } finally {await rm(root, {recursive: true, force: true});}
+});

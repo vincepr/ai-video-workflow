@@ -58,6 +58,16 @@ class RuntimeTest(unittest.TestCase):
         self.assertIn('test/image', result.stdout)
         self.assertFalse((self.root / 'ledger').exists())
 
+    def test_image_resolution_can_differ_from_video_resolution(self):
+        self.request['request']['execution']['imageResolution'] = '1K'
+        (self.run / 'request.json').write_text(json.dumps(self.request))
+        catalog = json.loads(self.catalog.read_text())
+        catalog['image-models']['data'][0]['supported_parameters']['resolution']['values'] = ['1K']
+        self.catalog.write_text(json.dumps(catalog))
+        result = self.cli('dry-run', '--stage', 'image', '--catalog', str(self.catalog))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('1K', result.stdout)
+
     def test_recorded_submission_is_write_once_and_preserves_bytes(self):
         fixture = self.root / 'image.json'
         import base64

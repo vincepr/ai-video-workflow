@@ -16,7 +16,7 @@ async function loadOrFreeze(root, request, catalog) {
   try {frozen = await readFrozenRequest(root, request.projectId, request.id);}
   catch (error) {if (error.code !== 'ENOENT') throw error;}
   if (frozen) {
-    if (JSON.stringify(frozen.request) !== JSON.stringify(request)) throw new Error('Request ID already frozen with a different request');
+    if (JSON.stringify(normalizeRequest(frozen.request, catalog)) !== JSON.stringify(request)) throw new Error('Request ID already frozen with a different request');
     return frozen;
   }
   const manifest = await resolveContext(root, request, catalog);

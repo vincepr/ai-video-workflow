@@ -19,7 +19,7 @@ export async function refineProductVideo({root, projectId, requestId, refinement
   if (request.workflow !== 'direct' || request.action !== 'generate') throw new Error('Only accepted direct requests support local refinement');
   const candidate = normalizeRequest({...draft, id: requestId, projectId}, catalog);
   const fixed = value => ({...value, brief: {...value.brief, cta: '', brand: ''}});
-  if (JSON.stringify(fixed(candidate)) !== JSON.stringify(fixed(request))) throw new Error('Local refinement may only change brand, CTA or final caption');
+  if (JSON.stringify(fixed(candidate)) !== JSON.stringify(fixed(normalizeRequest(request, catalog)))) throw new Error('Local refinement may only change brand, CTA or final caption');
   const caption = String(draft.finishing?.caption?.trim() || candidate.brief.cta).trim();
   if (!caption || caption.length > 40 || /[\r\n]/.test(caption)) throw new Error('Final caption must contain 1 to 40 characters on one line');
   const run = path.join(projectPaths(root, projectId).work, 'product-video', requestId);

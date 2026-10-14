@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {mkdtemp, mkdir, writeFile, rm} from 'node:fs/promises';
+import {mkdtemp, mkdir, writeFile, readFile, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {launchProductVideo, readLaunchStatus, cancelProductVideo, recordWorkerUpdate} from '../scripts/product-video/launcher.mjs';
@@ -36,6 +36,23 @@ test('agent and browser launch the same frozen request into selected fresh conte
     assert.equal(calls[0].projectId, 'alpha');
     assert.equal(calls[0].files.length, 9);
     assert.equal(JSON.stringify(calls[0]).includes('unrelated conversation'), false);
+  } finally {await rm(root, {recursive: true, force: true});}
+});
+
+test('a legacy frozen request without image resolution remains retryable', async () => {
+  const root = await fixture();
+  let calls = 0;
+  const transport = {createFreshSession: async () => {calls++; return {sessionId: 'fresh-1', executionId: 'run-1'};}};
+  try {
+    await launchProductVideo(root, request, {catalog, transport});
+    const file = path.join(root, 'projects/alpha/work/product-video', request.id, 'request.json');
+    const frozen = JSON.parse(await readFile(file, 'utf8'));
+    delete frozen.request.execution.imageResolution;
+    await writeFile(file, JSON.stringify(frozen));
+    const again = await launchProductVideo(root, request, {catalog, transport});
+    assert.equal(again.status, 'dispatched');
+    assert.equal(calls, 1);
+    assert.equal(JSON.parse(await readFile(file, 'utf8')).request.execution.imageResolution, undefined);
   } finally {await rm(root, {recursive: true, force: true});}
 });
 
