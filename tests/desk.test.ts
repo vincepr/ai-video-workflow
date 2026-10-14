@@ -64,7 +64,14 @@ test('the desk serves its page and modules without exposing repository files', a
     assert.match(html, /id="review-version"/);
     assert.match(html, /id="panel-product-video"/);
     assert.match(html, /id="pv-generate"/);
-    assert.match(html, /id="pv-image-resolution"/);
+    assert.match(html, /<select id="pv-image-preset"/);
+    assert.match(html, /<select id="pv-video-preset"/);
+    assert.match(html, /<select id="pv-aspect"/);
+    assert.match(html, /<select id="pv-duration"/);
+    assert.match(html, /<select id="pv-image-resolution"/);
+    assert.match(html, /<select id="pv-resolution"/);
+    assert.match(html, /id="pv-model-json"/);
+    assert.match(html, /id="pv-apply-model-json"/);
     assert.match(html, /id="pv-refine"/);
     assert.match(html, /id="rebuild-session"/);
     assert.match(html, /id="save-session"[^>]*>Save<\/button>/);
@@ -72,6 +79,7 @@ test('the desk serves its page and modules without exposing repository files', a
     assert.doesNotMatch(html, /id="reset-tab"/);
     assert.doesNotMatch(html, /id="save-version"/);
     assert.equal((await fetch(origin + '/workflow.mjs')).status, 200);
+    assert.equal((await fetch(origin + '/model-settings.mjs')).status, 200);
     assert.equal((await fetch(origin + '/images.html')).status, 200);
     const images = await fetch(origin + '/images.html').then(response => response.text());
     assert.doesNotMatch(images, /id="save-images"/);

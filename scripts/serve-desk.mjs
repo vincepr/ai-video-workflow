@@ -15,6 +15,7 @@ const files = new Map([
   ['/image-options.json', ['image-options.json', 'application/json']],
   ['/session.html', ['session.html', 'text/html']], ['/session.css', ['session.css', 'text/css']],
   ['/session.mjs', ['session.mjs', 'text/javascript']], ['/review-session.mjs', ['review-session.mjs', 'text/javascript']],
+  ['/model-settings.mjs', ['model-settings.mjs', 'text/javascript']],
   ['/session-history.json', ['session-history.json', 'application/json']],
 ]);
 

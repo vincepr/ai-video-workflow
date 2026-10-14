@@ -56,6 +56,14 @@ Finished versions also include context.md for a later upload session: topic, com
 
 Product-video configuration is available in the existing Creator Desk Product video tab. The agent and tab normalize the same version 1 request, stored under the project's ignored `work/product-video/<request-id>/` folder. Selected recipe files are snapshotted there. The tab can freeze Generate, but this host has no supported fresh agent-session launch operation, so it reports that limitation without spending credit. The existing T3 send still serves create-short requests. See [the migration contract](plans/atlas-migration/contract-v1.md) and [ADR 0017](adr/0017-product-video-runtime-boundary.md).
 
+The Product video tab suggests image and video models and offers ratio, resolution and duration menus. Open Custom model settings JSON to export the current choice or apply a custom model ID and standard controls. The JSON does not change the project's spending cap. It rejects model-specific fields such as `effort`, `quality` or `seed` until those controls have explicit capability and cost handling. Presets can become stale and are rechecked before a paid run.
+
+The JSON import uses this shape; an agent may prepare the same values for the local draft:
+
+```json
+{"version":1,"image":{"model":"bytedance-seed/seedream-5-0-pro","resolution":"1K"},"video":{"model":"alibaba/wan-3.0","resolution":"480p","durationSec":8},"aspectRatio":"9:16","audio":false}
+```
+
 For a direct run with accepted raw footage, edit the CTA or Final caption in that tab and choose Refine locally. Set `FFMPEG_PATH` and `FFPROBE_PATH` to absolute paths for a full FFmpeg build and FFprobe before starting the desk. The local action saves the changed form, creates an isolated refinement, and adds a numbered export to Videos. It reuses the same export when the same refinement ID is retried. The frozen request and original raw footage stay intact. A frozen request alone does not provide footage to refine.
 
 Offline provider operations use `.agents/skills/generate-product-video/scripts/runtime.py <run-dir> <operation>` with recorded responses. Local editing uses that skill's `scripts/finish.py`; it requires explicit full FFmpeg and FFprobe paths. Live provider capabilities and costs must be refreshed before any separately authorized paid run. Skit, drama and reference-remake stages are offline strategies with explicit unsupported results when their required provider routes are absent.

@@ -1,5 +1,6 @@
 import {createReviewSession, updatePicker, addComparison, pickerOptions, sessionSnapshot, initializeReview, pendingChanges, resetPicker, requestRebuild, draftState, saveReviewVersion, restoreReviewVersion, restoreWorkingDraft, applyRebuild, productVideoImpact} from './review-session.mjs';
 import {readSessionImages} from './image-selection.mjs';
+import {imagePresets, videoPresets, parseModelSettings, modelSettingsFromExecution, applyModelPreset, applyModelSettings, imageResolutionFor} from './model-settings.mjs';
 const [catalog, concepts] = await Promise.all(['image-options.json', 'concepts.json'].map((file) => fetch(file).then((response) => response.json())));
 let productCatalog = null;
 try {const response = await fetch('./api/product-video/catalog'); if (response.ok) productCatalog = await response.json();} catch {}
@@ -128,6 +129,17 @@ function productOptions(id, values, labels, selected) {
   select.replaceChildren(...values.map(value => {const option = node('option', labels?.[value]?.label ?? value); option.value = value; return option;}));
   select.value = values.includes(selected) ? selected : values[0] ?? '';
 }
+function modelChoices(id, choices, selected) {
+  const available = new Set(choices.map(String));
+  const values = [...available];
+  if (selected !== undefined && selected !== null && !available.has(String(selected))) values.push(String(selected));
+  const select = $(id);
+  select.replaceChildren(...values.map(value => {
+    const option = node('option', available.has(value) ? value : `Custom: ${value}`);
+    option.value = value; return option;
+  }));
+  select.value = String(selected ?? values[0] ?? '');
+}
 function renderProductVideo() {
   if (!productCatalog) {$('pv-status').textContent = 'Product video configuration is available in the local desk.'; $('pv-generate').disabled = true; $('pv-refine').disabled = true; return;}
   const draft = session.productVideo ?? {};
@@ -142,7 +154,18 @@ function renderProductVideo() {
   for (const id of ['format', 'hook', 'setting']) $(`pv-${id}`).closest('label').hidden = selectedWorkflow !== 'direct';
   $('pv-style').closest('label').hidden = selectedWorkflow === 'direct' || !(choices.styles?.length);
   productOptions('pv-destination', productCatalog.destinations, {}, draft.destination ?? 'private');
-  const values = {language: draft.language ?? 'en', product: draft.brief?.product ?? '', 'product-path': draft.references?.find(ref => ref.role === 'product')?.path ?? '', 'presenter-path': draft.references?.find(ref => ref.role === 'presenter')?.path ?? '', 'reference-video-path': draft.references?.find(ref => ref.role === 'reference-video')?.path ?? '', facts: (draft.brief?.facts ?? []).join('\n'), brand: draft.brief?.brand ?? '', cta: draft.brief?.cta ?? '', caption: draft.finishing?.caption ?? '', provider: draft.execution?.provider ?? 'openrouter', 'image-model': draft.execution?.models?.image ?? '', 'video-model': draft.execution?.models?.video ?? '', duration: draft.execution?.durationSec ?? 5, aspect: draft.execution?.aspectRatio ?? '9:16', 'image-resolution': draft.execution?.imageResolution ?? draft.execution?.resolution ?? '1K', resolution: draft.execution?.resolution ?? '480p', budget: draft.execution?.budget?.maxUsd ?? 0};
+  const imageModel = draft.execution?.models?.image ?? imagePresets[0].model;
+  const videoModel = draft.execution?.models?.video ?? videoPresets[0].model;
+  const imagePreset = imagePresets.find(item => item.model === imageModel);
+  const videoPreset = videoPresets.find(item => item.model === videoModel);
+  productOptions('pv-image-preset', [...imagePresets.map(item => item.model), 'custom'], Object.fromEntries([...imagePresets.map(item => [item.model, item]), ['custom', {label: 'Custom model ID'}]]), imagePreset?.model ?? 'custom');
+  productOptions('pv-video-preset', [...videoPresets.map(item => item.model), 'custom'], Object.fromEntries([...videoPresets.map(item => [item.model, item]), ['custom', {label: 'Custom model ID'}]]), videoPreset?.model ?? 'custom');
+  modelChoices('pv-image-resolution', imagePreset?.resolutions ?? ['1K', '2K', '4K'], imageResolutionFor(draft.execution, imagePreset));
+  modelChoices('pv-resolution', videoPreset?.resolutions ?? ['480p', '720p', '1080p'], draft.execution?.resolution ?? videoPreset?.defaultResolution ?? '480p');
+  modelChoices('pv-duration', videoPreset?.durations ?? [4, 5, 6, 8, 10, 12, 15, 20, 30], draft.execution?.durationSec ?? videoPreset?.defaultDurationSec ?? 8);
+  const ratios = (imagePreset?.ratios ?? ['9:16', '16:9', '1:1', '4:3', '3:4']).filter(ratio => (videoPreset?.ratios ?? ['9:16', '16:9', '1:1', '4:3', '3:4']).includes(ratio));
+  modelChoices('pv-aspect', ratios, draft.execution?.aspectRatio ?? '9:16');
+  const values = {language: draft.language ?? 'en', product: draft.brief?.product ?? '', 'product-path': draft.references?.find(ref => ref.role === 'product')?.path ?? '', 'presenter-path': draft.references?.find(ref => ref.role === 'presenter')?.path ?? '', 'reference-video-path': draft.references?.find(ref => ref.role === 'reference-video')?.path ?? '', facts: (draft.brief?.facts ?? []).join('\n'), brand: draft.brief?.brand ?? '', cta: draft.brief?.cta ?? '', caption: draft.finishing?.caption ?? '', provider: draft.execution?.provider ?? 'openrouter', 'image-model': imageModel, 'video-model': videoModel, duration: draft.execution?.durationSec ?? videoPreset?.defaultDurationSec ?? 8, aspect: draft.execution?.aspectRatio ?? '9:16', 'image-resolution': imageResolutionFor(draft.execution, imagePreset), resolution: draft.execution?.resolution ?? videoPreset?.defaultResolution ?? '480p', budget: draft.execution?.budget?.maxUsd ?? 0};
   for (const [id, value] of Object.entries(values)) $(`pv-${id}`).value = value;
   $('pv-audio').checked = draft.execution?.audio ?? false;
   const format = productCatalog.metadata.formats?.[$('pv-format').value];
@@ -167,8 +190,26 @@ function readProductVideoForm() {
     finishing: {caption: $('pv-caption').value.trim()}};
 }
 for (const field of $('product-video-form').querySelectorAll('input, textarea, select')) field.addEventListener('change', () => {
-  session.productVideo = readProductVideoForm(); save(); renderProductVideo();
+  if (field.id === 'pv-image-preset' && field.value === 'custom') {$('pv-image-model').focus(); return;}
+  if (field.id === 'pv-video-preset' && field.value === 'custom') {$('pv-video-model').focus(); return;}
+  const draft = readProductVideoForm();
+  if (field.id === 'pv-image-preset' && field.value !== 'custom') draft.execution = applyModelPreset(draft.execution, 'image', field.value);
+  if (field.id === 'pv-video-preset' && field.value !== 'custom') draft.execution = applyModelPreset(draft.execution, 'video', field.value);
+  session.productVideo = draft; save(); renderProductVideo();
 });
+$('pv-export-model-json').onclick = () => {
+  $('pv-model-json').value = JSON.stringify(modelSettingsFromExecution(readProductVideoForm().execution), null, 2);
+  $('pv-model-json-status').textContent = 'Current model settings shown. Editing this JSON does not call a provider.';
+};
+$('pv-apply-model-json').onclick = () => {
+  try {
+    const config = parseModelSettings($('pv-model-json').value);
+    const draft = readProductVideoForm();
+    draft.execution = applyModelSettings(draft.execution, config);
+    session.productVideo = draft; save(); renderProductVideo();
+    $('pv-model-json-status').textContent = 'Model settings applied to the local draft. Provider support is checked before a paid run.';
+  } catch (error) {$('pv-model-json-status').textContent = error.message;}
+};
 async function refreshProductVideoStatus() {
   const id = session.productVideoLaunch?.id;
   if (!id || !local) return;
