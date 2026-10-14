@@ -14,6 +14,10 @@ A successful contained product action can improve the footage while producing on
 
 For a mess-to-fresh idea, require a visible difference between the first and last desk states before spending on motion. Filing one item can demonstrate a compartment well, but does not create a full before-and-after reveal when the opening is already tidy. Match final copy to the change the clip actually shows.
 
+Treat the format's transformation as the motion brief, not merely a label or caption. A reference showcase may depict clutter sweeping away while a conservative prompt produces only a hand filing one item. Before paying, compare the planned opening frame, motion verb and final frame with the example's visual payoff. An example clip in a picker is not necessarily sent to the model as a motion reference. For a dramatic effect, protect the product's identity with a stable hero frame or a separate local composite, and inspect whether the generated transition morphs or removes the product.
+
+A first-frame-only reverse-splash prompt can clear the desk while also ejecting items already inside the organizer, then reconstructing them. Review the intermediate frames, not just the clean endpoint. If product contents must remain fixed, isolate the moving clutter in a local composite or use a verified matching end frame; add no-text constraints and inspect flying papers for invented lettering.
+
 Set a limit for reference corrections as well as video generation. Count rejected frames and preparation mistakes in the attempt's total cost. A spending ceiling is a limit, not a reason to keep refining an unconvincing concept.
 
 ## Product layout and camera movement

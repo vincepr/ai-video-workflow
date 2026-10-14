@@ -78,6 +78,22 @@ class RuntimeTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(json.loads(result.stdout)['estimatedUsd'], 0.5)
 
+    def test_video_token_sku_estimates_portrait_720p_without_audio(self):
+        self.request['request']['execution']['durationSec'] = 8
+        (self.run / 'request.json').write_text(json.dumps(self.request))
+        (self.run / 'first-frame.bin').write_bytes(b'frame')
+        (self.run / 'first-frame-meta.json').write_text(json.dumps({'sha256': hashlib.sha256(b'frame').hexdigest()}))
+        catalog = json.loads(self.catalog.read_text())
+        self.request['request']['execution']['models']['video'] = 'bytedance/seedance-2.0-mini'
+        (self.run / 'request.json').write_text(json.dumps(self.request))
+        catalog['video-models']['data'][0]['id'] = 'bytedance/seedance-2.0-mini'
+        catalog['video-models']['data'][0]['supported_durations'] = [8]
+        catalog['video-models']['data'][0]['pricing_skus'] = {'video_tokens_without_audio': '0.0000035'}
+        self.catalog.write_text(json.dumps(catalog))
+        result = self.cli('dry-run', '--stage', 'video', '--catalog', str(self.catalog))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertAlmostEqual(json.loads(result.stdout)['estimatedUsd'], 0.6048)
+
     def test_high_resolution_image_uses_variant_price(self):
         self.request['request']['execution']['imageResolution'] = '2K'
         (self.run / 'request.json').write_text(json.dumps(self.request))
@@ -157,6 +173,20 @@ class RuntimeTest(unittest.TestCase):
         self.assertNotEqual(second.returncode, 0)
         self.assertIn('headroom', second.stderr)
 
+    def test_shared_headroom_does_not_count_charged_usage_twice(self):
+        spec = importlib.util.spec_from_file_location('product_video_runtime', CLI)
+        runtime = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(runtime)
+        ledger = self.root / 'ledger'
+        ledger.mkdir()
+        (ledger / 'previous.json').write_text(json.dumps({
+            'run': str(self.root / 'projects/previous'), 'stage': 'video', 'keyIdentity': 'shared',
+            'estimateUsd': 2.0, 'chargedUsd': 1.7}))
+        args = type('Args', (), {'ledger': ledger})()
+        catalog = {'key': {'data': {'limit_remaining': 0.8}}}
+        runtime.reserve(self.run, 'video', args, self.request['request'], 0.5, catalog, 'shared')
+        self.assertTrue((self.run / 'video-submission.json').exists())
+
     def test_poll_and_download_reuse_accepted_job(self):
         (self.run / 'video-response.json').write_text(json.dumps({'id': 'job-1', 'status': 'queued'}))
         poll_fixture = self.root / 'completed.json'
@@ -213,7 +243,7 @@ class RuntimeTest(unittest.TestCase):
         self.assertEqual(json.loads((self.run / 'video-response.json').read_text())['id'], 'job-1')
         self.assertNotEqual(self.cli('download', '--recorded', str(failed)).returncode, 0)
 
-    def test_delayed_usage_replaces_reservation_for_later_stage(self):
+    def test_delayed_usage_does_not_double_count_against_remaining_balance(self):
         fixture = self.root / 'accepted.json'
         fixture.write_text(json.dumps({'id': 'job-1', 'status': 'queued'}))
         (self.run / 'first-frame.bin').write_bytes(b'frame')
@@ -223,12 +253,15 @@ class RuntimeTest(unittest.TestCase):
         status = self.root / 'status.json'
         status.write_text(json.dumps({'id': 'job-1', 'status': 'completed', 'usage': {'cost': 0.7}}))
         self.assertEqual(self.cli('poll', '--recorded', str(status)).returncode, 0)
-        image = self.root / 'image.json'
-        image.write_text(json.dumps({'data': []}))
-        result = self.cli('submit-image', '--recorded', str(image), '--catalog', str(self.catalog),
-                          '--key-identity', 'shared')
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn('ceiling', result.stderr) if 'ceiling' in result.stderr else self.assertIn('headroom', result.stderr)
+        spec = importlib.util.spec_from_file_location('product_video_runtime', CLI)
+        runtime = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(runtime)
+        other = self.root / 'projects/other/work/product-video/22222222-2222-2222-2222-222222222222'
+        other.mkdir(parents=True)
+        args = type('Args', (), {'ledger': self.root / 'ledger'})()
+        runtime.reserve(other, 'image', args, self.request['request'], 0.11,
+                        {'key': {'data': {'limit_remaining': 0.75}}}, 'shared')
+        self.assertTrue((other / 'image-submission.json').exists())
 
     def test_concurrent_duplicate_submission_has_one_receipt(self):
         fixture = self.root / 'accepted.json'

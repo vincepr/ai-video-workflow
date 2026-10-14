@@ -7,6 +7,7 @@ import argparse
 import base64
 import hashlib
 import json
+import math
 import mimetypes
 import os
 import sys
@@ -152,6 +153,14 @@ def estimate(stage, model, request, discovery_data, allow_legacy=True):
         current = 'duration_seconds_' + resolution
         if current in pricing:
             return float(pricing[current]) * seconds
+        if model.get('id') == 'bytedance/seedance-2.0-mini':
+            audio_key = 'video_tokens' if request['execution']['audio'] else 'video_tokens_without_audio'
+            if audio_key in pricing and resolution in ('480p', '720p'):
+                short_edge = int(resolution[:-1])
+                first, second = map(int, request['execution']['aspectRatio'].split(':'))
+                long_edge = math.ceil(short_edge * max(first, second) / min(first, second) / 2) * 2
+                tokens = math.ceil(short_edge * long_edge * seconds * 24 / 1024)
+                return tokens * float(pricing[audio_key])
         legacy = 'cents_per_video_output_second_' + resolution
         if allow_legacy and legacy in pricing:
             input_cost = float(pricing.get('cents_per_image_input', 0))
@@ -275,13 +284,12 @@ def reserve(run, stage, args, request, estimate_usd, discovery_data, identity):
         entries = list(ledger_entries(ledger, identity))
         this_run = sum(float(e.get('chargedUsd') if e.get('chargedUsd') is not None else e['estimateUsd'])
                        for _, e in entries if e['run'] == str(run))
-        accounted = sum(float(e.get('chargedUsd') if e.get('chargedUsd') is not None else e['estimateUsd'])
-                        for _, e in entries)
+        outstanding = sum(float(e['estimateUsd']) for _, e in entries if e.get('chargedUsd') is None)
         ceiling = float(request['execution']['budget']['maxUsd'])
         remaining = discovery_data['key']['data'].get('limit_remaining')
         if this_run + estimate_usd > ceiling + 1e-9:
             raise ValueError('Run ceiling exceeded')
-        if remaining is None or accounted + estimate_usd > float(remaining) + 1e-9:
+        if remaining is None or outstanding + estimate_usd > float(remaining) + 1e-9:
             raise ValueError('Shared key headroom insufficient or unavailable')
         marker_data = {'state': 'ambiguous', 'stage': stage, 'claimedAt': now(),
                        'estimateUsd': estimate_usd, 'keyIdentity': identity}
