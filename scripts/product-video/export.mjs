@@ -11,7 +11,7 @@ async function writeJson(file, value) {await writeFile(file, JSON.stringify(valu
 function relative(root, file) {return path.relative(root, file).split(path.sep).join('/');}
 
 /** Register one locally finished MP4 as a new numbered, immutable product-video export. */
-export async function registerFinishedExport({root, projectId, requestId, finishedFile, label}) {
+export async function registerFinishedExport({root, projectId, requestId, finishedFile, label = ''}) {
   const paths = projectPaths(root, projectId);
   const run = path.join(paths.work, 'product-video', requestId);
   const actualRun = await realpath(run);

@@ -20,7 +20,7 @@ export const pickerOptions = {
 export function createReviewSession(catalog, saved) {
   const defaults = {version: 1, reviewVersion: 2, sessionId: catalog.projectId ?? catalog.id.split('-panels')[0], catalogId: catalog.id, title: catalog.title,
     script: catalog.script, commentaryChoice: 'current', commentaryDrafts: {current: catalog.script},
-    images: null, motion: null, captions: null,
+    images: null, motion: null, captions: null, productVideo: null,
     voice: null, requestedPickers: [], extraTabs: [], activeTab: 'videos', notes: ''};
   if (saved?.version !== 1 || saved.catalogId !== catalog.id || saved.sessionId !== defaults.sessionId) return defaults;
   const session = {...defaults, ...structuredClone(saved)};
@@ -60,7 +60,7 @@ export function addComparison(session, label, options) {
 
 export function sessionSnapshot(session) {return structuredClone(session);}
 
-const draftKeys = ['title', 'script', 'commentaryChoice', 'commentaryDrafts', 'notes', 'images', 'motion', 'captions', 'voice', 'requestedPickers', 'extraTabs'];
+const draftKeys = ['title', 'script', 'commentaryChoice', 'commentaryDrafts', 'notes', 'images', 'motion', 'captions', 'voice', 'productVideo', 'requestedPickers', 'extraTabs'];
 export function draftState(session) {
   return Object.fromEntries(draftKeys.map((key) => [key, structuredClone(session[key])]));
 }
@@ -75,11 +75,32 @@ export function pendingChanges(session) {
   for (const key of ['images', 'motion', 'captions', 'voice']) {
     if (JSON.stringify(session[key]) !== JSON.stringify(applied[key])) changed.push(key);
   }
+  if (JSON.stringify(session.productVideo) !== JSON.stringify(applied.productVideo ?? null)) changed.push('product-video');
   for (const tab of session.extraTabs) {
     if (tab.choice === null && !applied.extraTabs.find((item) => item.id === tab.id)?.choice) continue;
     if (JSON.stringify(tab) !== JSON.stringify(applied.extraTabs.find((item) => item.id === tab.id))) changed.push(tab.id);
   }
   return {changed, review: scriptChanged ? ['images', 'voice'] : []};
+}
+export function productVideoImpact(session) {
+  const before = session.applied?.productVideo ?? null;
+  const after = session.productVideo ?? null;
+  if (!before && !after) return {kind: 'none', changed: []};
+  if (!before || !after) return {kind: 'generate', changed: ['configuration']};
+  const changed = [];
+  const walk = (left, right, prefix = '') => {
+    for (const key of new Set([...Object.keys(left ?? {}), ...Object.keys(right ?? {})])) {
+      const name = prefix ? `${prefix}.${key}` : key;
+      if (JSON.stringify(left?.[key]) === JSON.stringify(right?.[key])) continue;
+      if (left?.[key] && right?.[key] && !Array.isArray(left[key]) && !Array.isArray(right[key]) && typeof left[key] === 'object' && typeof right[key] === 'object') walk(left[key], right[key], name);
+      else changed.push(name);
+    }
+  };
+  walk(before, after);
+  if (JSON.stringify(session.captions) !== JSON.stringify(session.applied?.captions)) changed.push('captions');
+  if (JSON.stringify(session.motion) !== JSON.stringify(session.applied?.motion)) changed.push('motion');
+  if (!changed.length) return {kind: 'none', changed};
+  return {kind: changed.every(key => ['brief.cta', 'brief.brand', 'captions'].includes(key) || key.startsWith('finishing.')) ? 'finish' : 'generate', changed};
 }
 export function resetPicker(session, id) {
   const next = {...session, rebuildRequest: null};
@@ -87,6 +108,7 @@ export function resetPicker(session, id) {
     for (const key of ['script', 'commentaryChoice', 'commentaryDrafts', 'notes']) next[key] = structuredClone(session.applied[key]);
   } else if (['motion', 'captions', 'voice'].includes(id)) next[id] = null;
   else if (id === 'images') next.images = structuredClone(session.applied.images);
+  else if (id === 'product-video') next.productVideo = structuredClone(session.applied.productVideo ?? null);
   else next.extraTabs = next.extraTabs.map((tab) => tab.id === id ? {...tab, choice: null, notes: ''} : tab);
   if (['motion', 'captions', 'voice'].includes(id)) next.requestedPickers = session.requestedPickers.filter((key) => key !== id);
   return next;
@@ -105,7 +127,7 @@ export function saveReviewVersion(session, label) {
 export function restoreReviewVersion(session, id) {
   const version = session.versions.find((item) => item.id === id);
   if (!version) throw new Error('Unknown review version');
-  return {...session, ...structuredClone(version.state), workingDraft: session.workingDraft ?? draftState(session), selectedVersion: id, rebuildRequest: null};
+  return {...session, ...structuredClone(version.state), productVideo: structuredClone(version.state.productVideo ?? null), workingDraft: session.workingDraft ?? draftState(session), selectedVersion: id, rebuildRequest: null};
 }
 
 export function restoreWorkingDraft(session) {

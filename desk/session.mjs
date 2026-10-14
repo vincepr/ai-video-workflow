@@ -1,6 +1,8 @@
-import {createReviewSession, updatePicker, addComparison, pickerOptions, sessionSnapshot, initializeReview, pendingChanges, resetPicker, requestRebuild, draftState, saveReviewVersion, restoreReviewVersion, restoreWorkingDraft, applyRebuild} from './review-session.mjs';
+import {createReviewSession, updatePicker, addComparison, pickerOptions, sessionSnapshot, initializeReview, pendingChanges, resetPicker, requestRebuild, draftState, saveReviewVersion, restoreReviewVersion, restoreWorkingDraft, applyRebuild, productVideoImpact} from './review-session.mjs';
 import {readSessionImages} from './image-selection.mjs';
 const [catalog, concepts] = await Promise.all(['image-options.json', 'concepts.json'].map((file) => fetch(file).then((response) => response.json())));
+let productCatalog = null;
+try {const response = await fetch('./api/product-video/catalog'); if (response.ok) productCatalog = await response.json();} catch {}
 const $ = (id) => document.getElementById(id);
 const storageKey = `creator-desk:session:${catalog.projectId ?? catalog.id}:${catalog.id}`;
 let local = false, saved, history = [], saveTimer, sampleTick = 0, paused = false, submitting = false, imagePickerReady = false;
@@ -69,7 +71,7 @@ function cards(container, options, choice, action) {
     card.append(node('strong', option.label), node('span', option.detail)); return card;
   }));
 }
-const tabs = [['videos', 'Videos'], ['commentary', 'Commentary'], ['images', 'Images'], ['motion', 'Motion'], ['captions', 'Captions'], ['voice', 'Voice']];
+const tabs = [['videos', 'Videos'], ['product-video', 'Product video'], ['commentary', 'Commentary'], ['images', 'Images'], ['motion', 'Motion'], ['captions', 'Captions'], ['voice', 'Voice']];
 const optional = ['motion', 'captions', 'voice'];
 function inactive(id) {return optional.includes(id) && !session.requestedPickers.includes(id) && !session[id];}
 function renderTabs() {
@@ -106,6 +108,7 @@ function openTab(id) {
   panel.setAttribute('aria-labelledby', `tab-${id}`);
   if (extra) renderExtra(extra);
   if (id === 'videos') refreshHistory();
+  if (id === 'product-video') {renderProductVideo(); refreshProductVideoStatus();}
   updatePreviews();
 }
 function renderPickers() {
@@ -120,6 +123,83 @@ function renderPickers() {
     session.requestedPickers.push(id); save(); renderPickers(); openTab(id);
   }, 'secondary')));
 }
+function productOptions(id, values, labels, selected) {
+  const select = $(id);
+  select.replaceChildren(...values.map(value => {const option = node('option', labels?.[value]?.label ?? value); option.value = value; return option;}));
+  select.value = values.includes(selected) ? selected : values[0] ?? '';
+}
+function renderProductVideo() {
+  if (!productCatalog) {$('pv-status').textContent = 'Product video configuration is available in the local desk.'; $('pv-generate').disabled = true; return;}
+  const draft = session.productVideo ?? {};
+  const workflow = draft.workflow ?? 'direct';
+  productOptions('pv-workflow', Object.keys(productCatalog.choices), {direct: {label: 'Direct ad'}, skit: {label: 'Ad skit'}, drama: {label: 'AI drama'}, 'reference-remake': {label: 'Reference remake'}}, workflow);
+  const selectedWorkflow = $('pv-workflow').value;
+  const choices = productCatalog.choices[selectedWorkflow] ?? {};
+  productOptions('pv-format', choices.formats ?? [], productCatalog.metadata.formats, draft.choices?.format);
+  productOptions('pv-hook', choices.hooks ?? [], productCatalog.metadata.hooks, draft.choices?.hook ?? 'none');
+  productOptions('pv-setting', choices.settings ?? [], productCatalog.metadata.settings, draft.choices?.setting ?? 'auto');
+  productOptions('pv-style', choices.styles ?? [], productCatalog.metadata.styles?.[selectedWorkflow], draft.choices?.style);
+  for (const id of ['format', 'hook', 'setting']) $(`pv-${id}`).closest('label').hidden = selectedWorkflow !== 'direct';
+  $('pv-style').closest('label').hidden = selectedWorkflow === 'direct' || !(choices.styles?.length);
+  productOptions('pv-destination', productCatalog.destinations, {}, draft.destination ?? 'private');
+  const values = {language: draft.language ?? 'en', product: draft.brief?.product ?? '', 'product-path': draft.references?.find(ref => ref.role === 'product')?.path ?? '', 'presenter-path': draft.references?.find(ref => ref.role === 'presenter')?.path ?? '', 'reference-video-path': draft.references?.find(ref => ref.role === 'reference-video')?.path ?? '', facts: (draft.brief?.facts ?? []).join('\n'), brand: draft.brief?.brand ?? '', cta: draft.brief?.cta ?? '', provider: draft.execution?.provider ?? 'openrouter', 'image-model': draft.execution?.models?.image ?? '', 'video-model': draft.execution?.models?.video ?? '', duration: draft.execution?.durationSec ?? 5, aspect: draft.execution?.aspectRatio ?? '9:16', resolution: draft.execution?.resolution ?? '720p', budget: draft.execution?.budget?.maxUsd ?? 0};
+  for (const [id, value] of Object.entries(values)) $(`pv-${id}`).value = value;
+  $('pv-audio').checked = draft.execution?.audio ?? false;
+  const format = productCatalog.metadata.formats?.[$('pv-format').value];
+  const choiceHint = selectedWorkflow === 'reference-remake' ? 'Reference remake is unsupported until a verified video-edit provider route is available.' : format?.needsPresenter ? 'This format needs a presenter reference.' : 'No presenter reference is required by this format.';
+  $('pv-applicability').textContent = `${choiceHint} ${productCatalog.runtime?.freshSessionAvailable ? '' : 'Fresh production sessions are unavailable here. Generate can freeze the request, but cannot start an isolated worker.'}`;
+  $('pv-generate').disabled = !local || selectedWorkflow === 'reference-remake';
+  $('pv-request-details').textContent = session.productVideoLaunch ? JSON.stringify(session.productVideoLaunch, null, 2) : 'No frozen request yet.';
+}
+function readProductVideoForm() {
+  const workflow = $('pv-workflow').value;
+  const choices = workflow === 'direct' ? {format: $('pv-format').value, hook: $('pv-hook').value, setting: $('pv-setting').value} : {style: $('pv-style').value};
+  const references = [{role: 'product', path: $('pv-product-path').value.trim()}];
+  if ($('pv-presenter-path').value.trim()) references.push({role: 'presenter', path: $('pv-presenter-path').value.trim()});
+  if ($('pv-reference-video-path').value.trim()) references.push({role: 'reference-video', path: $('pv-reference-video-path').value.trim()});
+  return {action: 'generate', workflow, choices, language: $('pv-language').value.trim(), destination: $('pv-destination').value,
+    references, brief: {product: $('pv-product').value.trim(), facts: $('pv-facts').value.split('\n').map(line => line.trim()).filter(Boolean), brand: $('pv-brand').value.trim(), cta: $('pv-cta').value.trim()},
+    execution: {provider: $('pv-provider').value.trim(), models: {image: $('pv-image-model').value.trim(), video: $('pv-video-model').value.trim()}, durationSec: Number($('pv-duration').value), aspectRatio: $('pv-aspect').value.trim(), resolution: $('pv-resolution').value.trim(), audio: $('pv-audio').checked, budget: {currency: 'USD', maxUsd: Number($('pv-budget').value)}}};
+}
+for (const field of $('product-video-form').querySelectorAll('input, textarea, select')) field.addEventListener('change', () => {
+  session.productVideo = readProductVideoForm(); save(); renderProductVideo();
+});
+async function refreshProductVideoStatus() {
+  const id = session.productVideoLaunch?.id;
+  if (!id || !local) return;
+  try {
+    const response = await fetch(`./api/product-video/status?requestId=${encodeURIComponent(id)}`);
+    if (!response.ok) return;
+    const {launch, worker} = await response.json();
+    session.productVideoLaunch = {...session.productVideoLaunch, launch, worker};
+    $('pv-status').textContent = launch?.status === 'unsupported' ? `Unavailable: ${launch.reason}. The request is frozen; no provider call was made.` : `Dispatch: ${launch?.status ?? 'pending'}. Worker: ${worker?.status ?? 'not started'}. A dispatched request is not a finished video.`;
+    $('pv-request-details').textContent = JSON.stringify(session.productVideoLaunch, null, 2);
+  } catch {$('pv-status').textContent = 'Progress is temporarily unavailable.';}
+}
+$('pv-generate').onclick = async () => {
+  session.productVideo = readProductVideoForm();
+  const old = session.productVideoLaunch;
+  const id = old && JSON.stringify(old.draft) === JSON.stringify(session.productVideo) ? old.id : crypto.randomUUID();
+  session.productVideoLaunch = {id, draft: structuredClone(session.productVideo)};
+  session = saveReviewVersion(session, `Product video ${session.versions.length + 1}`); save(false);
+  $('pv-status').textContent = 'Freezing request and checking launch capability...';
+  clearTimeout(saveTimer);
+  try {
+    const saved = await fetch('./api/session', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(sessionSnapshot(session))});
+    if (!saved.ok) throw new Error('Could not save configuration');
+    const response = await fetch('./api/product-video/generate', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({requestId: id})});
+    const result = await response.json(); if (!response.ok) throw new Error(result.error ?? 'Could not freeze request');
+    session.productVideoLaunch = {...session.productVideoLaunch, launch: result}; save(false);
+    await refreshProductVideoStatus();
+  } catch (error) {$('pv-status').textContent = error.message;}
+};
+$('pv-refresh').onclick = refreshProductVideoStatus;
+$('pv-cancel').onclick = async () => {
+  if (!session.productVideoLaunch?.id) return;
+  const response = await fetch('./api/product-video/cancel', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({requestId: session.productVideoLaunch.id})});
+  if (!response.ok) {$('pv-status').textContent = 'Could not cancel this request.'; return;}
+  await refreshProductVideoStatus();
+};
 const angle = concepts.concepts.find((concept) => concept.id === concepts.selectedConcept) ?? concepts.concepts[0] ?? {drafts: []};
 for (const [index, draft] of angle.drafts.entries()) session.commentaryDrafts[`draft-${index}`] ??= draft.text;
 session = initializeReview(session);
@@ -167,7 +247,7 @@ function renderChanges() {
   const {changed, review} = pendingChanges(session);
   const label = (id) => tabs.find(([key]) => key === id)?.[1] ?? session.extraTabs.find((tab) => tab.id === id)?.label ?? id;
   $('change-summary').textContent = changed.length ? `Pending: ${changed.map(label).join(', ')}.${review.length ? ` Review ${review.map(label).join(' and ')} against the changed narration.` : ''}` : 'No pending changes. Inactive pickers leave the current video as it is.';
-  $('rebuild-session').disabled = submitting || !local || !changed.length;
+  $('rebuild-session').disabled = submitting || !local || !changed.some(id => id !== 'product-video');
   $('save-session').disabled = submitting;
   $('rebuild-status').textContent = session.lastAction?.message ?? '';
 }
@@ -181,7 +261,7 @@ function renderVersions() {
 function refreshDraft() {
   $('image-picker').contentWindow?.creatorDesk?.setImageSelection?.(session.images);
   $('voice-notes').value = session.voice?.notes ?? '';
-  renderPickers(); renderCommentary(); updatePreviews(); openTab(session.activeTab);
+  renderPickers(); renderCommentary(); renderProductVideo(); updatePreviews(); openTab(session.activeTab);
 }
 function resetTab(id) {syncImages(); session = resetPicker(session, id); save(); refreshDraft();}
 $('review-version').onchange = () => {
@@ -222,7 +302,8 @@ function renderHistory() {
     const unavailable = ['deleted', 'replaced', 'unavailable'].includes(record.status);
     const card = node('article', '', `render-card${unavailable ? ' unavailable' : ''}`);
     const episode = record.snapshot.episode;
-    const seconds = episode.shots.reduce((total, shot) => total + shot.seconds, 0);
+    const seconds = record.snapshot.productVideo && record.snapshot.renderer?.fps ? record.snapshot.renderer.frames / record.snapshot.renderer.fps
+      : episode.shots.reduce((total, shot) => total + shot.seconds, 0);
     const name = `${record.iteration ? record.iteration + ' / ' : ''}${record.label}`;
     const selected = record.id === session.lastAppliedRender;
     card.append(node('h3', name), node('p', `${seconds.toFixed(1)} seconds / ${new Date(record.createdAt).toLocaleString()}`), node('span', selected ? `${record.status} / Selected` : record.status === 'local' ? 'Local file' : record.status, 'status'), node('p', record.file, 'quiet'));

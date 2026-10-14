@@ -108,3 +108,23 @@ test('commentary notes can be saved and sent without inventing a changed script'
   assert.equal(request.rebuildRequest.state.notes,'Make the opening shorter');
   assert.equal(request.rebuildRequest.state.script,'Original');
 });
+
+test('product video changes are versioned and classify local finishing separately', () => {
+  let session = review.initializeReview(createReviewSession({id: 'test', title: 'Test', script: 'Original'}));
+  session.productVideo = {workflow: 'direct', choices: {format: 'hypermotion'}, brief: {product: 'Cube', brand: 'One', cta: 'Visit'}, references: [{role: 'product', path: 'projects/test/media/cube.png'}]};
+  session = review.initializeReview({...session, applied: {...session.applied, productVideo: structuredClone(session.productVideo)}});
+  session.productVideo.brief.cta = 'Shop now';
+  assert.deepEqual(review.productVideoImpact(session), {kind: 'finish', changed: ['brief.cta']});
+  session = review.saveReviewVersion(session, 'CTA');
+  assert.equal(session.versions[0].state.productVideo.brief.cta, 'Shop now');
+  session.productVideo.choices.format = 'tvspot';
+  assert.equal(review.productVideoImpact(session).kind, 'generate');
+  assert.ok(review.pendingChanges(session).changed.includes('product-video'));
+  session.productVideo = structuredClone(session.applied.productVideo);
+  session.captions = {mode: 'word'};
+  assert.equal(review.productVideoImpact(session).kind, 'finish');
+  session.motion = {movement: 'strong'};
+  assert.equal(review.productVideoImpact(session).kind, 'generate');
+  const legacy = {...session, versions: [{id: 'old', state: {script: 'Old', motion: null}}]};
+  assert.equal(review.restoreReviewVersion(legacy, 'old').productVideo, null);
+});

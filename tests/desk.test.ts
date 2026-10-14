@@ -5,6 +5,8 @@ import {mkdtemp, mkdir, writeFile, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {recordRender} from '../scripts/render-history.mjs';
+import {recordWorkerUpdate} from '../scripts/product-video/launcher.mjs';
+import {normalizeRequest} from '../scripts/product-video/request.mjs';
 import {createServer} from 'node:http';
 
 test('project desks keep catalogs, sessions and videos separate', async () => {
@@ -60,6 +62,8 @@ test('the desk serves its page and modules without exposing repository files', a
     assert.match(html, /Creator Desk/);
     assert.match(html, /id="project-picker"/);
     assert.match(html, /id="review-version"/);
+    assert.match(html, /id="panel-product-video"/);
+    assert.match(html, /id="pv-generate"/);
     assert.match(html, /id="rebuild-session"/);
     assert.match(html, /id="save-session"[^>]*>Save<\/button>/);
     assert.match(html, /id="rebuild-session"[^>]*>Save &amp; send to T3<\/button>/);
@@ -151,4 +155,50 @@ test('the local session persists choices and serves only registered videos with 
     assert.equal(path.dirname(root), tmpdir());
     await rm(root, {recursive: true, force: true});
   }
+});
+
+test('product video catalog is compact and Generate freezes the saved draft once', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'desk-product-'));
+  const base = '.agents/skills/generate-product-video';
+  const paths = [`${base}/SKILL.md`, `${base}/references/common.md`, `${base}/references/workflows/direct.md`, `${base}/references/configuration/formats/hypermotion.md`, `${base}/references/private.md`, 'projects/alpha/media/cube.png', 'projects/alpha/project.json'];
+  const catalog: any = {version: 1, files: {router: paths[0], common: paths[1], workflows: {direct: paths[2]}, formats: {hypermotion: paths[3]}, hooks: {}, settings: {}, destinations: {private: paths[4]}}, choices: {direct: {formats: ['hypermotion'], hooks: ['none'], settings: ['auto']}, skit: {styles: ['funny']}}, metadata: {formats: {hypermotion: {label: 'Hyper Motion'}}, styles: {skit: {funny: {label: 'Funny'}}}}};
+  const calls: any[] = [];
+  const server = createDeskServer({root, productVideoTransport: {createFreshSession: async (seed: any) => {calls.push(seed); return {sessionId: 'fresh-1', executionId: 'run-1'};}}});
+  try {
+    for (const file of paths) {await mkdir(path.dirname(path.join(root, file)), {recursive: true}); await writeFile(path.join(root, file), file);}
+    await writeFile(path.join(root, 'projects/alpha/project.json'), JSON.stringify({id: 'alpha', title: 'Alpha'}));
+    const catalogPath = path.join(root, base, 'references/configuration/catalog.json');
+    await writeFile(catalogPath, JSON.stringify(catalog));
+    await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
+    const address = server.address(); assert.ok(address && typeof address !== 'string');
+    const url = `http://127.0.0.1:${address.port}/projects/alpha`;
+    const choices = await fetch(`${url}/api/product-video/catalog`).then(response => response.json());
+    assert.equal(choices.metadata.formats.hypermotion.label, 'Hyper Motion');
+    assert.equal(choices.metadata.styles.skit.funny.label, 'Funny');
+    assert.equal(JSON.stringify(choices).includes('references/configuration/formats'), false);
+    const draft = {action: 'plan', workflow: 'direct', choices: {format: 'hypermotion', hook: 'none', setting: 'auto'}, language: 'en', destination: 'private', references: [{role: 'product', path: 'projects/alpha/media/cube.png'}], brief: {product: 'Synthetic cube', facts: ['Blue shell']}, execution: {provider: 'openrouter', models: {}, durationSec: 5, aspectRatio: '9:16', resolution: '720p', audio: false, budget: {currency: 'USD', maxUsd: 0}}};
+    assert.equal((await fetch(`${url}/api/session`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({version: 1, sessionId: 'alpha', productVideo: draft})})).status, 200);
+    assert.equal(calls.length, 0);
+    const id = '9a4fec5b-d5d4-4fc6-ae92-df73acd109be';
+    const generate = () => fetch(`${url}/api/product-video/generate`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({requestId: id})});
+    assert.equal((await generate()).status, 200);
+    assert.equal((await generate()).status, 200);
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].skill, 'generate-product-video');
+    assert.equal(calls[0].request.projectId, 'alpha');
+    assert.deepEqual(calls[0].request, normalizeRequest({...draft, id, projectId: 'alpha', source: 'agent'}, catalog));
+    await recordWorkerUpdate(root, 'alpha', id, {executionId: 'run-1', status: 'accepted', receipt: {jobId: 'synthetic-job'}});
+    const progress = await fetch(`${url}/api/product-video/status?requestId=${id}`).then(response => response.json());
+    assert.equal(progress.launch.status, 'dispatched');
+    assert.equal(progress.worker.status, 'accepted');
+    const cancel = await fetch(`${url}/api/product-video/cancel`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({requestId: id})});
+    assert.equal((await cancel.json()).status, 'cancelled');
+    assert.equal((await fetch(`${url}/api/product-video/status?requestId=${id}`).then(response => response.json())).worker.receipt.jobId, 'synthetic-job');
+    assert.equal((await fetch(`${url}/api/product-video/generate`, {method: 'POST', headers: {'Content-Type': 'application/json', Origin: 'https://example.com'}, body: JSON.stringify({requestId: id})})).status, 403);
+    catalog.metadata.formats.hypermotion = {label: 'Hyper Motion', requiredInputs: ['product', 'presenter']};
+    await writeFile(catalogPath, JSON.stringify(catalog));
+    const needsPresenter = await fetch(`${url}/api/product-video/generate`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({requestId: 'e7d60911-3dcb-47a1-96d1-1bbccf5920da'})});
+    assert.equal(needsPresenter.status, 400);
+    assert.match((await needsPresenter.json()).error, /presenter/);
+  } finally {await new Promise<void>(resolve => server.close(() => resolve())); await rm(root, {recursive: true, force: true});}
 });

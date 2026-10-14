@@ -5,15 +5,58 @@ import path from 'node:path';
 import {readRenderHistory, resolveRenderPath} from './render-history.mjs';
 import {sendSavedRequest} from './t3-bridge.mjs';
 import {sessionDirectory} from './projects.mjs';
+import {launchProductVideo, readLaunchStatus, cancelProductVideo} from './product-video/launcher.mjs';
 
 function json(response, status, value) {
   response.writeHead(status, {'Content-Type': 'application/json', 'Cache-Control': 'no-store'});
   response.end(JSON.stringify(value));
 }
 
-export async function handleSessionRequest(request, response, {root, sessionId}) {
+export async function handleSessionRequest(request, response, {root, sessionId, productVideoTransport}) {
   const pathname = new URL(request.url, 'http://localhost').pathname;
   if (!pathname.startsWith('/api/')) return false;
+  if (pathname.startsWith('/api/product-video/')) {
+    const catalogPath = path.join(root, '.agents/skills/generate-product-video/references/configuration/catalog.json');
+    if (pathname === '/api/product-video/catalog' && request.method === 'GET') {
+      try {
+        const catalog = JSON.parse(await readFile(catalogPath, 'utf8'));
+        const compact = entry => entry?.label ? {label: entry.label, needsPresenter: entry.needsPresenter ?? false, requiredInputs: entry.requiredInputs ?? []}
+          : Object.fromEntries(Object.entries(entry ?? {}).map(([id, child]) => [id, compact(child)]));
+        const metadata = Object.fromEntries(Object.entries(catalog.metadata ?? {}).map(([group, entries]) => [group, compact(entries)]));
+        json(response, 200, {version: catalog.version, choices: catalog.choices, metadata, destinations: Object.keys(catalog.files.destinations), runtime: {freshSessionAvailable: typeof productVideoTransport?.createFreshSession === 'function'}});
+      } catch {json(response, 500, {error: 'Could not read product video catalog'});}
+      return true;
+    }
+    if (request.headers.origin && request.headers.origin !== `http://${request.headers.host}`) {json(response, 403, {error: 'Origin does not match the local desk'}); return true;}
+    if (pathname === '/api/product-video/status' && request.method === 'GET') {
+      const id = new URL(request.url, 'http://localhost').searchParams.get('requestId');
+      try {json(response, 200, await readLaunchStatus(root, sessionId, id));}
+      catch {json(response, 404, {error: 'Product video request not found'});}
+      return true;
+    }
+    if (['/api/product-video/generate', '/api/product-video/cancel'].includes(pathname) && request.method === 'POST') {
+      if (!request.headers['content-type']?.startsWith('application/json')) {json(response, 415, {error: 'Expected JSON'}); return true;}
+      const chunks = []; let bytes = 0;
+      for await (const chunk of request) {bytes += chunk.length; if (bytes > 1024) {json(response, 413, {error: 'Request is too large'}); return true;} chunks.push(chunk);}
+      let body;
+      try {body = JSON.parse(Buffer.concat(chunks).toString('utf8'));} catch {json(response, 400, {error: 'Invalid JSON'}); return true;}
+      if (typeof body?.requestId !== 'string') {json(response, 400, {error: 'Missing request ID'}); return true;}
+      try {
+        if (pathname.endsWith('/cancel')) {json(response, 200, await cancelProductVideo(root, sessionId, body.requestId)); return true;}
+        const catalog = JSON.parse(await readFile(catalogPath, 'utf8'));
+        const work = await sessionDirectory(root, sessionId);
+        const session = JSON.parse(await readFile(path.join(work, 'session.json'), 'utf8'));
+        if (session.sessionId !== sessionId || !session.productVideo) throw new Error('No saved product video configuration for this project');
+        const draft = {...session.productVideo, id: body.requestId, projectId: sessionId};
+        const selected = draft.workflow === 'direct' ? catalog.metadata?.formats?.[draft.choices?.format]
+          : catalog.metadata?.styles?.[draft.workflow]?.[draft.choices?.style];
+        for (const role of selected?.requiredInputs ?? []) if (!draft.references?.some(ref => ref.role === role)) throw new Error(`Missing ${role} reference for this choice`);
+        json(response, 200, await launchProductVideo(root, draft, {catalog, transport: productVideoTransport}));
+      } catch (error) {json(response, 400, {error: error.message});}
+      return true;
+    }
+    json(response, 405, {error: 'Product video endpoint does not support this method'}); return true;
+  }
   if (pathname === '/api/session/send') {
     if (request.method !== 'POST') {json(response,405,{error:'Expected POST'});return true;}
     if (request.headers.origin && request.headers.origin !== `http://${request.headers.host}`) {json(response,403,{error:'Origin does not match the local desk'});return true;}

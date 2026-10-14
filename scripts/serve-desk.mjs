@@ -18,7 +18,8 @@ const files = new Map([
   ['/session-history.json', ['session-history.json', 'application/json']],
 ]);
 
-export function createDeskServer({root = fileURLToPath(new URL('../', import.meta.url)), sessionId = 'sample'} = {}) {
+/** @param {{root?: string, sessionId?: string, productVideoTransport?: {createFreshSession: (seed: any) => Promise<{sessionId: string, executionId: string}>}}} options */
+export function createDeskServer({root = fileURLToPath(new URL('../', import.meta.url)), sessionId = 'sample', productVideoTransport} = {}) {
   return createServer(async (request, response) => {
     let pathname = new URL(request.url, 'http://localhost').pathname;
     if (pathname === '/api/projects' && request.method === 'GET') {
@@ -33,7 +34,7 @@ export function createDeskServer({root = fileURLToPath(new URL('../', import.met
       catch {response.writeHead(404); response.end('Project not found'); return;}
       if (!projectRoute[2]) {response.writeHead(302, {Location: `${pathname}/`}); response.end(); return;}
       pathname = projectRoute[2];
-      request.url = pathname;
+      request.url = pathname + new URL(request.url, 'http://localhost').search;
     } else if (['/', '/session.html', '/images.html', '/index.html'].includes(pathname) && ['GET', 'HEAD'].includes(request.method)) {
       const projects = await listProjects(root);
       if (projects.length) {response.writeHead(302, {Location: `/projects/${projects.find(item => item.id === sessionId)?.id ?? projects[0].id}${pathname}`}); response.end(); return;}
@@ -43,7 +44,7 @@ export function createDeskServer({root = fileURLToPath(new URL('../', import.met
       const projects = await listProjects(root);
       requestSession = projects.find(item => item.id === sessionId)?.id ?? projects[0]?.id ?? sessionId;
     }
-    if (await handleSessionRequest(request, response, {root, sessionId: requestSession})) return;
+    if (await handleSessionRequest(request, response, {root, sessionId: requestSession, productVideoTransport})) return;
     if (!['GET', 'HEAD'].includes(request.method)) {response.writeHead(405); response.end(); return;}
     const entry = files.get(pathname) ?? (/^\/panel-options\/[a-z-]+\.jpg$/.test(pathname)
       ? [pathname.slice(1), 'image/jpeg'] : undefined);
