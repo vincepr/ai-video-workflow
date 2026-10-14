@@ -68,6 +68,47 @@ class RuntimeTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('1K', result.stdout)
 
+    def test_current_openrouter_duration_sku_estimates_usd_before_submission(self):
+        (self.run / 'first-frame.bin').write_bytes(b'frame')
+        (self.run / 'first-frame-meta.json').write_text(json.dumps({'sha256': hashlib.sha256(b'frame').hexdigest()}))
+        catalog = json.loads(self.catalog.read_text())
+        catalog['video-models']['data'][0]['pricing_skus'] = {'duration_seconds_720p': '0.1'}
+        self.catalog.write_text(json.dumps(catalog))
+        result = self.cli('dry-run', '--stage', 'video', '--catalog', str(self.catalog))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)['estimatedUsd'], 0.5)
+
+    def test_high_resolution_image_uses_variant_price(self):
+        self.request['request']['execution']['imageResolution'] = '2K'
+        (self.run / 'request.json').write_text(json.dumps(self.request))
+        catalog = json.loads(self.catalog.read_text())
+        catalog['image-models']['data'][0]['supported_parameters']['resolution']['values'] = ['1K', '2K']
+        catalog['image-endpoints']['endpoints'][0]['pricing'].append(
+            {'billable': 'output_image', 'unit': 'image', 'cost_usd': 0.2, 'variant': 'high_resolution'})
+        self.catalog.write_text(json.dumps(catalog))
+        result = self.cli('dry-run', '--stage', 'image', '--catalog', str(self.catalog))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertAlmostEqual(json.loads(result.stdout)['estimatedUsd'], 0.21)
+
+    def test_high_resolution_image_without_variant_price_stops(self):
+        self.request['request']['execution']['imageResolution'] = '2K'
+        (self.run / 'request.json').write_text(json.dumps(self.request))
+        catalog = json.loads(self.catalog.read_text())
+        catalog['image-models']['data'][0]['supported_parameters']['resolution']['values'] = ['2K']
+        self.catalog.write_text(json.dumps(catalog))
+        result = self.cli('dry-run', '--stage', 'image', '--catalog', str(self.catalog))
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('high-resolution image price', result.stderr)
+
+    def test_live_estimate_rejects_legacy_video_price(self):
+        spec = importlib.util.spec_from_file_location('product_video_runtime', CLI)
+        runtime = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(runtime)
+        catalog = json.loads(self.catalog.read_text())
+        model = catalog['video-models']['data'][0]
+        with self.assertRaisesRegex(ValueError, 'current video price'):
+            runtime.estimate('video', model, self.request['request'], catalog, allow_legacy=False)
+
     def test_recorded_submission_is_write_once_and_preserves_bytes(self):
         fixture = self.root / 'image.json'
         import base64

@@ -144,17 +144,28 @@ def model_for(stage, request, discovery):
     return model
 
 
-def estimate(stage, model, request, discovery_data):
+def estimate(stage, model, request, discovery_data, allow_legacy=True):
     pricing = model.get('pricing_skus') or {}
     if stage == 'video':
-        key = 'cents_per_video_output_second_' + request['execution']['resolution']
-        if key not in pricing:
-            raise ValueError('No video price for selected resolution')
-        input_cost = float(pricing.get('cents_per_image_input', 0))
-        return (float(pricing[key]) * request['execution']['durationSec'] + input_cost) / 100
+        resolution = request['execution']['resolution']
+        seconds = request['execution']['durationSec']
+        current = 'duration_seconds_' + resolution
+        if current in pricing:
+            return float(pricing[current]) * seconds
+        legacy = 'cents_per_video_output_second_' + resolution
+        if allow_legacy and legacy in pricing:
+            input_cost = float(pricing.get('cents_per_image_input', 0))
+            return (float(pricing[legacy]) * seconds + input_cost) / 100
+        raise ValueError('No current video price for selected resolution')
     endpoints = discovery_data.get('image-endpoints') or {}
     prices = (endpoints.get('endpoints') or [{}])[0].get('pricing') or []
-    output = next((item for item in prices if item.get('billable') == 'output_image' and not item.get('variant')), None)
+    resolution = request['execution'].get('imageResolution', request['execution']['resolution'])
+    variant = 'high_resolution' if resolution in ('2K', '4K') else None
+    output = next((item for item in prices if item.get('billable') == 'output_image' and item.get('variant') == variant), None)
+    if output is None and variant is not None:
+        raise ValueError('No verifiable high-resolution image price')
+    if output is None:
+        output = next((item for item in prices if item.get('billable') == 'output_image' and not item.get('variant')), None)
     input_price = next((item for item in prices if item.get('billable') == 'input_image'), None)
     if not output or not input_price:
         raise ValueError('No verifiable image input/output price')
@@ -308,7 +319,7 @@ def submit(run, stage, args, root):
         if catalog.get('recorded') or age < 0 or age > 900:
             raise ValueError('Fresh live discovery required before paid submission')
     model = model_for(stage, request, catalog)
-    estimate_usd = estimate(stage, model, request, catalog)
+    estimate_usd = estimate(stage, model, request, catalog, allow_legacy=bool(args.recorded))
     key = None if args.recorded else key_from_env(root)
     if not args.recorded:
         # An earlier catalog snapshot may overstate the remaining balance.

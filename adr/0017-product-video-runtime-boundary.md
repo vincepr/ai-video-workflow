@@ -9,6 +9,8 @@ Agent and Creator Desk submit one version 1 request. Normalize it before launch 
 
 The direct, skit, drama and reference-remake strategies are distinct. Python performs OpenRouter operations and local finishing; agent callbacks plan and inspect creative results. Provider capabilities, current prices and a shared USD ceiling gate paid submissions. Ambiguous submissions stop until reconciled.
 
+The price gate reads the provider's current resolution-specific video `duration_seconds_<resolution>` rate as USD per second. Image prices use the high-resolution variant for 2K and 4K when the catalog offers it. Missing high-resolution prices stop the estimate instead of silently using a lower tier. Keep the older cents-per-second fixture shape for recorded offline responses.
+
 Image and video resolution are separate request fields because the selected providers use different value sets. `imageResolution` controls image preparation, while `resolution` controls video generation. Older frozen drafts without `imageResolution` keep their original shared resolution value.
 
 Creator Desk offers a small set of documented image and video model presets with selectable ratio, resolution and duration. Presets are starting values, not claims of current availability. A strict version 1 JSON format imports or exports the same standard execution controls, so an agent can prepare them without a separate launch path. Unknown JSON fields fail visibly. There is no universal image `effort` control: model-specific quality and provider options require their own capability and cost validation before they can be sent.
@@ -25,3 +27,4 @@ Run `npm run check`, the Python runtime and finishing tests, `npm run files`, an
 
 Test a request with 1K image output and 480p video output, including provider capability validation and the Creator Desk form.
 Check preset changes and JSON round trips without provider calls. Confirm the desk shows the selected controls and preserves a custom model ID; live discovery remains the final gate before paid submission.
+Verify both current USD-per-second video pricing and high-resolution image pricing with recorded catalog fixtures before a paid submission.

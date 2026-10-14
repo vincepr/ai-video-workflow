@@ -12,6 +12,8 @@ Review a complete inexpensive ad draft using source images, temporary captions a
 
 A successful contained product action can improve the footage while producing only a slight improvement in the user's advertising judgment. Assess the hook, benefit, pacing and visual payoff separately from motion quality. Do not treat a longer assembled edit as evidence of stronger creative value, or rerun the same concept after the user stops it.
 
+For a mess-to-fresh idea, require a visible difference between the first and last desk states before spending on motion. Filing one item can demonstrate a compartment well, but does not create a full before-and-after reveal when the opening is already tidy. Match final copy to the change the clip actually shows.
+
 Set a limit for reference corrections as well as video generation. Count rejected frames and preparation mistakes in the attempt's total cost. A spending ceiling is a limit, not a reason to keep refining an unconvincing concept.
 
 ## Product layout and camera movement
@@ -34,5 +36,7 @@ A still-image storyboard does not validate the final video component's layering 
 Record provider errors separately from creative failures. Keep model/route capabilities, actual output size, unexpected audio and reported charges with the attempt. Account totals may lag individual receipts, so use recorded costs and outstanding request estimates when enforcing the budget.
 
 Inspect the actual audio and canvas even when the catalog advertises a different behavior. Track both technical success and creative acceptance, plus the cost of all attempts. A failed creative has zero accepted advertising seconds; retain its total cost instead of computing a misleading successful-output rate.
+
+Inspect downloaded media even when a request disables model audio. If an unexpected audio stream arrives, explicitly replace or remove it during local finishing and measure the encoded result.
 
 Separate observations from inferred causes. A single rejected clip does not prove a model is universally poor. Save what the next attempt should change and what would count as improvement, then inspect the next result against those criteria. Preserve failed assets as evidence without marking them selected for a later advertisement.
