@@ -7,7 +7,7 @@ export function musicVolume(frame: number, totalFrames: number, volume: number) 
 export function timeline(episode: Episode) {
   let cursor = 0;
   return episode.shots.map((shot) => {
-    const frames = Math.round(shot.seconds * FPS);
+    const frames = 'video' in shot ? shot.endFrame - shot.startFrame : Math.round(shot.seconds * FPS);
     const entry = {shot, from: cursor, frames};
     cursor += frames;
     return entry;

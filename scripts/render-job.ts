@@ -13,7 +13,7 @@ export async function prepareRender(root: string, options: {projectId?: string; 
   const pickers = options.session ? JSON.parse(await readFile(path.resolve(root, options.session), 'utf8')) : null;
   if (project && pickers && pickers.sessionId !== project) throw new Error('Review session belongs to a different project');
   const mediaRoot = await realpath(project ? projectPaths(root, project).media : publicDirectory);
-  for (const asset of [...episode.shots.map(shot => shot.image), episode.audio, episode.music?.audio].filter(Boolean) as string[]) {
+  for (const asset of [...episode.shots.map(shot => 'video' in shot ? shot.video : shot.image), episode.audio, episode.music?.audio].filter(Boolean) as string[]) {
     const resolved = await realpath(path.join(publicDirectory, asset));
     if (!resolved.startsWith(mediaRoot + path.sep)) throw new Error('Asset is outside project media');
     await access(resolved);

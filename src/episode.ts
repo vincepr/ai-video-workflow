@@ -1,5 +1,5 @@
 export type Camera = [number, number, number];
-export type Shot = {
+export type ImageShot = {
   image: string;
   seconds: number;
   text: string;
@@ -8,8 +8,11 @@ export type Shot = {
   source: string;
   rights: string;
 };
+export type VideoShot = {video: string; startFrame: number; endFrame: number; text: string; source: string; rights: string};
+export type Shot = ImageShot | VideoShot;
+export type ImageEpisode = {title: string; shots: ImageShot[]; audio?: string; music?: BackgroundMusic};
 export type BackgroundMusic = {audio: string; volume: number; title: string; artist: string; source: string; license: string; attribution: string};
-export type Episode = {title: string; shots: Shot[]; audio?: string; music?: BackgroundMusic};
+export type Episode = {version?: 2; title: string; shots: Shot[]; audio?: string; music?: BackgroundMusic};
 
 function record(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -33,12 +36,15 @@ function camera(value: unknown): void {
   }
 }
 
+export function validateEpisode(value: ImageEpisode): ImageEpisode;
+export function validateEpisode(value: unknown): Episode;
 export function validateEpisode(value: unknown): Episode {
   if (!value || typeof value !== 'object' || !('shots' in value) ||
       !Array.isArray(value.shots) || value.shots.length === 0) {
     throw new Error('Episode needs shots');
   }
   const episode = record(value);
+  if (episode.version !== undefined && episode.version !== 2) throw new Error('Unsupported episode version');
   text(episode.title, 'title', 80);
   if (episode.music !== undefined) {
     const music = record(episode.music);
@@ -52,6 +58,16 @@ export function validateEpisode(value: unknown): Episode {
   }
   for (const item of value.shots) {
     const shot = record(item);
+    if ('video' in shot) {
+      if (episode.version !== 2 || 'image' in shot || typeof shot.video !== 'string' ||
+          !/^[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)*\.(mp4|mov|webm)$/.test(shot.video)) throw new Error('Video shot needs version 2 and a local video path');
+      if (!Number.isInteger(shot.startFrame) || !Number.isInteger(shot.endFrame) ||
+          (shot.startFrame as number) < 0 || (shot.endFrame as number) <= (shot.startFrame as number) ||
+          (shot.endFrame as number) - (shot.startFrame as number) > 3600) throw new Error('Invalid video frame range');
+      if (typeof shot.text !== 'string' || shot.text.length > 140) throw new Error('Invalid video text');
+      text(shot.source, 'source'); text(shot.rights, 'rights');
+      continue;
+    }
     text(shot.image, 'image');
     if (!/^[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)*\.(png|jpg|jpeg|webp|svg)$/.test(shot.image as string)) {
       throw new Error('Image must be a local path under public/');

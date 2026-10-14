@@ -1,7 +1,7 @@
-import {validateEpisode, type Episode} from './episode';
+import {validateEpisode, type ImageEpisode} from './episode';
 import {approvedBrief} from '../desk/workflow.mjs';
 
-export function buildEpisode(brief: unknown, seconds: number, audio?: string, assets?: unknown, generatedMedia = 'media/generated'): Episode {
+export function buildEpisode(brief: unknown, seconds: number, audio?: string, assets?: unknown, generatedMedia = 'media/generated'): ImageEpisode {
   const draft = approvedBrief(brief);
   if (assets === undefined) throw new Error('Source images are required. Select symbolic artwork explicitly for a smoke test.');
   if (typeof draft.conceptId !== 'string' || !/^[a-z0-9][a-z0-9-]{0,79}$/.test(draft.conceptId)) throw new Error('Invalid concept ID');
@@ -27,5 +27,5 @@ export function buildEpisode(brief: unknown, seconds: number, audio?: string, as
     seconds: seconds * text.split(' ').length / words.length,
     text,
   }))};
-  return validateEpisode(episode);
+  return validateEpisode(episode) as ImageEpisode;
 }

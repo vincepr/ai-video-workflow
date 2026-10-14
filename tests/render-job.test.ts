@@ -31,3 +31,20 @@ test('render preparation freezes project inputs, selects its media and never ove
     await assert.rejects(() => prepareRender(root, {projectId: 'alpha'}), /ENOENT/);
   } finally {await rm(root, {recursive: true, force: true});}
 });
+
+test('version 2 video media must stay in the owning project', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'video-shot-'));
+  const directory = path.join(root, 'projects', 'alpha');
+  const episode = {version: 2, title: 'Moving clip', shots: [{video: 'media/clips/clip.mp4', startFrame: 0, endFrame: 30,
+    text: '', source: 'Fixture', rights: 'Owned'}]};
+  try {
+    await mkdir(path.join(directory, 'media', 'clips'), {recursive: true});
+    await writeFile(path.join(directory, 'project.json'), JSON.stringify({id: 'alpha', title: 'Alpha'}));
+    await writeFile(path.join(directory, 'media', 'clips', 'clip.mp4'), 'synthetic video');
+    await writeFile(path.join(directory, 'episode.json'), JSON.stringify(episode));
+    const job = await prepareRender(root, {projectId: 'alpha'});
+    assert.equal(job.episode.version, 2);
+    await rm(path.join(directory, 'media', 'clips', 'clip.mp4'));
+    await assert.rejects(() => prepareRender(root, {projectId: 'alpha'}), /ENOENT/);
+  } finally {await rm(root, {recursive: true, force: true});}
+});

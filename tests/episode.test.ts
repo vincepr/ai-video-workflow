@@ -38,3 +38,14 @@ test('rejects invalid timing, camera positions, asset paths and provenance', () 
   }
   assert.throws(() => validateEpisode({...sample, title: ''}));
 });
+
+test('version 2 video shots use local clips and exact source frames without changing still episodes', () => {
+  const video = {version: 2, title: 'Clip', shots: [{video: 'media/clips/raw.mp4', startFrame: 15, endFrame: 75,
+    text: '', source: 'Recorded fixture', rights: 'Owned fixture'}]};
+  assert.deepEqual(validateEpisode(video), video);
+  for (const patch of [{video: '../other.mp4'}, {video: 'https://example.com/clip.mp4'},
+    {startFrame: -1}, {startFrame: 10.5}, {endFrame: 15}, {endFrame: 15.2}]) {
+    assert.throws(() => validateEpisode({...video, shots: [{...video.shots[0], ...patch}]}), Error);
+  }
+  assert.throws(() => validateEpisode({...video, version: 1}), /version|video/i);
+});
