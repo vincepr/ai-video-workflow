@@ -3,6 +3,7 @@ import test from 'node:test';
 import {mkdtemp, mkdir, writeFile, readFile, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
 import {createProject} from '../scripts/projects.mjs';
 import {readRenderHistory} from '../scripts/render-history.mjs';
 import {registerFinishedExport} from '../scripts/product-video/export.mjs';
@@ -22,7 +23,8 @@ test('registration reserves a numbered video and persists frozen plan, release a
     await writeFile(path.join(run, 'direct-state.json'), JSON.stringify({status: 'finishing-ready', finishPlan: plan}));
     await writeFile(path.join(run, 'video-raw.mp4'), 'raw bytes');
     await writeFile(path.join(run, 'finished.mp4'), 'finished bytes');
-    await writeFile(path.join(run, 'finish-report.json'), JSON.stringify({file: path.join(run, 'finished.mp4'), frames: 30, fps: 30, canvas: [180, 320], sources: [{path: path.join(run, 'video-raw.mp4'), sha256: 'synthetic'}]}));
+    const outputSha256 = createHash('sha256').update('finished bytes').digest('hex');
+    await writeFile(path.join(run, 'finish-report.json'), JSON.stringify({file: path.join(run, 'finished.mp4'), outputSha256, frames: 30, fps: 30, canvas: [180, 320], sources: [{path: path.join(run, 'video-raw.mp4'), sha256: 'synthetic'}]}));
     const result = await registerFinishedExport({root, projectId: 'demo', requestId: id, finishedFile: path.join(run, 'finished.mp4'), label: 'First pass'});
     assert.match(result.output, /projects[\\/]demo[\\/]videos[\\/]000001-first-pass[\\/]video\.mp4$/);
     assert.equal(await readFile(result.output, 'utf8'), 'finished bytes');
@@ -38,5 +40,21 @@ test('registration reserves a numbered video and persists frozen plan, release a
     assert.equal(history[0].status, 'available');
     assert.equal(history[0].release.description, description.trimEnd());
     assert.equal(history[0].snapshot.productVideo.requestId, id);
+  } finally {await rm(root, {recursive: true, force: true});}
+});
+
+test('registration rejects bytes changed after the finishing report', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'pv-export-tamper-'));
+  const id = '9a4fec5b-d5d4-4fc6-ae92-df73acd109be';
+  try {
+    await createProject(root, 'demo', 'Demo');
+    const run = path.join(root, 'projects/demo/work/product-video', id);
+    await mkdir(run, {recursive: true});
+    const plan = {version: 1, fps: 30, segments: [], captions: [], audio: {source: 'none'}};
+    await writeFile(path.join(run, 'request.json'), JSON.stringify({request: {id, projectId: 'demo', brief: {product: 'Synthetic block'}, references: []}, context: {files: []}}));
+    await writeFile(path.join(run, 'direct-state.json'), JSON.stringify({status: 'finishing-ready', finishPlan: plan}));
+    await writeFile(path.join(run, 'finished.mp4'), 'changed bytes');
+    await writeFile(path.join(run, 'finish-report.json'), JSON.stringify({file: path.join(run, 'finished.mp4'), outputSha256: '0'.repeat(64), frames: 30, fps: 30, canvas: [180, 320], sources: []}));
+    await assert.rejects(() => registerFinishedExport({root, projectId: 'demo', requestId: id, finishedFile: path.join(run, 'finished.mp4')}), /hash|changed/i);
   } finally {await rm(root, {recursive: true, force: true});}
 });

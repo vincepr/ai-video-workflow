@@ -25,6 +25,7 @@ export async function registerFinishedExport({root, projectId, requestId, finish
   const report = await json(path.join(run, 'finish-report.json'));
   if (path.resolve(report.file) !== actualFile || report.frames <= 0 || report.fps !== state.finishPlan.fps) throw new Error('Finish report does not match the file or plan');
   const hash = createHash('sha256').update(await readFile(actualFile)).digest('hex');
+  if (!/^[a-f0-9]{64}$/.test(report.outputSha256) || report.outputSha256 !== hash) throw new Error('Finished file hash changed after the report');
   const title = String(label || frozen.request.brief.product).trim();
   const iteration = await reserveIteration(root, projectId, title);
   await copyFile(actualFile, iteration.output);

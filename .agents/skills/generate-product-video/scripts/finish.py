@@ -217,7 +217,7 @@ def render(run, plan_file, output, ffmpeg, ffprobe):
         measured = command([ffmpeg, '-hide_banner', '-i', output, '-vn', '-af', 'volumedetect,astats=metadata=1:reset=0', '-f', 'null', '-'])
         audio_analysis = measured.stderr
         (run / 'audio-analysis.txt').write_text(audio_analysis, encoding='utf8')
-    report = {'version': 1, 'file': str(output), 'frames': total, 'fps': fps, 'durationSec': duration, 'canvas': [width, height],
+    report = {'version': 1, 'file': str(output), 'outputSha256': hashlib.sha256(output.read_bytes()).hexdigest(), 'frames': total, 'fps': fps, 'durationSec': duration, 'canvas': [width, height],
               'sources': [{'path': str(source), 'sha256': hashlib.sha256(source.read_bytes()).hexdigest()} for source in sources],
               'segments': plan['segments'], 'captions': plan.get('captions', []), 'audio': audio,
               'audioMeasuredFromEncodedOutput': audio_analysis is not None, 'probe': result}
