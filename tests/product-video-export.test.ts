@@ -58,3 +58,25 @@ test('registration rejects bytes changed after the finishing report', async () =
     await assert.rejects(() => registerFinishedExport({root, projectId: 'demo', requestId: id, finishedFile: path.join(run, 'finished.mp4')}), /hash|changed/i);
   } finally {await rm(root, {recursive: true, force: true});}
 });
+
+test('refined edit registers its own plan without changing the original run', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'pv-export-refine-'));
+  const id = '9a4fec5b-d5d4-4fc6-ae92-df73acd109be';
+  const variantId = '172197b8-239b-4bea-853e-d496443b1002';
+  try {
+    await createProject(root, 'demo', 'Demo');
+    const run = path.join(root, 'projects/demo/work/product-video', id);
+    const variantDirectory = path.join(run, 'refinements', variantId);
+    await mkdir(variantDirectory, {recursive: true});
+    const original = {version: 1, fps: 30, segments: [{source: 'video-raw.mp4', fromFrame: 0, toFrame: 30, kind: 'motion'}], captions: [], audio: {source: 'none'}};
+    const revised = {...original, captions: [{text: 'New CTA', fromFrame: 0, toFrame: 30}]};
+    await writeFile(path.join(run, 'request.json'), JSON.stringify({request: {id, projectId: 'demo', brief: {product: 'Synthetic block'}, references: []}, context: {files: []}}));
+    await writeFile(path.join(run, 'direct-state.json'), JSON.stringify({status: 'finishing-ready', finishPlan: original}));
+    await writeFile(path.join(variantDirectory, 'edit-plan.json'), JSON.stringify(revised));
+    await writeFile(path.join(variantDirectory, 'finished.mp4'), 'revised bytes');
+    await writeFile(path.join(variantDirectory, 'finish-report.json'), JSON.stringify({file: path.join(variantDirectory, 'finished.mp4'), outputSha256: createHash('sha256').update('revised bytes').digest('hex'), frames: 30, fps: 30, canvas: [180, 320], sources: []}));
+    const result = await registerFinishedExport({root, projectId: 'demo', requestId: id, finishedFile: path.join(variantDirectory, 'finished.mp4'), variantDirectory, label: 'New CTA'});
+    assert.equal(JSON.parse(await readFile(path.join(path.dirname(result.output), 'finish-plan.json'), 'utf8')).captions[0].text, 'New CTA');
+    assert.equal(JSON.parse(await readFile(path.join(run, 'direct-state.json'), 'utf8')).finishPlan.captions.length, 0);
+  } finally {await rm(root, {recursive: true, force: true});}
+});

@@ -11,7 +11,7 @@ async function writeJson(file, value) {await writeFile(file, JSON.stringify(valu
 function relative(root, file) {return path.relative(root, file).split(path.sep).join('/');}
 
 /** Register one locally finished MP4 as a new numbered, immutable product-video export. */
-export async function registerFinishedExport({root, projectId, requestId, finishedFile, label = ''}) {
+export async function registerFinishedExport({root, projectId, requestId, finishedFile, label = '', variantDirectory = /** @type {string | null} */ (null), releaseBrief = null}) {
   const paths = projectPaths(root, projectId);
   const run = path.join(paths.work, 'product-video', requestId);
   const actualRun = await realpath(run);
@@ -22,14 +22,25 @@ export async function registerFinishedExport({root, projectId, requestId, finish
   if (frozen.request.id !== requestId || frozen.request.projectId !== projectId) throw new Error('Frozen request does not belong to this project');
   const state = await json(path.join(run, 'direct-state.json'));
   if (state.status !== 'finishing-ready' || state.finishPlan?.version !== 1) throw new Error('Direct run is not ready for finishing');
-  const report = await json(path.join(run, 'finish-report.json'));
-  if (path.resolve(report.file) !== actualFile || report.frames <= 0 || report.fps !== state.finishPlan.fps) throw new Error('Finish report does not match the file or plan');
+  let finishPlan = state.finishPlan;
+  let sourceDirectory = run;
+  if (variantDirectory !== null) {
+    const relativeVariant = path.relative(run, variantDirectory).split(path.sep).join('/');
+    if (!/^refinements\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(relativeVariant) ||
+        await realpath(variantDirectory) !== path.resolve(variantDirectory)) throw new Error('Invalid refinement directory');
+    sourceDirectory = variantDirectory;
+    finishPlan = await json(path.join(sourceDirectory, 'edit-plan.json'));
+    if (finishPlan.version !== 1 || finishPlan.fps !== state.finishPlan.fps) throw new Error('Refinement plan does not match frozen run');
+    if (actualFile !== path.join(sourceDirectory, 'finished.mp4')) throw new Error('Refinement output must be its finished MP4');
+  }
+  const report = await json(path.join(sourceDirectory, 'finish-report.json'));
+  if (path.resolve(report.file) !== actualFile || report.frames <= 0 || report.fps !== finishPlan.fps) throw new Error('Finish report does not match the file or plan');
   const hash = createHash('sha256').update(await readFile(actualFile)).digest('hex');
   if (!/^[a-f0-9]{64}$/.test(report.outputSha256) || report.outputSha256 !== hash) throw new Error('Finished file hash changed after the report');
   const title = String(label || frozen.request.brief.product).trim();
   const iteration = await reserveIteration(root, projectId, title);
   await copyFile(actualFile, iteration.output);
-  await writeJson(path.join(iteration.directory, 'finish-plan.json'), state.finishPlan);
+  await writeJson(path.join(iteration.directory, 'finish-plan.json'), finishPlan);
   await writeJson(path.join(iteration.directory, 'finish-report.json'), report);
   await writeJson(path.join(iteration.directory, 'frozen-request.json'), frozen);
   const sourceAttribution = [];
@@ -43,11 +54,11 @@ export async function registerFinishedExport({root, projectId, requestId, finish
   }
   await writeJson(path.join(iteration.directory, 'source-attribution.json'), sourceAttribution);
   const credits = [...new Set(sourceAttribution.filter(item => item.attribution.attributionRequired).map(item => item.attribution.exactCredit).filter(Boolean))];
-  const description = [frozen.request.brief.product, frozen.request.brief.cta, ...credits].filter(Boolean).join('\n\n').trim();
+  const description = [frozen.request.brief.product, releaseBrief?.brand ?? frozen.request.brief.brand, releaseBrief?.cta ?? frozen.request.brief.cta, ...credits].filter(Boolean).join('\n\n').trim();
   const sourceLines = (report.sources ?? []).map(source => `- ${source.path} (${source.sha256})`).join('\n');
   const context = `# Product-video export\n\nRequest: ${requestId}\nWorkflow: ${frozen.request.workflow ?? 'direct'}\nCreative choice: ${JSON.stringify(frozen.request.choices ?? {})}\n\n## Sources\n\n${sourceLines || 'Not recorded'}\n\nReference attribution is in source-attribution.json.\n\n## Edit\n\n${report.frames} frames at ${report.fps} fps. Segment ranges and caption windows are in finish-plan.json. Raw output remains in the frozen run.\n\n## Release questions\n\nCheck source rights, factual claims and destination eligibility before publication.\n`;
   await writeFile(path.join(iteration.directory, 'context.md'), context, {flag: 'wx'});
-  const episode = {title, shots: [], productVideo: {requestId, finishPlan: state.finishPlan, sourceSha256: report.sources ?? [], outputSha256: hash}};
+  const episode = {title, shots: [], productVideo: {requestId, finishPlan, sourceSha256: report.sources ?? [], outputSha256: hash}};
   const recorded = await recordRender(root, {output: iteration.output, episode, sessionId: projectId, label: title,
     renderer: {kind: 'product-video-ffmpeg', fps: report.fps, frames: report.frames, canvas: report.canvas}});
   const release = {description, music: null};

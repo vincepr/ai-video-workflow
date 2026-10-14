@@ -6,6 +6,7 @@ import {readRenderHistory, resolveRenderPath} from './render-history.mjs';
 import {sendSavedRequest} from './t3-bridge.mjs';
 import {sessionDirectory} from './projects.mjs';
 import {launchProductVideo, readLaunchStatus, cancelProductVideo} from './product-video/launcher.mjs';
+import {refineProductVideo} from './product-video/refine-action.mjs';
 
 function json(response, status, value) {
   response.writeHead(status, {'Content-Type': 'application/json', 'Cache-Control': 'no-store'});
@@ -34,7 +35,7 @@ export async function handleSessionRequest(request, response, {root, sessionId, 
       catch {json(response, 404, {error: 'Product video request not found'});}
       return true;
     }
-    if (['/api/product-video/generate', '/api/product-video/cancel'].includes(pathname) && request.method === 'POST') {
+    if (['/api/product-video/generate', '/api/product-video/cancel', '/api/product-video/refine'].includes(pathname) && request.method === 'POST') {
       if (!request.headers['content-type']?.startsWith('application/json')) {json(response, 415, {error: 'Expected JSON'}); return true;}
       const chunks = []; let bytes = 0;
       for await (const chunk of request) {bytes += chunk.length; if (bytes > 1024) {json(response, 413, {error: 'Request is too large'}); return true;} chunks.push(chunk);}
@@ -43,11 +44,25 @@ export async function handleSessionRequest(request, response, {root, sessionId, 
       if (typeof body?.requestId !== 'string') {json(response, 400, {error: 'Missing request ID'}); return true;}
       try {
         if (pathname.endsWith('/cancel')) {json(response, 200, await cancelProductVideo(root, sessionId, body.requestId)); return true;}
+        if (pathname.endsWith('/refine') && (typeof body.refinementId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.refinementId))) {
+          json(response, 400, {error: 'Invalid refinement ID'}); return true;
+        }
         const catalog = JSON.parse(await readFile(catalogPath, 'utf8'));
         const work = await sessionDirectory(root, sessionId);
         const session = JSON.parse(await readFile(path.join(work, 'session.json'), 'utf8'));
         if (session.sessionId !== sessionId || !session.productVideo) throw new Error('No saved product video configuration for this project');
         const draft = {...session.productVideo, id: body.requestId, projectId: sessionId};
+        if (pathname.endsWith('/refine')) {
+          if (!path.isAbsolute(process.env.FFMPEG_PATH ?? '') || !path.isAbsolute(process.env.FFPROBE_PATH ?? '')) {
+            json(response, 409, {error: 'Local finishing requires absolute FFMPEG_PATH and FFPROBE_PATH for full FFmpeg'}); return true;
+          }
+          try {
+            const result = await refineProductVideo({root, projectId: sessionId, requestId: body.requestId,
+              refinementId: body.refinementId, draft, catalog, ffmpeg: process.env.FFMPEG_PATH, ffprobe: process.env.FFPROBE_PATH});
+            json(response, 200, result);
+          } catch (error) {json(response, 409, {error: error.message});}
+          return true;
+        }
         const selected = draft.workflow === 'direct' ? catalog.metadata?.formats?.[draft.choices?.format]
           : catalog.metadata?.styles?.[draft.workflow]?.[draft.choices?.style];
         for (const role of selected?.requiredInputs ?? []) if (!draft.references?.some(ref => ref.role === role)) throw new Error(`Missing ${role} reference for this choice`);

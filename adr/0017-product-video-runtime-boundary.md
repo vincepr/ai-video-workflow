@@ -13,6 +13,8 @@ The existing T3 bridge starts a turn in a paired thread and retains its history.
 
 Existing still episodes keep their schema. Version 2 adds project-local video shots with explicit source frame ranges. The local finisher preserves raw media and creates numbered exports with frozen edit plans, history, credits and encoded-output measurements.
 
+Local CTA and caption changes in Creator Desk render from an accepted direct edit in a separate refinement folder. A stable refinement ID and export receipt prevent a repeated request from reserving another numbered export. The original edit plan and source bytes remain available for comparison.
+
 ## Validation
 
 Run `npm run check`, the Python runtime and finishing tests, `npm run files`, and the product-video skill validator. Render a version 2 moving shot and inspect opening, midpoint and CTA frames. Check source/output hashes and encoded audio in the ignored migration project. Record offline, live and creative verdicts separately.

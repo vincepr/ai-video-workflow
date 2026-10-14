@@ -64,6 +64,7 @@ test('the desk serves its page and modules without exposing repository files', a
     assert.match(html, /id="review-version"/);
     assert.match(html, /id="panel-product-video"/);
     assert.match(html, /id="pv-generate"/);
+    assert.match(html, /id="pv-refine"/);
     assert.match(html, /id="rebuild-session"/);
     assert.match(html, /id="save-session"[^>]*>Save<\/button>/);
     assert.match(html, /id="rebuild-session"[^>]*>Save &amp; send to T3<\/button>/);
@@ -194,6 +195,9 @@ test('product video catalog is compact and Generate freezes the saved draft once
     const cancel = await fetch(`${url}/api/product-video/cancel`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({requestId: id})});
     assert.equal((await cancel.json()).status, 'cancelled');
     assert.equal((await fetch(`${url}/api/product-video/status?requestId=${id}`).then(response => response.json())).worker.receipt.jobId, 'synthetic-job');
+    const refine = await fetch(`${url}/api/product-video/refine`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({requestId: id, refinementId: '7834ae4f-9ed6-45e1-855e-519752097d72'})});
+    assert.equal(refine.status, 409);
+    assert.match((await refine.json()).error, /FFmpeg|accepted|unavailable/i);
     assert.equal((await fetch(`${url}/api/product-video/generate`, {method: 'POST', headers: {'Content-Type': 'application/json', Origin: 'https://example.com'}, body: JSON.stringify({requestId: id})})).status, 403);
     catalog.metadata.formats.hypermotion = {label: 'Hyper Motion', requiredInputs: ['product', 'presenter']};
     await writeFile(catalogPath, JSON.stringify(catalog));

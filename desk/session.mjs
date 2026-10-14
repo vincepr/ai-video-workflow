@@ -5,7 +5,7 @@ let productCatalog = null;
 try {const response = await fetch('./api/product-video/catalog'); if (response.ok) productCatalog = await response.json();} catch {}
 const $ = (id) => document.getElementById(id);
 const storageKey = `creator-desk:session:${catalog.projectId ?? catalog.id}:${catalog.id}`;
-let local = false, saved, history = [], saveTimer, sampleTick = 0, paused = false, submitting = false, imagePickerReady = false;
+let local = false, saved, history = [], saveTimer, sampleTick = 0, paused = false, submitting = false, refining = false, imagePickerReady = false;
 try {saved = JSON.parse(localStorage.getItem(storageKey) ?? localStorage.getItem(`creator-desk:session:${catalog.id}`));} catch {}
 try {
   const response = await fetch('./api/session');
@@ -129,7 +129,7 @@ function productOptions(id, values, labels, selected) {
   select.value = values.includes(selected) ? selected : values[0] ?? '';
 }
 function renderProductVideo() {
-  if (!productCatalog) {$('pv-status').textContent = 'Product video configuration is available in the local desk.'; $('pv-generate').disabled = true; return;}
+  if (!productCatalog) {$('pv-status').textContent = 'Product video configuration is available in the local desk.'; $('pv-generate').disabled = true; $('pv-refine').disabled = true; return;}
   const draft = session.productVideo ?? {};
   const workflow = draft.workflow ?? 'direct';
   productOptions('pv-workflow', Object.keys(productCatalog.choices), {direct: {label: 'Direct ad'}, skit: {label: 'Ad skit'}, drama: {label: 'AI drama'}, 'reference-remake': {label: 'Reference remake'}}, workflow);
@@ -142,13 +142,17 @@ function renderProductVideo() {
   for (const id of ['format', 'hook', 'setting']) $(`pv-${id}`).closest('label').hidden = selectedWorkflow !== 'direct';
   $('pv-style').closest('label').hidden = selectedWorkflow === 'direct' || !(choices.styles?.length);
   productOptions('pv-destination', productCatalog.destinations, {}, draft.destination ?? 'private');
-  const values = {language: draft.language ?? 'en', product: draft.brief?.product ?? '', 'product-path': draft.references?.find(ref => ref.role === 'product')?.path ?? '', 'presenter-path': draft.references?.find(ref => ref.role === 'presenter')?.path ?? '', 'reference-video-path': draft.references?.find(ref => ref.role === 'reference-video')?.path ?? '', facts: (draft.brief?.facts ?? []).join('\n'), brand: draft.brief?.brand ?? '', cta: draft.brief?.cta ?? '', provider: draft.execution?.provider ?? 'openrouter', 'image-model': draft.execution?.models?.image ?? '', 'video-model': draft.execution?.models?.video ?? '', duration: draft.execution?.durationSec ?? 5, aspect: draft.execution?.aspectRatio ?? '9:16', resolution: draft.execution?.resolution ?? '720p', budget: draft.execution?.budget?.maxUsd ?? 0};
+  const values = {language: draft.language ?? 'en', product: draft.brief?.product ?? '', 'product-path': draft.references?.find(ref => ref.role === 'product')?.path ?? '', 'presenter-path': draft.references?.find(ref => ref.role === 'presenter')?.path ?? '', 'reference-video-path': draft.references?.find(ref => ref.role === 'reference-video')?.path ?? '', facts: (draft.brief?.facts ?? []).join('\n'), brand: draft.brief?.brand ?? '', cta: draft.brief?.cta ?? '', caption: draft.finishing?.caption ?? '', provider: draft.execution?.provider ?? 'openrouter', 'image-model': draft.execution?.models?.image ?? '', 'video-model': draft.execution?.models?.video ?? '', duration: draft.execution?.durationSec ?? 5, aspect: draft.execution?.aspectRatio ?? '9:16', resolution: draft.execution?.resolution ?? '720p', budget: draft.execution?.budget?.maxUsd ?? 0};
   for (const [id, value] of Object.entries(values)) $(`pv-${id}`).value = value;
   $('pv-audio').checked = draft.execution?.audio ?? false;
   const format = productCatalog.metadata.formats?.[$('pv-format').value];
   const choiceHint = selectedWorkflow === 'reference-remake' ? 'Reference remake is unsupported until a verified video-edit provider route is available.' : format?.needsPresenter ? 'This format needs a presenter reference.' : 'No presenter reference is required by this format.';
   $('pv-applicability').textContent = `${choiceHint} ${productCatalog.runtime?.freshSessionAvailable ? '' : 'Fresh production sessions are unavailable here. Generate can freeze the request, but cannot start an isolated worker.'}`;
-  $('pv-generate').disabled = !local || selectedWorkflow === 'reference-remake';
+  for (const field of $('product-video-form').querySelectorAll('input, textarea, select')) field.disabled = refining;
+  $('pv-generate').disabled = refining || !local || selectedWorkflow === 'reference-remake';
+  const canRefine = local && selectedWorkflow === 'direct' && session.productVideoLaunch?.draft?.workflow === 'direct' && !!session.productVideoLaunch?.id;
+  $('pv-refine').disabled = refining || !canRefine;
+  $('pv-refine-status').textContent = session.productVideoRefinement?.message ?? (canRefine ? 'A prior direct request is selected. Local finishing requires its prepared footage.' : 'A saved direct run is required.');
   $('pv-request-details').textContent = session.productVideoLaunch ? JSON.stringify(session.productVideoLaunch, null, 2) : 'No frozen request yet.';
 }
 function readProductVideoForm() {
@@ -159,7 +163,8 @@ function readProductVideoForm() {
   if ($('pv-reference-video-path').value.trim()) references.push({role: 'reference-video', path: $('pv-reference-video-path').value.trim()});
   return {action: 'generate', workflow, choices, language: $('pv-language').value.trim(), destination: $('pv-destination').value,
     references, brief: {product: $('pv-product').value.trim(), facts: $('pv-facts').value.split('\n').map(line => line.trim()).filter(Boolean), brand: $('pv-brand').value.trim(), cta: $('pv-cta').value.trim()},
-    execution: {provider: $('pv-provider').value.trim(), models: {image: $('pv-image-model').value.trim(), video: $('pv-video-model').value.trim()}, durationSec: Number($('pv-duration').value), aspectRatio: $('pv-aspect').value.trim(), resolution: $('pv-resolution').value.trim(), audio: $('pv-audio').checked, budget: {currency: 'USD', maxUsd: Number($('pv-budget').value)}}};
+    execution: {provider: $('pv-provider').value.trim(), models: {image: $('pv-image-model').value.trim(), video: $('pv-video-model').value.trim()}, durationSec: Number($('pv-duration').value), aspectRatio: $('pv-aspect').value.trim(), resolution: $('pv-resolution').value.trim(), audio: $('pv-audio').checked, budget: {currency: 'USD', maxUsd: Number($('pv-budget').value)}},
+    finishing: {caption: $('pv-caption').value.trim()}};
 }
 for (const field of $('product-video-form').querySelectorAll('input, textarea, select')) field.addEventListener('change', () => {
   session.productVideo = readProductVideoForm(); save(); renderProductVideo();
@@ -199,6 +204,29 @@ $('pv-cancel').onclick = async () => {
   const response = await fetch('./api/product-video/cancel', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({requestId: session.productVideoLaunch.id})});
   if (!response.ok) {$('pv-status').textContent = 'Could not cancel this request.'; return;}
   await refreshProductVideoStatus();
+};
+$('pv-refine').onclick = async () => {
+  if (refining || !session.productVideoLaunch?.id || session.productVideoLaunch.draft?.workflow !== 'direct') return;
+  session.productVideo = readProductVideoForm();
+  if (session.productVideo.workflow !== 'direct') return;
+  const requestId = session.productVideoLaunch.id;
+  const finish = {requestId, brand: session.productVideo.brief.brand, cta: session.productVideo.brief.cta, caption: session.productVideo.finishing.caption};
+  const old = session.productVideoRefinement;
+  const refinementId = old && JSON.stringify(old.finish) === JSON.stringify(finish) ? old.id : crypto.randomUUID();
+  session.productVideoRefinement = {id: refinementId, finish, message: 'Saving refinement before local finishing...'};
+  refining = true; renderProductVideo(); save(false); clearTimeout(saveTimer);
+  try {
+    const saved = await fetch('./api/session', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(sessionSnapshot(session))});
+    if (!saved.ok) throw new Error('Could not save the refinement. Nothing was finished.');
+    const response = await fetch('./api/product-video/refine', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({requestId, refinementId})});
+    const result = await response.json();
+    if (!response.ok || result.status === 'unsupported') throw new Error(result.error ?? result.reason ?? 'Local finishing is unavailable for this request.');
+    session.productVideoRefinement = {...session.productVideoRefinement, result, message: 'Local refinement exported. Review the new numbered video in Videos before marking it selected.'};
+    save(false); await refreshHistory(); openTab('videos');
+  } catch (error) {
+    session.productVideoRefinement = {...session.productVideoRefinement, message: `Local finishing unavailable: ${error.message}`};
+    save(false);
+  } finally {refining = false; renderProductVideo();}
 };
 const angle = concepts.concepts.find((concept) => concept.id === concepts.selectedConcept) ?? concepts.concepts[0] ?? {drafts: []};
 for (const [index, draft] of angle.drafts.entries()) session.commentaryDrafts[`draft-${index}`] ??= draft.text;
