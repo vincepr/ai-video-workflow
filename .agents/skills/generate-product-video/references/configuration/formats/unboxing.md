@@ -1,3 +1,3 @@
 # Unboxing Reveal
 
-Follow packaging layers from sealed exterior to the first complete product view. Keep hands, included pieces and orientation consistent; use real packaging sounds where licensed, then end on the contents arranged as supplied.
+Open on the actual sealed package. Show each meaningful opening step in order, with the product hidden until the reveal, then end on the complete supplied contents. Keep hands, packaging layers, included pieces and orientation consistent. A shot that starts with an already-open box cannot deliver the unboxing reveal. Use real packaging sounds only when available and licensed.

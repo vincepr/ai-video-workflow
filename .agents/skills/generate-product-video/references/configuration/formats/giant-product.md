@@ -1,3 +1,3 @@
 # Giant Product
 
-Place an obviously impossible oversized product in a recognizable environment, with a person as a scale cue only if planned. Track the camera from environment to product while keeping its reference geometry; finish with an ordinary-scale product view so fantasy size is not presented as a specification.
+Open with a recognizable environment and clear scale cues. Reveal an impossibly large but recognizable product through a camera tilt, pullback or passing foreground objects; show a human reaction only when planned. Finish with an ordinary-scale product view or clearly separate hero shot so the fantasy size is not presented as a specification. A generic close-up without an environment-scale reveal misses this format.

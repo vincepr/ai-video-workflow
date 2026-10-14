@@ -1,3 +1,3 @@
 # Selfie Testimonial
 
-Use an arm-length phone view with natural reframing around the presenter and product. Build from a specific prior problem to a firsthand observation, then a visible product detail; do not imply an unverified personal result.
+Open at arm's length with a person describing a specific prior problem in their own setting. Let natural phone reframing reveal the product detail tied to a genuine firsthand observation, then return to the person's reaction. A generic polished product shot or unsupported success story misses the testimonial. Do not imply an unverified personal result.

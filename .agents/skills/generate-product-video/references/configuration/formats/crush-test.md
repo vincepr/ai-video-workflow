@@ -1,3 +1,3 @@
 # Crush Test
 
-Show the product and a documented test condition in one readable frame. Use slow motion around contact and recovery, then show the actual observed result; do not invent drop ratings, damage resistance or destructive proof.
+Open with the product and a specific, documented test condition visible together. Show the setup, the contact or pressure event, and an unambiguous aftermath, with slow motion only where it makes the event clearer. A person merely holding or bending the product cannot stand in for a promised impact test. State only the observed result; do not invent ratings, resistance or destructive proof.

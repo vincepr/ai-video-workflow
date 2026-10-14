@@ -1,3 +1,3 @@
 # Camera POV
 
-Set the lens at user eye level and let hands enter to perform a verified simple action. Keep the camera path physically plausible and the product stable; end on the resulting view from the same perspective, without revealing a talking presenter.
+Open from the user's eye line with the product in reach and a reason to interact. Let the user's hands perform one complete verified action while the camera moves as their head plausibly would. End on the resulting first-person view. A detached product orbit or presenter shot loses the POV experience.

@@ -1,3 +1,3 @@
 # This Gadget Saved Me
 
-Open on a credible everyday interruption, then show the product solving one verified part of it. Let the presenter react with relief rather than a scripted miracle; finish with the restored routine and a clear product view.
+Open with a visible everyday interruption that blocks a routine. Show the product performing the specific verified action that removes that obstacle, then the routine resuming with a small, credible reaction. A presenter praising a held gadget without the interrupted-to-restored change misses the rescue beat. Finish on a clear product view without a miracle claim.

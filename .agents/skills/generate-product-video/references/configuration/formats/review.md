@@ -1,3 +1,3 @@
 # Product Review
 
-Frame a presenter and a repeatable product test with the relevant condition visible. Cut to the observed result before any verdict; use measured language and end by naming what this single test can establish.
+Open with the presenter naming one narrow question and showing a repeatable test condition. Show the test action and its observed result before the verdict, then close with what that one observation establishes. A presenter turning the product in their hand and listing claims is an overview, not a review test. Keep the verdict measured.

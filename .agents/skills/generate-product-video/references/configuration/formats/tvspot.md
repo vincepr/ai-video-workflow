@@ -1,3 +1,3 @@
 # TV Spot
 
-Build a polished hero composition with controlled light and an uncluttered product silhouette. Move from a wide reveal to material detail with deliberate camera motion; finish on a clean end card assembled locally, with any voiceover sourced separately.
+Open with a composed scene that gives the product space and a clear silhouette. Make a deliberate wide-to-detail reveal with controlled light, then resolve on a distinct hero frame and locally assembled end card. A single slow product orbit does not supply the full TV-spot arc. Source any voiceover separately and keep unverified claims out of the generated footage.

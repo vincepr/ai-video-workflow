@@ -18,6 +18,8 @@ Treat the format's transformation as the motion brief, not merely a label or cap
 
 A first-frame-only reverse-splash prompt can clear the desk while also ejecting items already inside the organizer, then reconstructing them. Review the intermediate frames, not just the clean endpoint. If product contents must remain fixed, isolate the moving clutter in a local composite or use a verified matching end frame; add no-text constraints and inspect flying papers for invented lettering.
 
+Seedance 2.0 Mini gave an inexpensive way to test a transformation concept, but one reviewed clip did not keep all objects and product details coherent during that effect. Treat it as a concept probe when that tradeoff is acceptable. For a final scene that needs sustained realism, compare the current price and controls of fuller models such as Seedance 2.0, Kling, Grok or Sora 2 before choosing a route. Model ranking and price change; do not assume a named model is cheapest or that a stronger model will fix continuity without an inspected sample.
+
 Set a limit for reference corrections as well as video generation. Count rejected frames and preparation mistakes in the attempt's total cost. A spending ceiling is a limit, not a reason to keep refining an unconvincing concept.
 
 ## Product layout and camera movement
