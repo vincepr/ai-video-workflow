@@ -27,6 +27,13 @@ class ProjectBundleTest(unittest.TestCase):
             (source / 'projects/example/media/frame.png').write_bytes(b'frame')
             (source / 'projects/example/work').mkdir()
             (source / 'projects/example/work/run.json').write_text('{"model":"example"}')
+            revision_id = '00000000-0000-4000-8000-000000000001'
+            revisions = source / 'projects/example/work/agent-video/revisions'
+            revisions.mkdir(parents=True)
+            (revisions / f'{revision_id}.json').write_text(json.dumps({
+                'schemaVersion': 2, 'projectId': 'example', 'revisionId': revision_id,
+                'frozenAt': '2026-10-15T00:00:00.000Z', 'references': [], 'budgetUsd': 0,
+                'estimateUsd': 0, 'plan': {'concept': 'Transfer test', 'shots': [], 'stages': []}}))
             (source / 'projects/example/videos').mkdir()
             (source / 'projects/example/videos/video.mp4').write_bytes(b'video')
             archive = base / 'example.zip'
@@ -37,6 +44,13 @@ class ProjectBundleTest(unittest.TestCase):
             self.assertEqual(imported.returncode, 0, imported.stderr)
             self.assertEqual((destination / 'projects/example/media/frame.png').read_bytes(), b'frame')
             self.assertEqual((destination / 'projects/example/work/run.json').read_text(), '{"model":"example"}')
+            self.assertEqual(json.loads((destination / 'projects/example/work/agent-video/revisions' / f'{revision_id}.json').read_text())['plan']['concept'], 'Transfer test')
+            module = (Path(__file__).resolve().parents[1] / 'scripts/agent-video.mjs').as_uri()
+            inspected = subprocess.run(['node', '--input-type=module', '-e',
+                f"import {{agentStatus}} from '{module}'; console.log((await agentStatus(process.argv[1], 'example', '{revision_id}')).revision.plan.concept)",
+                str(destination)], capture_output=True, text=True)
+            self.assertEqual(inspected.returncode, 0, inspected.stderr)
+            self.assertEqual(inspected.stdout.strip(), 'Transfer test')
             self.assertEqual((destination / 'projects/example/videos/video.mp4').read_bytes(), b'video')
             self.assertEqual(json.loads((destination / 'projects/example/project.json').read_text())['title'], 'Example')
 

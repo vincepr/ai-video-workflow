@@ -109,7 +109,10 @@ export async function agentStatus(root, id, revisionId) {
   const uncertain = attempts.some(attempt => attempt.status === 'uncertain' &&
     !attempts.some(next => next.stageId === attempt.stageId && next.id !== attempt.id && ['succeeded', 'failed'].includes(next.status) &&
       (attempt.providerJobId ? next.providerJobId === attempt.providerJobId : next.reconcilesAttemptId === attempt.id && next.reconciliationEvidence)));
+  const stopped = revision.plan.stages.map(stage => ({stage, last: attempts.filter(attempt => attempt.stageId === stage.id).at(-1)}))
+    .find(({stage, last}) => ['failed', 'unsupported'].includes(last?.status) && !attempts.some(attempt => attempt.stageId === stage.id && attempt.status === 'succeeded'));
   const blocked = revision.estimateUsd > revision.budgetUsd ? 'Plan exceeds spending cap' : uncertain ? 'Uncertain submission needs reconciliation' :
+    stopped ? `Stage ${stopped.stage.id} ${stopped.last.status}` :
     revision.plan.stages.some(stage => stage.provider !== 'local' && !attempts.some(attempt => attempt.stageId === stage.id && attempt.status === 'succeeded')) ? 'Live provider capability and price are not verified by this CLI' : null;
   const complete = revision.plan.stages.length > 0 && revision.plan.stages.every(stage => attempts.some(attempt => attempt.stageId === stage.id && attempt.status === 'succeeded'));
   return {revision, attempts, spentUsd, blocked, status: blocked ? 'blocked' : complete ? 'complete' : 'planned'};
@@ -118,8 +121,11 @@ export async function agentStatus(root, id, revisionId) {
 export function shareableAgentSummary(status) {
   const {revision, attempts, spentUsd} = status;
   return {kind: revision.kind, concept: revision.plan.concept, shots: revision.plan.shots.map(({id, description, caption}) => ({id, description, caption})),
-    stages: revision.plan.stages.map(stage => ({id: stage.id, kind: stage.kind, provider: stage.provider, model: stage.model,
-      outcome: attempts.filter(attempt => attempt.stageId === stage.id).at(-1)?.status ?? 'not started'})), spentUsd};
+    stages: revision.plan.stages.map(stage => {
+      const last = attempts.filter(attempt => attempt.stageId === stage.id).at(-1);
+      return {id: stage.id, kind: stage.kind, provider: stage.provider, model: stage.model,
+        outcome: last?.status ?? 'not started', validationOnly: last?.mode === 'recorded'};
+    }), spentUsd};
 }
 
 export async function recordAgentAttempt(root, id, revisionId, draft) {
@@ -147,6 +153,7 @@ export async function recordAgentAttempt(root, id, revisionId, draft) {
   if (status.spentUsd + Math.max(0, draft.costUsd - (uncertain?.costUsd ?? 0)) > revision.budgetUsd) throw new Error('Attempt exceeds spending cap');
   const files = async names => Promise.all(names.map(async name => ({path: name, sha256: await hashMedia(root, id, name)})));
   const attempt = {revisionId, stageId: stage.id, id: draft.id, status: draft.status, provider: draft.provider, model: draft.model,
+    mode: draft.mode === 'recorded' ? 'recorded' : 'reported',
     parameters: draft.parameters ?? stage.parameters, prompt: String(draft.prompt ?? ''), providerJobId: draft.providerJobId ?? null,
     reconcilesAttemptId: draft.reconcilesAttemptId ?? null, reconciliationEvidence: draft.reconciliationEvidence ?? null,
     startedAt: draft.startedAt, endedAt: draft.endedAt, recordedAt: new Date().toISOString(), costUsd: draft.costUsd, inspection: draft.inspection ?? null,
@@ -157,11 +164,34 @@ export async function recordAgentAttempt(root, id, revisionId, draft) {
   return attempt;
 }
 
-export async function runAgentRevision(root, id, revisionId) {
-  const status = await agentStatus(root, id, revisionId);
-  if (status.blocked) return status;
+export async function runAgentRevision(root, id, revisionId, {recorded = false} = {}) {
+  let status = await agentStatus(root, id, revisionId);
   if (status.status === 'complete') return status;
-  return {...status, status: 'needs-agent', reason: 'Agent must execute and inspect the planned stages through a verified adapter'};
+  if (status.blocked && (!recorded || !(status.blocked.startsWith('Live provider') || status.blocked.endsWith(' failed')))) return status;
+  if (!recorded) return {...status, status: 'needs-agent', reason: 'Agent must execute and inspect the planned stages through a verified adapter'};
+  for (const stage of status.revision.plan.stages) {
+    const attempts = status.attempts.filter(attempt => attempt.stageId === stage.id);
+    if (attempts.some(attempt => attempt.status === 'succeeded')) continue;
+    if (attempts.at(-1)?.status === 'unsupported') return status;
+    if (status.spentUsd + stage.estimateUsd > status.revision.budgetUsd) return {...status, status: 'blocked', blocked: `Stage ${stage.id} exceeds spending cap`};
+    const file = path.join(base(root, id), 'recorded', revisionId, `${stage.id}.json`);
+    let saved;
+    try {saved = JSON.parse(await readFile(file, 'utf8'));}
+    catch (error) {
+      if (error.code === 'ENOENT') return attempts.at(-1)?.status === 'failed' ? status :
+        {...status, status: 'waiting-recorded-response', reason: `Missing recorded response for ${stage.id}`};
+      throw error;
+    }
+    const response = Array.isArray(saved) ? saved.find(item => !attempts.some(attempt => attempt.id === item?.id)) :
+      attempts.length ? null : saved;
+    if (!response) return status;
+    if (status.spentUsd + response.costUsd > status.revision.budgetUsd) return {...status, status: 'blocked', blocked: `Recorded cost for ${stage.id} exceeds spending cap`};
+    await recordAgentAttempt(root, id, revisionId, {...response, stageId: stage.id,
+      provider: response.provider ?? stage.provider, model: response.model ?? stage.model, mode: 'recorded'});
+    status = await agentStatus(root, id, revisionId);
+    if (response.status !== 'succeeded') return {...status, status: 'blocked', blocked: `Stage ${stage.id} ${response.status}`};
+  }
+  return agentStatus(root, id, revisionId);
 }
 
 export async function attachAgentExport(root, id, revisionId, file) {

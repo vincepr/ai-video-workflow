@@ -4,7 +4,7 @@ import {mkdtemp, mkdir, writeFile, rm} from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {randomUUID} from 'node:crypto';
-import {agentStatus, attachAgentExport, freezeAgentRevision, normalizeAgentConfig, recordAgentAttempt, runAgentRevision} from '../scripts/agent-video.mjs';
+import {agentStatus, attachAgentExport, freezeAgentRevision, normalizeAgentConfig, recordAgentAttempt, runAgentRevision, shareableAgentSummary} from '../scripts/agent-video.mjs';
 import {createDeskServer} from '../scripts/serve-desk.mjs';
 
 test('agent revisions are immutable and paid plans stop before submission', async () => {
@@ -101,5 +101,74 @@ test('an uncertain submission without a job ID needs explicit manual reconciliat
       inspection: {accepted: true}, providerJobId: 'later-id', reconcilesAttemptId: attempt.id, reconciliationEvidence: 'Provider account receipt checked by agent'});
     assert.equal((await agentStatus(root, projectId, revisionId)).status, 'complete');
     assert.equal((await agentStatus(root, projectId, revisionId)).spentUsd, 0.5);
+  } finally {await rm(root, {recursive: true, force: true});}
+});
+
+test('recorded stages run in order, resume without duplicate attempts and stop at the cap', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'agent-recorded-'));
+  const projectId = 'synthetic';
+  const revisionId = randomUUID();
+  const media = path.join(root, 'projects', projectId, 'media');
+  const recorded = path.join(root, 'projects', projectId, 'work', 'agent-video', 'recorded', revisionId);
+  const frame = `projects/${projectId}/media/frame.png`;
+  const finished = `projects/${projectId}/media/finished.mp4`;
+  try {
+    await mkdir(media, {recursive: true}); await mkdir(recorded, {recursive: true});
+    await writeFile(path.join(media, 'frame.png'), 'frame'); await writeFile(path.join(media, 'finished.mp4'), 'finished');
+    await freezeAgentRevision(root, {schemaVersion: 2, projectId, revisionId, change: 'First plan', brief: 'A story', kind: 'other', budgetUsd: 0.5, references: [],
+      plan: {concept: 'Reveal', shots: [{id: 'one', description: 'Reveal'}], stages: [
+        {id: 'frame', kind: 'image', provider: 'openrouter', model: 'example', estimateUsd: 0.4, parameters: {}},
+        {id: 'finish', kind: 'finish', provider: 'local', model: 'ffmpeg', estimateUsd: 0, parameters: {}}]}});
+    const startedAt = new Date().toISOString();
+    const frameResponse = {id: randomUUID(), status: 'succeeded', costUsd: 0.4, startedAt, endedAt: startedAt,
+      inputs: [], outputs: [frame], parameters: {}, prompt: 'Reveal', providerJobId: 'job-1', inspection: {accepted: true}};
+    await writeFile(path.join(recorded, 'frame.json'), JSON.stringify(frameResponse));
+    assert.equal((await runAgentRevision(root, projectId, revisionId, {recorded: true})).status, 'waiting-recorded-response');
+    assert.equal((await agentStatus(root, projectId, revisionId)).attempts.length, 1);
+    await writeFile(path.join(recorded, 'finish.json'), JSON.stringify({...frameResponse, id: randomUUID(), costUsd: 0, providerJobId: null, inputs: [frame], outputs: [finished], prompt: ''}));
+    assert.equal((await runAgentRevision(root, projectId, revisionId, {recorded: true})).status, 'complete');
+    assert.equal((await runAgentRevision(root, projectId, revisionId, {recorded: true})).attempts.length, 2);
+    assert.equal((await agentStatus(root, projectId, revisionId)).spentUsd, 0.4);
+    assert.equal(shareableAgentSummary(await agentStatus(root, projectId, revisionId)).stages[0].validationOnly, true);
+  } finally {await rm(root, {recursive: true, force: true});}
+});
+
+test('recorded execution stops before over-cap work and preserves unsupported receipts', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'agent-recorded-stop-'));
+  const projectId = 'synthetic';
+  const work = path.join(root, 'projects', projectId, 'work', 'agent-video', 'recorded');
+  const config = (revisionId: string, budgetUsd: number) => ({schemaVersion: 2, projectId, revisionId, change: 'First plan', brief: 'A frame', kind: 'ad', budgetUsd, references: [],
+    plan: {concept: 'Frame', shots: [{id: 'one', description: 'Frame'}], stages: [{id: 'image', kind: 'image', provider: 'openrouter', model: 'example', estimateUsd: 0.4, parameters: {}}]}});
+  try {
+    const overCap = randomUUID();
+    await freezeAgentRevision(root, config(overCap, 0.3));
+    assert.match((await runAgentRevision(root, projectId, overCap, {recorded: true})).blocked ?? '', /exceeds spending cap/);
+    assert.equal((await agentStatus(root, projectId, overCap)).attempts.length, 0);
+    const unsupported = randomUUID();
+    await freezeAgentRevision(root, config(unsupported, 0.5));
+    await mkdir(path.join(work, unsupported), {recursive: true});
+    const now = new Date().toISOString();
+    await writeFile(path.join(work, unsupported, 'image.json'), JSON.stringify({id: randomUUID(), status: 'unsupported', costUsd: 0,
+      startedAt: now, endedAt: now, inputs: [], outputs: [], parameters: {}, prompt: '', inspection: null}));
+    assert.match((await runAgentRevision(root, projectId, unsupported, {recorded: true})).blocked ?? '', /unsupported/);
+    assert.match((await agentStatus(root, projectId, unsupported)).blocked ?? '', /unsupported/);
+    assert.equal((await runAgentRevision(root, projectId, unsupported, {recorded: true})).attempts.length, 1);
+    const retry = randomUUID();
+    await freezeAgentRevision(root, config(retry, 1));
+    await mkdir(path.join(work, retry), {recursive: true});
+    await mkdir(path.join(root, 'projects', projectId, 'media'), {recursive: true});
+    await writeFile(path.join(root, 'projects', projectId, 'media', 'frame.png'), 'frame');
+    const retryFile = path.join(work, retry, 'image.json');
+    const failed = {id: randomUUID(), status: 'failed', costUsd: 0.1, startedAt: now, endedAt: now,
+      inputs: [], outputs: [], parameters: {}, prompt: 'Frame'};
+    const succeeded = {...failed, id: randomUUID(), status: 'succeeded', costUsd: 0.4,
+      outputs: [`projects/${projectId}/media/frame.png`], inspection: {accepted: true}};
+    await writeFile(retryFile, JSON.stringify([{...failed, provider: 'wrong'}, succeeded]));
+    await assert.rejects(runAgentRevision(root, projectId, retry, {recorded: true}), /Incomplete attempt/);
+    assert.equal((await agentStatus(root, projectId, retry)).attempts.length, 0);
+    await writeFile(retryFile, JSON.stringify([failed, succeeded]));
+    assert.match((await runAgentRevision(root, projectId, retry, {recorded: true})).blocked ?? '', /failed/);
+    assert.equal((await runAgentRevision(root, projectId, retry, {recorded: true})).status, 'complete');
+    assert.equal((await agentStatus(root, projectId, retry)).attempts.length, 2);
   } finally {await rm(root, {recursive: true, force: true});}
 });

@@ -14,7 +14,7 @@ try {
   else if (command === 'latest') result = await latestAgentRevision(root, args[0]);
   else if (command === 'status') result = await agentStatus(root, args[0], args[1]);
   else if (command === 'summary') result = shareableAgentSummary(await agentStatus(root, args[0], args[1]));
-  else if (command === 'run' || command === 'resume') result = await runAgentRevision(root, args[0], args[1]);
+  else if (command === 'run' || command === 'resume') result = await runAgentRevision(root, args[0], args[1], {recorded: args[2] === '--recorded'});
   else if (command === 'record') result = await recordAgentAttempt(root, args[0], args[1], JSON.parse(await readFile(path.resolve(args[2]), 'utf8')));
   else if (command === 'attach') result = await attachAgentExport(root, args[0], args[1], args[2]);
   else throw new Error('Usage: agent-video <plan|freeze> <draft.json> | <inspect|status|run|resume> <project-id> <revision-id> | record <project-id> <revision-id> <attempt.json>');
