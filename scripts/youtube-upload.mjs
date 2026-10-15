@@ -5,10 +5,11 @@ import {execFileSync} from 'node:child_process';
 import {dirname, join, relative, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-export async function uploadPrivate({file, metadata, token, receipt, request = fetch}) {
+export async function uploadPrivate({file, metadata, token, receipt, privacyStatus = 'private', request = fetch}) {
+  if (!['private', 'unlisted'].includes(privacyStatus)) throw new Error('Unsupported privacy status.');
   const size = (await stat(file)).size;
   const sha256 = createHash('sha256').update(await readFile(file)).digest('hex');
-  const requestedStatus = {privacyStatus: 'private', selfDeclaredMadeForKids: false, containsSyntheticMedia: true};
+  const requestedStatus = {privacyStatus, selfDeclaredMadeForKids: false, containsSyntheticMedia: true};
   const record = {file, sha256, bytes: size, metadata, requestedStatus, startedAt: new Date().toISOString(), state: 'started'};
   await writeFile(receipt, JSON.stringify(record, null, 2) + '\n', {flag: 'wx', mode: 0o600});
   const save = async () => writeFile(receipt, JSON.stringify(record, null, 2) + '\n', {mode: 0o600});
@@ -35,7 +36,7 @@ export async function uploadPrivate({file, metadata, token, receipt, request = f
     body: createReadStream(file), duplex: 'half', signal: AbortSignal.timeout(300_000)});
     if (!response.ok) throw new Error(`Video transfer failed (HTTP ${response.status}). Inspect saved session before retrying.`);
     const video = await response.json();
-    if (!video.id || video.status?.privacyStatus !== 'private') throw new Error('YouTube did not confirm a private video. Inspect the saved session.');
+    if (!video.id || video.status?.privacyStatus !== privacyStatus) throw new Error('YouTube did not confirm the requested visibility. Inspect the saved session.');
     const completed = Object.assign(record, {state: 'uploaded', videoId: video.id, url: `https://www.youtube.com/watch?v=${video.id}`,
       channelId: video.snippet?.channelId, privacyStatus: video.status.privacyStatus,
       uploadStatus: video.status.uploadStatus, returnedSnippet: video.snippet, completedAt: new Date().toISOString()});
@@ -76,8 +77,8 @@ export async function setThumbnail({videoId, file, token, request = fetch}) {
 
 async function main() {
   const [command, fileArg, metadataArg, receiptArg, extra] = process.argv.slice(2);
-  if (command !== 'upload-private' || !fileArg || !metadataArg || !receiptArg || extra) {
-    throw new Error('Usage: node scripts/youtube-upload.mjs upload-private <video.mp4> <metadata.json> <receipt.json>');
+  if (!['upload-private', 'upload-unlisted'].includes(command) || !fileArg || !metadataArg || !receiptArg || extra) {
+    throw new Error('Usage: node scripts/youtube-upload.mjs upload-private|upload-unlisted <video.mp4> <metadata.json> <receipt.json>');
   }
   const root = fileURLToPath(new URL('../', import.meta.url));
   const file = await realpath(resolve(root, fileArg));
@@ -116,7 +117,8 @@ async function main() {
   } catch {throw new Error('YouTube credentials are missing or invalid. Run youtube-auth.mjs connect.');}
   const token = await accessToken(client, stored);
   if (token !== stored) await writeFile(tokenPath, JSON.stringify(token, null, 2) + '\n', {mode: 0o600});
-  const result = await uploadPrivate({file, metadata, token: token.access_token, receipt});
+  const result = await uploadPrivate({file, metadata, token: token.access_token, receipt,
+    privacyStatus: command === 'upload-unlisted' ? 'unlisted' : 'private'});
   console.log(JSON.stringify({videoId: result.videoId, url: result.url, channelId: result.channelId,
     privacyStatus: result.privacyStatus, uploadStatus: result.uploadStatus, receipt: relative(root, receipt)}, null, 2));
 }

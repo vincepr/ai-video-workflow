@@ -48,6 +48,28 @@ test('upload sends the selected bytes privately with metadata and saves a confir
   } finally {await rm(directory, {recursive: true, force: true});}
 });
 
+test('unlisted upload requests and confirms unlisted visibility', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'youtube-unlisted-'));
+  try {
+    const file = join(directory, 'video.mp4');
+    const receipt = join(directory, 'receipt.json');
+    await writeFile(file, 'selected-export');
+    let calls = 0;
+    const request: typeof fetch = async (_input, options) => {
+      calls++;
+      if (calls === 1) {
+        assert.equal(JSON.parse(String(options?.body)).status.privacyStatus, 'unlisted');
+        return new Response(null, {headers: {Location: 'https://www.googleapis.com/upload/youtube/v3/videos?upload_id=test'}});
+      }
+      return Response.json({id: 'unlisted-video', status: {privacyStatus: 'unlisted', uploadStatus: 'uploaded'}});
+    };
+    const result = await uploadPrivate({file, metadata: {title: 'Test'}, token: 'token', receipt, privacyStatus: 'unlisted', request});
+    assert.equal(result.privacyStatus, 'unlisted');
+    assert.equal(JSON.parse(await readFile(receipt, 'utf8')).requestedStatus.privacyStatus, 'unlisted');
+    assert.equal(calls, 2);
+  } finally {await rm(directory, {recursive: true, force: true});}
+});
+
 test('an existing attempt prevents any duplicate upload request', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'youtube-upload-'));
   try {
