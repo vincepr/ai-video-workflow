@@ -20,6 +20,8 @@ Local tools for producing short videos with an agent. Requires Node.js 24 or new
 
 Run `npm run files` for the tracked inventory and boundary checks. Git also ignores media extensions outside these folders, except the two approved branding PNGs. Do not force-add ignored files.
 
+To move a project between machines, use the [transfer-project skill](.agents/skills/transfer-project/SKILL.md). Its ZIP carries that project's ignored `media/`, `work/` and `videos/` data separately from Git. Clone or update the repository first, then import the ZIP. Credentials stay local.
+
 ## Commands
 
 ```sh
