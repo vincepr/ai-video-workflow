@@ -29,7 +29,7 @@ test('agent revisions are immutable and paid plans stop before submission', asyn
       startedAt: new Date().toISOString(), endedAt: new Date().toISOString(), inputs: draft.references, outputs: [], providerJobId: 'job-1', parameters: {ratio: '9:16'}, prompt: 'Make a frame'};
     await recordAgentAttempt(root, projectId, draft.revisionId, attempt);
     assert.match((await agentStatus(root, projectId, draft.revisionId)).blocked ?? '', /Uncertain/);
-    await assert.rejects(recordAgentAttempt(root, projectId, draft.revisionId, {...attempt, id: randomUUID(), providerJobId: 'different'}), /same provider job/);
+    await assert.rejects(recordAgentAttempt(root, projectId, draft.revisionId, {...attempt, id: randomUUID(), providerJobId: 'different'}), /same job ID/);
     await recordAgentAttempt(root, projectId, draft.revisionId, {...attempt, id: randomUUID(), status: 'succeeded', costUsd: 0.4, outputs: [image], inspection: {accepted: true}});
     assert.equal((await agentStatus(root, projectId, draft.revisionId)).status, 'planned');
     await assert.rejects(recordAgentAttempt(root, projectId, draft.revisionId, {...attempt, id: randomUUID(), costUsd: 2}), /spending cap/);
@@ -82,7 +82,7 @@ test('project page edits use the same revision freeze and leave the parent intac
   }
 });
 
-test('an uncertain submission without a job ID cannot be treated as reconciled', async () => {
+test('an uncertain submission without a job ID needs explicit manual reconciliation', async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'agent-uncertain-'));
   const projectId = 'synthetic';
   const media = path.join(root, 'projects', projectId, 'media');
@@ -90,12 +90,16 @@ test('an uncertain submission without a job ID cannot be treated as reconciled',
     await mkdir(media, {recursive: true});
     await writeFile(path.join(media, 'frame.png'), 'frame');
     const revisionId = randomUUID();
-    await freezeAgentRevision(root, {schemaVersion: 2, projectId, revisionId, change: 'First plan', brief: 'A frame', kind: 'ad', budgetUsd: 1,
+    await freezeAgentRevision(root, {schemaVersion: 2, projectId, revisionId, change: 'First plan', brief: 'A frame', kind: 'ad', budgetUsd: 0.75,
       references: [], plan: {concept: 'Frame', shots: [{id: 'one', description: 'Frame'}], stages: [{id: 'image', kind: 'image', provider: 'openrouter', model: 'example', estimateUsd: 0.5, parameters: {}}]}});
     const attempt = {id: randomUUID(), stageId: 'image', status: 'uncertain', provider: 'openrouter', model: 'example', costUsd: 0.5,
       startedAt: new Date().toISOString(), endedAt: new Date().toISOString(), inputs: [], outputs: [], parameters: {}, prompt: 'Frame'};
     await recordAgentAttempt(root, projectId, revisionId, attempt);
-    await assert.rejects(recordAgentAttempt(root, projectId, revisionId, {...attempt, id: randomUUID(), status: 'succeeded', outputs: [`projects/${projectId}/media/frame.png`], inspection: {accepted: true}}), /same provider job/);
+    await assert.rejects(recordAgentAttempt(root, projectId, revisionId, {...attempt, id: randomUUID(), status: 'succeeded', outputs: [`projects/${projectId}/media/frame.png`], inspection: {accepted: true}}), /documented manual reconciliation/);
     assert.match((await agentStatus(root, projectId, revisionId)).blocked ?? '', /Uncertain/);
+    await recordAgentAttempt(root, projectId, revisionId, {...attempt, id: randomUUID(), status: 'succeeded', outputs: [`projects/${projectId}/media/frame.png`],
+      inspection: {accepted: true}, providerJobId: 'later-id', reconcilesAttemptId: attempt.id, reconciliationEvidence: 'Provider account receipt checked by agent'});
+    assert.equal((await agentStatus(root, projectId, revisionId)).status, 'complete');
+    assert.equal((await agentStatus(root, projectId, revisionId)).spentUsd, 0.5);
   } finally {await rm(root, {recursive: true, force: true});}
 });

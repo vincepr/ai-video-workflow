@@ -102,13 +102,13 @@ export async function agentStatus(root, id, revisionId) {
   attempts.sort((a, b) => (a.recordedAt ?? a.endedAt).localeCompare(b.recordedAt ?? b.endedAt) || a.id.localeCompare(b.id));
   const charges = new Map();
   for (const attempt of attempts) {
-    const key = attempt.providerJobId ? `${attempt.stageId}:${attempt.providerJobId}` : attempt.id;
+    const key = attempt.reconcilesAttemptId ?? (attempt.providerJobId ? `${attempt.stageId}:${attempt.providerJobId}` : attempt.id);
     charges.set(key, Math.max(charges.get(key) ?? 0, attempt.costUsd ?? 0));
   }
   const spentUsd = [...charges.values()].reduce((sum, cost) => sum + cost, 0);
   const uncertain = attempts.some(attempt => attempt.status === 'uncertain' &&
-    !(attempt.providerJobId && attempts.some(next => next.stageId === attempt.stageId && next.providerJobId === attempt.providerJobId &&
-      next.id !== attempt.id && ['succeeded', 'failed'].includes(next.status))));
+    !attempts.some(next => next.stageId === attempt.stageId && next.id !== attempt.id && ['succeeded', 'failed'].includes(next.status) &&
+      (attempt.providerJobId ? next.providerJobId === attempt.providerJobId : next.reconcilesAttemptId === attempt.id && next.reconciliationEvidence)));
   const blocked = revision.estimateUsd > revision.budgetUsd ? 'Plan exceeds spending cap' : uncertain ? 'Uncertain submission needs reconciliation' :
     revision.plan.stages.some(stage => stage.provider !== 'local' && !attempts.some(attempt => attempt.stageId === stage.id && attempt.status === 'succeeded')) ? 'Live provider capability and price are not verified by this CLI' : null;
   const complete = revision.plan.stages.length > 0 && revision.plan.stages.every(stage => attempts.some(attempt => attempt.stageId === stage.id && attempt.status === 'succeeded'));
@@ -138,12 +138,17 @@ export async function recordAgentAttempt(root, id, revisionId, draft) {
     ...status.attempts.filter(attempt => attempt.status === 'succeeded').flatMap(attempt => attempt.outputs.map(output => output.path))]);
   if (draft.inputs.some(name => !availableInputs.has(name))) throw new Error('Attempt input must come from a frozen reference or successful stage output');
   const uncertain = status.attempts.find(attempt => attempt.stageId === stage.id && attempt.status === 'uncertain' &&
-    !(attempt.providerJobId && status.attempts.some(next => next.stageId === stage.id && next.providerJobId === attempt.providerJobId && next.id !== attempt.id && ['succeeded', 'failed'].includes(next.status))));
-  if (uncertain && (!uncertain.providerJobId || draft.providerJobId !== uncertain.providerJobId || !['succeeded', 'failed'].includes(draft.status))) throw new Error('Uncertain submission must be reconciled with the same provider job ID');
+    !status.attempts.some(next => next.stageId === stage.id && next.id !== attempt.id && ['succeeded', 'failed'].includes(next.status) &&
+      (attempt.providerJobId ? next.providerJobId === attempt.providerJobId : next.reconcilesAttemptId === attempt.id && next.reconciliationEvidence)));
+  if (draft.reconcilesAttemptId && (!uncertain || draft.reconcilesAttemptId !== uncertain.id)) throw new Error('Invalid reconciliation link');
+  if (uncertain && (!['succeeded', 'failed'].includes(draft.status) || (uncertain.providerJobId ? draft.providerJobId !== uncertain.providerJobId :
+      draft.reconcilesAttemptId !== uncertain.id || typeof draft.reconciliationEvidence !== 'string' || !draft.reconciliationEvidence.trim())))
+    throw new Error('Uncertain submission requires the same job ID or a documented manual reconciliation');
   if (status.spentUsd + Math.max(0, draft.costUsd - (uncertain?.costUsd ?? 0)) > revision.budgetUsd) throw new Error('Attempt exceeds spending cap');
   const files = async names => Promise.all(names.map(async name => ({path: name, sha256: await hashMedia(root, id, name)})));
   const attempt = {revisionId, stageId: stage.id, id: draft.id, status: draft.status, provider: draft.provider, model: draft.model,
     parameters: draft.parameters ?? stage.parameters, prompt: String(draft.prompt ?? ''), providerJobId: draft.providerJobId ?? null,
+    reconcilesAttemptId: draft.reconcilesAttemptId ?? null, reconciliationEvidence: draft.reconciliationEvidence ?? null,
     startedAt: draft.startedAt, endedAt: draft.endedAt, recordedAt: new Date().toISOString(), costUsd: draft.costUsd, inspection: draft.inspection ?? null,
     inputs: await files(draft.inputs), outputs: await files(draft.outputs)};
   const file = path.join(base(root, id), 'attempts', stage.id, `${attempt.id}.json`);
