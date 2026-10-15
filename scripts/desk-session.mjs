@@ -1,12 +1,13 @@
 import {createReadStream} from 'node:fs';
-import {mkdir, readFile, rename, stat, writeFile} from 'node:fs/promises';
+import {mkdir, readFile, realpath, rename, stat, writeFile} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
 import path from 'node:path';
 import {readRenderHistory, resolveRenderPath} from './render-history.mjs';
 import {sendSavedRequest} from './t3-bridge.mjs';
-import {sessionDirectory} from './projects.mjs';
+import {projectPaths, sessionDirectory} from './projects.mjs';
 import {launchProductVideo, readLaunchStatus, cancelProductVideo} from './product-video/launcher.mjs';
 import {refineProductVideo} from './product-video/refine-action.mjs';
+import {agentStatus, freezeAgentRevision, latestAgentRevision, shareableAgentSummary} from './agent-video.mjs';
 
 function json(response, status, value) {
   response.writeHead(status, {'Content-Type': 'application/json', 'Cache-Control': 'no-store'});
@@ -16,6 +17,62 @@ function json(response, status, value) {
 export async function handleSessionRequest(request, response, {root, sessionId, productVideoTransport}) {
   const pathname = new URL(request.url, 'http://localhost').pathname;
   if (!pathname.startsWith('/api/')) return false;
+  if (pathname.startsWith('/api/agent-video')) {
+    if (request.headers.origin && request.headers.origin !== `http://${request.headers.host}`) {json(response, 403, {error: 'Origin does not match the local desk'}); return true;}
+    try {
+      const latest = await latestAgentRevision(root, sessionId);
+      if (pathname === '/api/agent-video' && request.method === 'GET') {
+        const status = latest ? await agentStatus(root, sessionId, latest.revisionId) : null;
+        json(response, 200, {status, shareable: status ? shareableAgentSummary(status) : null}); return true;
+      }
+      if (pathname === '/api/agent-video/asset' && request.method === 'GET') {
+        const name = new URL(request.url, 'http://localhost').searchParams.get('path');
+        const status = latest ? await agentStatus(root, sessionId, latest.revisionId) : null;
+        const allowed = new Set([...(status?.revision.references.map(ref => ref.path) ?? []), ...(status?.attempts.flatMap(attempt => attempt.outputs.map(output => output.path)) ?? [])]);
+        if (!allowed.has(name)) {json(response, 404, {error: 'Asset is not in this revision'}); return true;}
+        const media = await realpath(projectPaths(root, sessionId).media);
+        const actual = await realpath(path.resolve(root, name));
+        if (!actual.startsWith(media + path.sep)) throw new Error('Asset leaves project media');
+        const kind = {'.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4', '.mp3': 'audio/mpeg', '.wav': 'audio/wav'}[path.extname(actual).toLowerCase()];
+        if (!kind) throw new Error('Unsupported preview type');
+        response.writeHead(200, {'Content-Type': kind, 'Cache-Control': 'no-store'});
+        const stream = createReadStream(actual);
+        stream.on('error', () => response.destroy());
+        response.on('close', () => stream.destroy());
+        stream.pipe(response); return true;
+      }
+      if (pathname === '/api/agent-video/edit' && request.method === 'POST') {
+        if (!latest) throw new Error('No agent revision exists for this project');
+        if (!request.headers['content-type']?.startsWith('application/json')) {json(response, 415, {error: 'Expected JSON'}); return true;}
+        const chunks = []; let bytes = 0;
+        for await (const chunk of request) {bytes += chunk.length; if (bytes > 64 * 1024) throw new Error('Edit is too large'); chunks.push(chunk);}
+        const edit = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+        if (!edit || typeof edit !== 'object' || Object.keys(edit).some(key => !['captions', 'outputFormat'].includes(key)) ||
+            !['9:16', '16:9', '1:1'].includes(edit.outputFormat ?? latest.outputFormat) ||
+            (edit.captions && (typeof edit.captions !== 'object' || Array.isArray(edit.captions) || Object.values(edit.captions).some(value => typeof value !== 'string' || value.length > 200)))) throw new Error('Invalid direct edit');
+        const shots = latest.plan.shots.map(shot => ({...shot, caption: edit.captions?.[shot.id] ?? shot.caption}));
+        if (Object.keys(edit.captions ?? {}).some(id => !shots.some(shot => shot.id === id))) throw new Error('Unknown shot');
+        const revision = await freezeAgentRevision(root, {...latest, revisionId: randomUUID(), parentId: latest.revisionId,
+          change: 'Direct page edit', outputFormat: edit.outputFormat ?? latest.outputFormat,
+          references: latest.references.map(ref => ref.path), plan: {...latest.plan, shots}});
+        json(response, 200, {revisionId: revision.revisionId}); return true;
+      }
+      if (pathname === '/api/agent-video/upload' && request.method === 'POST') {
+        const extension = new URL(request.url, 'http://localhost').searchParams.get('ext');
+        if (!['.png', '.jpg', '.jpeg', '.webp', '.mp4', '.wav', '.mp3'].includes(extension)) throw new Error('Unsupported upload type');
+        const media = path.join(root, 'projects', sessionId, 'media', 'uploads');
+        await mkdir(media, {recursive: true});
+        const name = `${randomUUID()}${extension}`;
+        const file = path.join(media, name);
+        const chunks = []; let bytes = 0;
+        for await (const chunk of request) {bytes += chunk.length; if (bytes > 100 * 1024 * 1024) throw new Error('Upload exceeds 100 MB'); chunks.push(chunk);}
+        if (!bytes) throw new Error('Upload is empty');
+        await writeFile(file, Buffer.concat(chunks), {flag: 'wx'});
+        json(response, 200, {path: `projects/${sessionId}/media/uploads/${name}`}); return true;
+      }
+      json(response, 405, {error: 'Agent video endpoint does not support this method'}); return true;
+    } catch (error) {json(response, 400, {error: error.message}); return true;}
+  }
   if (pathname.startsWith('/api/product-video/')) {
     const catalogPath = path.join(root, '.agents/skills/generate-product-video/references/configuration/catalog.json');
     if (pathname === '/api/product-video/catalog' && request.method === 'GET') {

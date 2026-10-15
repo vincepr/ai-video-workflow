@@ -15,6 +15,16 @@
     <div class="session-tab-bar"><div class="session-save-actions"><button id="save-session" class="secondary" type="button">Save</button><button id="rebuild-session" class="primary" type="button">Save &amp; send to T3</button></div><nav id="session-tabs" class="session-tabs" role="tablist" aria-label="Session pickers"></nav></div>
     <div class="review-toolbar"><p id="change-summary" role="status"></p></div>
     <p id="rebuild-status" class="hint" role="status"></p>
+    <section id="panel-agent-video" class="session-panel" role="tabpanel" hidden>
+      <h2>Project video</h2><p class="hint">Ask the agent to start from your brief and spending cap. This page shows the saved plan and progress. Direct edits save a new revision without starting generation.</p>
+      <label>Upload a reference<input id="av-upload" type="file" accept="image/png,image/jpeg,image/webp,video/mp4,audio/wav,audio/mpeg"></label>
+      <p id="av-upload-status" role="status" class="hint"></p><div id="av-upload-preview"></div>
+      <div class="session-save-actions"><button id="av-refresh" class="secondary" type="button">Refresh progress</button><button id="av-save" class="secondary" type="button">Save captions and format</button></div>
+      <p id="av-status" role="status" class="hint">No agent video revision yet.</p><div id="av-plan"></div>
+      <details><summary>Shareable creation summary</summary><pre id="av-summary"></pre></details>
+      <details><summary>Private run record</summary><pre id="av-private"></pre></details>
+      <p class="hint">Older product runs remain in the Product video tab.</p>
+    </section>
     <section id="panel-inactive" class="session-panel" role="tabpanel" hidden><h2 id="inactive-title"></h2><p class="hint">No choices made. This picker does not change the current video.</p><button id="enable-picker" class="secondary" type="button">Add this picker</button></section>
     <section id="panel-commentary" class="session-panel" role="tabpanel" hidden><h2>Commentary</h2><p class="hint">Keep the current narration or choose a starting draft, then edit it.</p><div id="commentary-options" class="picker-cards"></div><label for="session-script">Current narration</label><textarea id="session-script" rows="9" maxlength="4000"></textarea><label for="commentary-notes">Notes for the next revision</label><textarea id="commentary-notes" rows="3" maxlength="2000"></textarea><p class="hint">A changed script needs a matching recording before rendering.</p></section>
     <section id="panel-images" class="session-panel" role="tabpanel"><iframe id="image-picker" src="images.html?embedded=1" title="Image choices and arrangement"></iframe></section>

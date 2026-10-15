@@ -72,12 +72,12 @@ function cards(container, options, choice, action) {
     card.append(node('strong', option.label), node('span', option.detail)); return card;
   }));
 }
-const tabs = [['videos', 'Videos'], ['product-video', 'Product video'], ['commentary', 'Commentary'], ['images', 'Images'], ['motion', 'Motion'], ['captions', 'Captions'], ['voice', 'Voice']];
+const tabs = [['agent-video', 'Project video'], ['videos', 'Videos'], ['product-video', 'Product video'], ['commentary', 'Commentary'], ['images', 'Images'], ['motion', 'Motion'], ['captions', 'Captions'], ['voice', 'Voice']];
 const optional = ['motion', 'captions', 'voice'];
 function inactive(id) {return optional.includes(id) && !session.requestedPickers.includes(id) && !session[id];}
 function renderTabs() {
   const changes = pendingChanges(session);
-  const visible = tabs.filter(([id]) => !['captions', 'voice'].includes(id) || !inactive(id));
+  const visible = tabs.filter(([id]) => (id !== 'product-video' || session.productVideo || session.productVideoLaunch) && (!['captions', 'voice'].includes(id) || !inactive(id)));
   if (!session.extraTabs.some((tab) => tab.label.toLowerCase() === 'music')) visible.push(['music', 'Music']);
   $('session-tabs').replaceChildren(...[...visible, ...session.extraTabs.map((tab) => [tab.id, tab.label]), ['add', '+ Add comparison']].map(([id, label]) => {
     const tab = button(label, () => openTab(id)); tab.id = `tab-${id}`; tab.setAttribute('role', 'tab');
@@ -94,7 +94,10 @@ function renderTabs() {
   }));
 }
 function openTab(id) {
+  if (id === 'product-video' && !session.productVideo && !session.productVideoLaunch) id = 'agent-video';
   syncImages(); session.activeTab = id; save(false);
+  $('save-session').parentElement.hidden = id === 'agent-video';
+  document.querySelector('.session-footer').hidden = id === 'agent-video';
   document.querySelectorAll('.session-panel').forEach((panel) => {panel.hidden = true;});
   const extra = session.extraTabs.find((tab) => tab.id === id);
   const disabled = inactive(id) || id === 'music';
@@ -109,6 +112,7 @@ function openTab(id) {
   panel.setAttribute('aria-labelledby', `tab-${id}`);
   if (extra) renderExtra(extra);
   if (id === 'videos') refreshHistory();
+  if (id === 'agent-video') refreshAgentVideo();
   if (id === 'product-video') {renderProductVideo(); refreshProductVideoStatus();}
   updatePreviews();
 }
@@ -124,6 +128,67 @@ function renderPickers() {
     session.requestedPickers.push(id); save(); renderPickers(); openTab(id);
   }, 'secondary')));
 }
+let agentVideo = null;
+async function refreshAgentVideo() {
+  try {
+    const response = await fetch('./api/agent-video');
+    if (!response.ok) throw new Error('Project video status is unavailable');
+    const {status, shareable} = await response.json();
+    agentVideo = status;
+    $('av-plan').replaceChildren();
+    $('av-save').disabled = !status;
+    $('av-summary').textContent = shareable ? JSON.stringify(shareable, null, 2) : 'No revision yet.';
+    $('av-private').textContent = status ? JSON.stringify(status, null, 2) : 'No revision yet.';
+    if (!status) {$('av-status').textContent = 'No agent video revision yet. Give the agent a brief and spending cap to begin.'; return;}
+    const revision = status.revision;
+    $('av-status').textContent = `Revision ${revision.revisionId}: ${status.status}. ${status.blocked ?? ''} Cap $${revision.budgetUsd.toFixed(2)}, planned $${revision.estimateUsd.toFixed(2)}, recorded $${status.spentUsd.toFixed(2)}.`;
+    $('av-plan').append(node('h3', 'Concept'), node('p', revision.plan.concept), node('h3', 'Shots'));
+    for (const shot of revision.plan.shots) {
+      const label = node('label', `${shot.id}: ${shot.description}`);
+      const input = document.createElement('input'); input.value = shot.caption; input.maxLength = 200; input.dataset.shot = shot.id;
+      label.append(input); $('av-plan').append(label);
+    }
+    const format = node('label', 'Output format');
+    const select = document.createElement('select'); select.id = 'av-format';
+    for (const value of ['9:16', '16:9', '1:1']) {const option = node('option', value); option.value = value; select.append(option);}
+    select.value = revision.outputFormat; format.append(select); $('av-plan').append(format, node('h3', 'Stages'));
+    for (const stage of revision.plan.stages) $('av-plan').append(node('p', `${stage.id}: ${stage.kind} via ${stage.provider} / ${stage.model}, estimate $${stage.estimateUsd.toFixed(2)}`));
+    if (revision.references.length) $('av-plan').append(node('p', `References: ${revision.references.map(ref => ref.path).join(', ')}`));
+    const previews = [...revision.references.map(ref => ref.path), ...status.attempts.flatMap(attempt => attempt.outputs.map(output => output.path))];
+    if (previews.length) $('av-plan').append(node('h3', 'Previews'));
+    for (const name of [...new Set(previews)]) {
+      const extension = name.split('.').at(-1)?.toLowerCase();
+      const media = ['png', 'jpg', 'jpeg', 'webp'].includes(extension) ? document.createElement('img') : extension === 'mp4' ? document.createElement('video') : ['mp3', 'wav'].includes(extension) ? document.createElement('audio') : null;
+      if (!media) continue;
+      media.src = `./api/agent-video/asset?path=${encodeURIComponent(name)}`;
+      media.alt = name.split('/').at(-1); media.controls = media.tagName !== 'IMG'; media.style.maxWidth = '240px';
+      const figure = node('figure'); figure.append(media, node('figcaption', name.split('/').at(-1))); $('av-plan').append(figure);
+    }
+  } catch (error) {$('av-status').textContent = error.message;}
+}
+$('av-refresh').onclick = refreshAgentVideo;
+$('av-save').onclick = async () => {
+  if (!agentVideo) return;
+  const captions = Object.fromEntries([...$('av-plan').querySelectorAll('input[data-shot]')].map(input => [input.dataset.shot, input.value]));
+  try {
+    const response = await fetch('./api/agent-video/edit', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({captions, outputFormat: $('av-format').value})});
+    const result = await response.json(); if (!response.ok) throw new Error(result.error);
+    await refreshAgentVideo();
+  } catch (error) {$('av-status').textContent = error.message;}
+};
+$('av-upload').onchange = async () => {
+  const file = $('av-upload').files?.[0]; if (!file) return;
+  const extension = `.${file.name.split('.').at(-1).toLowerCase()}`;
+  if (file.size > 100 * 1024 * 1024) {$('av-upload-status').textContent = 'Upload exceeds 100 MB'; return;}
+  try {
+    const response = await fetch(`./api/agent-video/upload?ext=${encodeURIComponent(extension)}`, {method: 'POST', body: file});
+    const result = await response.json(); if (!response.ok) throw new Error(result.error);
+    $('av-upload-status').textContent = `Saved ${result.path}. Tell the agent to use this reference in the next revision.`;
+    const preview = file.type.startsWith('image/') ? document.createElement('img') : file.type.startsWith('video/') ? document.createElement('video') : document.createElement('audio');
+    preview.src = URL.createObjectURL(file); preview.alt = file.name; preview.controls = true; preview.style.maxWidth = '240px';
+    $('av-upload-preview').replaceChildren(preview);
+  } catch (error) {$('av-upload-status').textContent = error.message;}
+};
 function productOptions(id, values, labels, selected) {
   const select = $(id);
   select.replaceChildren(...values.map(value => {const option = node('option', labels?.[value]?.label ?? value); option.value = value; return option;}));
@@ -384,6 +449,9 @@ function renderHistory() {
       const credits=node('details');credits.append(node('summary','Upload description'),node('pre',record.release.description));
       card.append(credits,button('Download description',()=>download(record.release.description,`${record.id}.description.txt`),'secondary'));
     }
+    const provenance = node('details');
+    provenance.append(node('summary', 'How this was made'), node('pre', record.provenance ? JSON.stringify(record.provenance.summary, null, 2) : 'Detailed provenance was not recorded for this export.'));
+    card.append(provenance);
     if (!record.snapshot.pickers) card.append(node('p', 'Older render: episode settings are preserved; picker choices were not captured.'));
     const details = node('details'); details.append(node('summary', 'State when this video was rendered'), node('pre', JSON.stringify(record.snapshot, null, 2)));
     card.append(details, button('Download snapshot', () => download(record.snapshot, `${record.id}.snapshot.json`), 'secondary'));

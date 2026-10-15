@@ -29,12 +29,17 @@ npm ci
 npm run check
 npm run project -- create next-story "Next story"
 npm run project -- list
+npm run agent-video -- plan projects/<id>/work/agent-video/draft.json
+npm run agent-video -- freeze projects/<id>/work/agent-video/draft.json
+npm run agent-video -- status <id> <revision-id>
 npm run desk
 npm run render -- --project homunculus
 npm run render -- --project homunculus --session projects/homunculus/work/session.json
 ```
 
 Creator Desk opens at http://localhost:4173/. Select a project at the top, or open /projects/<id>/. New projects start with empty catalogs; ask the agent to research and prepare choices. Creating or opening a project does not call a model provider.
+
+The Project video tab reads version 2 agent-authored revisions from ignored `work/agent-video/`. It shows the concept, shots, cap, stage choices and progress. Uploads are saved under project media; a caption or output-format edit creates a child revision. Ask the agent to plan and freeze a new video with the `agent-video` skill. The CLI currently blocks paid execution until a verified route and price adapter is connected. Existing product-video version 1 requests and anime review sessions remain separate and readable.
 
 Each render reserves `projects/<id>/videos/000011-readable-title/`, containing video.mp4, episode.json, props, optional review snapshot and upload credits. Six-digit numbers increase per project and sort by name. Failed runs may leave gaps. Never overwrite an iteration or delete reservation records. Videos shows the newest exports first and marks the applied choice separately. Deleted files stay greyed out with their original snapshots.
 

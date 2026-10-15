@@ -60,7 +60,15 @@ export async function readRenderHistory(root, sessionId) {
       const metadata = await stat(await resolveRenderPath(root, record.file));
       status = metadata.size === record.fingerprint.bytes && metadata.mtimeMs === record.fingerprint.modifiedAt ? 'available' : 'replaced';
     } catch (error) {status = error.code === 'ENOENT' ? 'deleted' : 'unavailable';}
-    return {...record, status, videoUrl: status === 'available' ? `/api/renders/${record.id}/video` : null};
+    let provenance = null;
+    if (record.file.startsWith(`projects/${sessionId}/videos/`)) {
+      try {
+        const directory = path.dirname(path.resolve(root, record.file));
+        provenance = {manifest: JSON.parse(await readFile(path.join(directory, 'provenance.json'), 'utf8')),
+          summary: JSON.parse(await readFile(path.join(directory, 'shareable-summary.json'), 'utf8'))};
+      } catch (error) {if (error.code !== 'ENOENT') throw error;}
+    }
+    return {...record, status, provenance, videoUrl: status === 'available' ? `/api/renders/${record.id}/video` : null};
   }));
   return records.sort((a, b) => (b.iteration ?? '').localeCompare(a.iteration ?? '') || b.createdAt.localeCompare(a.createdAt));
 }
