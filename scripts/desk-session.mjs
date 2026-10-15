@@ -28,7 +28,8 @@ export async function handleSessionRequest(request, response, {root, sessionId, 
       if (pathname === '/api/agent-video/asset' && request.method === 'GET') {
         const name = new URL(request.url, 'http://localhost').searchParams.get('path');
         const status = latest ? await agentStatus(root, sessionId, latest.revisionId) : null;
-        const allowed = new Set([...(status?.revision.references.map(ref => ref.path) ?? []), ...(status?.attempts.flatMap(attempt => attempt.outputs.map(output => output.path)) ?? [])]);
+        const allowed = new Set([...(status?.revision.references.map(ref => ref.path) ?? []), ...(status?.attempts.flatMap(attempt => attempt.outputs.map(output => output.path)) ?? []),
+          ...(status?.pending.map(item => item.preview) ?? [])]);
         if (!allowed.has(name)) {json(response, 404, {error: 'Asset is not in this revision'}); return true;}
         const media = await realpath(projectPaths(root, sessionId).media);
         const actual = await realpath(path.resolve(root, name));

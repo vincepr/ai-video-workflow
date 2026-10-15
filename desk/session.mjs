@@ -154,7 +154,8 @@ async function refreshAgentVideo() {
     select.value = revision.outputFormat; format.append(select); $('av-plan').append(format, node('h3', 'Stages'));
     for (const stage of revision.plan.stages) $('av-plan').append(node('p', `${stage.id}: ${stage.kind} via ${stage.provider} / ${stage.model}, estimate $${stage.estimateUsd.toFixed(2)}`));
     if (revision.references.length) $('av-plan').append(node('p', `References: ${revision.references.map(ref => ref.path).join(', ')}`));
-    const previews = [...revision.references.map(ref => ref.path), ...status.attempts.flatMap(attempt => attempt.outputs.map(output => output.path))];
+    const previews = [...revision.references.map(ref => ref.path), ...status.attempts.flatMap(attempt => attempt.outputs.map(output => output.path)),
+      ...(status.pending ?? []).map(item => item.preview)];
     if (previews.length) $('av-plan').append(node('h3', 'Previews'));
     for (const name of [...new Set(previews)]) {
       const extension = name.split('.').at(-1)?.toLowerCase();

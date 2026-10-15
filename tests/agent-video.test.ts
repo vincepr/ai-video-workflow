@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp, mkdir, writeFile, rm} from 'node:fs/promises';
+import {mkdtemp, mkdir, readFile, writeFile, rm} from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {randomUUID} from 'node:crypto';
@@ -170,5 +170,115 @@ test('recorded execution stops before over-cap work and preserves unsupported re
     assert.match((await runAgentRevision(root, projectId, retry, {recorded: true})).blocked ?? '', /failed/);
     assert.equal((await runAgentRevision(root, projectId, retry, {recorded: true})).status, 'complete');
     assert.equal((await agentStatus(root, projectId, retry)).attempts.length, 2);
+  } finally {await rm(root, {recursive: true, force: true});}
+});
+
+test('local finish renders once, waits for inspection, then attaches one numbered export', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'agent-local-'));
+  const projectId = 'synthetic';
+  const revisionId = randomUUID();
+  const project = path.join(root, 'projects', projectId);
+  const source = `projects/${projectId}/media/source.svg`;
+  try {
+    await mkdir(path.join(project, 'media'), {recursive: true});
+    await writeFile(path.join(project, 'project.json'), JSON.stringify({id: projectId, title: 'Synthetic'}));
+    await writeFile(path.join(project, 'media', 'source.svg'), '<svg xmlns="http://www.w3.org/2000/svg"/>');
+    await freezeAgentRevision(root, {schemaVersion: 2, projectId, revisionId, change: 'First plan', brief: 'A local reveal',
+      kind: 'other', budgetUsd: 0, references: [source], plan: {concept: 'Reveal', shots: [{id: 'opening', description: 'Reveal', caption: 'New caption'}],
+        stages: [{id: 'finish', kind: 'finish', provider: 'local', model: 'remotion', estimateUsd: 0, parameters: {episode: {
+          title: 'Reveal', shots: [{image: 'media/source.svg', seconds: 1, text: 'Old caption', from: [50, 50, 1], to: [50, 50, 1],
+            source: 'Synthetic', rights: 'Synthetic'}]}}}]}});
+    let renders = 0;
+    const renderLocal = async ({output}: {output: string}) => {renders++; await writeFile(output, 'rendered');};
+    const pending = await runAgentRevision(root, projectId, revisionId, {renderLocal});
+    assert.equal(pending.status, 'needs-inspection');
+    assert.equal(renders, 1);
+    assert.equal((await agentStatus(root, projectId, revisionId)).pending.length, 1);
+    const server = createDeskServer({root});
+    try {
+      await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
+      const address = server.address(); assert.ok(address && typeof address !== 'string');
+      const url = `http://127.0.0.1:${address.port}/projects/${projectId}`;
+      assert.equal((await fetch(`${url}/api/agent-video/asset?path=${encodeURIComponent(pending.preview)}`).then(response => response.text())), 'rendered');
+    } finally {await new Promise<void>(resolve => server.close(() => resolve()));}
+    assert.equal((await runAgentRevision(root, projectId, revisionId, {renderLocal})).status, 'needs-inspection');
+    assert.equal(renders, 1);
+    const draft = path.join(root, pending.attemptDraft);
+    const attempt = JSON.parse(await readFile(draft, 'utf8'));
+    assert.equal(JSON.parse(await readFile(path.join(path.dirname(draft), 'props.json'), 'utf8')).episode.shots[0].text, 'New caption');
+    assert.equal(attempt.parameters.episode.shots[0].text, 'New caption');
+    await recordAgentAttempt(root, projectId, revisionId, {...attempt, inspection: {accepted: true, note: 'Reviewed preview'}});
+    const attemptFile = path.join(project, 'work', 'agent-video', 'attempts', 'finish', `${attempt.id}.json`);
+    const originalAttempt = await readFile(attemptFile, 'utf8');
+    const changedAttempt = JSON.parse(originalAttempt);
+    changedAttempt.parameters.episode.shots[0].text = 'False caption';
+    await writeFile(attemptFile, JSON.stringify(changedAttempt));
+    await assert.rejects(runAgentRevision(root, projectId, revisionId, {renderLocal}), /does not match rendered controls/);
+    await writeFile(attemptFile, originalAttempt);
+    const finished = await runAgentRevision(root, projectId, revisionId, {renderLocal});
+    assert.equal(finished.status, 'complete');
+    assert.match(finished.export, /^projects\/synthetic\/videos\/000001-reveal\/video\.mp4$/);
+    assert.equal((await runAgentRevision(root, projectId, revisionId, {renderLocal})).export, finished.export);
+    assert.equal(renders, 1);
+    assert.equal(JSON.parse(await readFile(path.join(root, path.dirname(finished.export), 'provenance.json'), 'utf8')).revisionId, revisionId);
+  } finally {await rm(root, {recursive: true, force: true});}
+});
+
+test('local render failure is recorded and a no-output retry can render a preview', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'agent-local-retry-'));
+  const projectId = 'synthetic';
+  const revisionId = randomUUID();
+  const media = path.join(root, 'projects', projectId, 'media');
+  try {
+    await mkdir(media, {recursive: true});
+    await writeFile(path.join(media, 'source.svg'), '<svg/>');
+    await freezeAgentRevision(root, {schemaVersion: 2, projectId, revisionId, change: 'First plan', brief: 'Local retry',
+      kind: 'other', budgetUsd: 0, references: [`projects/${projectId}/media/source.svg`], plan: {
+        concept: 'Reveal', shots: [{id: 'one', description: 'Reveal'}], stages: [{id: 'finish', kind: 'finish', provider: 'local',
+          model: 'remotion', estimateUsd: 0, parameters: {episode: {title: 'Retry', shots: [{image: 'media/source.svg', seconds: 1,
+            text: 'Reveal', from: [50, 50, 1], to: [50, 50, 1], source: 'Synthetic', rights: 'Synthetic'}]}}}]}});
+    let calls = 0;
+    const renderLocal = async ({output}: {output: string}) => {if (++calls === 1) throw new Error('renderer exited'); await writeFile(output, 'retry');};
+    assert.match((await runAgentRevision(root, projectId, revisionId, {renderLocal})).blocked ?? '', /renderer exited/);
+    const failed = await agentStatus(root, projectId, revisionId);
+    assert.equal(failed.attempts.length, 1);
+    assert.equal(failed.attempts[0].status, 'failed');
+    assert.match(failed.attempts[0].error, /renderer exited/);
+    assert.equal(failed.status, 'blocked');
+    const directory = path.join(root, 'projects', projectId, 'work', 'agent-video', 'local', revisionId, 'finish');
+    const interrupted = {...failed.attempts[0], id: randomUUID(), inputs: failed.attempts[0].inputs.map((input: {path: string}) => input.path)};
+    await writeFile(path.join(directory, 'render-failure.json'), JSON.stringify({reason: 'Interrupted failure receipt', retryable: true, attempt: interrupted}));
+    assert.match((await runAgentRevision(root, projectId, revisionId, {renderLocal})).blocked ?? '', /Interrupted failure receipt/);
+    assert.equal((await agentStatus(root, projectId, revisionId)).attempts.length, 2);
+    assert.equal(calls, 1);
+    assert.equal((await runAgentRevision(root, projectId, revisionId, {renderLocal})).status, 'needs-inspection');
+    assert.equal((await agentStatus(root, projectId, revisionId)).status, 'needs-inspection');
+    assert.equal(calls, 2);
+  } finally {await rm(root, {recursive: true, force: true});}
+});
+
+test('an interrupted completed local render recovers without rendering again', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'agent-local-recover-'));
+  const projectId = 'synthetic';
+  const revisionId = randomUUID();
+  const media = path.join(root, 'projects', projectId, 'media');
+  try {
+    await mkdir(media, {recursive: true});
+    await writeFile(path.join(media, 'source.svg'), '<svg/>');
+    await freezeAgentRevision(root, {schemaVersion: 2, projectId, revisionId, change: 'First plan', brief: 'Recover render',
+      kind: 'other', budgetUsd: 0, references: [`projects/${projectId}/media/source.svg`], plan: {
+        concept: 'Reveal', shots: [{id: 'one', description: 'Reveal'}], stages: [{id: 'finish', kind: 'finish', provider: 'local',
+          model: 'remotion', estimateUsd: 0, parameters: {episode: {title: 'Recovery', shots: [{image: 'media/source.svg', seconds: 1,
+            text: 'Reveal', from: [50, 50, 1], to: [50, 50, 1], source: 'Synthetic', rights: 'Synthetic'}]}}}]}});
+    const directory = path.join(root, 'projects', projectId, 'work', 'agent-video', 'local', revisionId, 'finish');
+    await mkdir(directory, {recursive: true});
+    await writeFile(path.join(directory, 'render-lock'), JSON.stringify({pid: 999999999, startedAt: new Date().toISOString()}));
+    await writeFile(path.join(directory, 'rendered.mp4'), 'complete render');
+    assert.equal((await agentStatus(root, projectId, revisionId)).status, 'interrupted');
+    const recovered = await runAgentRevision(root, projectId, revisionId, {renderLocal: async () => {throw new Error('render repeated');},
+      probeLocal: async () => ({width: 1080, height: 1920, nb_frames: '30'})});
+    assert.equal(recovered.status, 'needs-inspection');
+    assert.equal(JSON.parse(await readFile(path.join(directory, 'render-result.json'), 'utf8')).recovered, true);
+    assert.equal((await agentStatus(root, projectId, revisionId)).attempts.length, 0);
   } finally {await rm(root, {recursive: true, force: true});}
 });
