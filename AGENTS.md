@@ -12,4 +12,5 @@
 - Store reusable media in media/ with matching .attribution.json files. See adr/0010-music-and-upload-credits.md.
 - Commit completed changes and push to origin/main.
 - Use OpenRouter sparingly. Follow adr/0004-api-costs.md before making requests.
+- For product videos, use .agents/skills/generate-product-video/references/model-recommendations.md. If its review date is over 30 days old, reassess models, capabilities and prices before choosing.
 - Publishing and adding other paid services require an explicit request.

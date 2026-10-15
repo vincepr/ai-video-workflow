@@ -16,7 +16,7 @@ For research or older project work without a frozen request, read [generation](r
 - [Paid advertising](references/paid.md): campaign creative, including boosted posts.
 - [Shop and brand pages](references/shop.md): Relaxdays or another merchant's product pages and owned channels.
 
-Before paid generation, read [lessons](references/lessons.md) and any existing reviews under the assigned project's reviews/ folder. Use the recorded outcome and user feedback to decide what the next attempt should change.
+Before paid generation, read [lessons](references/lessons.md), [model recommendations](references/model-recommendations.md) and any existing reviews under the assigned project's reviews/ folder. Use the recorded outcome and user feedback to decide what the next attempt should change. Reassess the recommendations when their review date is over 30 days old; verify the chosen route and exact price again before each paid request.
 For deeper workflow research, use [workflow resources](references/workflow-resources.md). Refresh their availability and terms before adopting code or services.
 
 If several destinations are requested, prepare a shared footage plan and separate release requirements. Do not assume one destination's eligibility applies elsewhere. Preserve the selected product and merchant.
