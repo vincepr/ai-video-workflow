@@ -2,6 +2,7 @@ import {readFile, writeFile, stat} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {readFrozenRequest} from './request.mjs';
+import {readFirstFrameReview} from './frame-review.mjs';
 
 async function json(file) {
   try {return JSON.parse(await readFile(file, 'utf8'));}
@@ -52,6 +53,9 @@ export async function runDirectWorkflow({root, projectId, requestId, agent, exec
     state.status = decision.accepted ? 'frame-accepted' : 'frame-rejected'; await save(stateFile, state);
   }
   if (!state.frameDecision.accepted) return state;
+  if (request.execution.reviewMode === 'first-frame' && !(await readFirstFrameReview(root, projectId, requestId))?.approved) {
+    state.status = 'first-frame-review'; await save(stateFile, state); return state;
+  }
   if (!state.videoSubmission) {
     state.videoSubmission = await execute('submit-video', {run, request});
     state.status = 'video-submitted'; await save(stateFile, state);
@@ -69,11 +73,14 @@ export async function runDirectWorkflow({root, projectId, requestId, agent, exec
     const file = path.join(run, 'video-raw.mp4');
     if (!await exists(file)) throw new Error('Raw video missing after download');
     state.review = await agent.inspectVideo({file, request, context});
-    if (!state.review || typeof state.review.accepted !== 'boolean' || !Array.isArray(state.review.acceptedRanges)) throw new Error('Raw video inspection is incomplete');
+    if (!state.review || typeof state.review.accepted !== 'boolean' || !Array.isArray(state.review.acceptedRanges) || !Array.isArray(state.review.captions)) throw new Error('Raw video inspection and first text edit are incomplete');
     state.status = state.review.accepted ? 'raw-accepted' : 'raw-rejected'; await save(stateFile, state);
   }
   if (!state.review.accepted) return state;
-  state.finishPlan = {version: 1, fps: 30, segments: state.review.acceptedRanges.map(({fromFrame, toFrame}) => ({source: 'video-raw.mp4', fromFrame, toFrame, kind: 'motion'})), captions: [], audio: {source: 'none'}};
+  const segments = state.review.acceptedRanges.map(({fromFrame, toFrame}) => ({source: 'video-raw.mp4', fromFrame, toFrame, kind: 'motion'}));
+  const frames = segments.reduce((sum, segment) => sum + segment.toFrame - segment.fromFrame, 0);
+  if (state.review.captions.some(item => typeof item.text !== 'string' || !item.text.trim() || !Number.isInteger(item.fromFrame) || !Number.isInteger(item.toFrame) || item.fromFrame < 0 || item.toFrame <= item.fromFrame || item.toFrame > frames)) throw new Error('First text edit has an invalid caption window');
+  state.finishPlan = {version: 1, fps: 30, segments, captions: state.review.captions, audio: {source: 'none'}};
   state.status = 'finishing-ready'; await save(stateFile, state);
   return state;
 }

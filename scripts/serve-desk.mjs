@@ -3,6 +3,7 @@ import {readFile, realpath} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {handleSessionRequest} from './desk-session.mjs';
+import {createCodexProductVideoTransport} from './product-video/codex-transport.mjs';
 import {listProjects, readProject, projectPaths} from './projects.mjs';
 
 const files = new Map([
@@ -21,6 +22,7 @@ const files = new Map([
 
 /** @param {{root?: string, sessionId?: string, productVideoTransport?: {createFreshSession: (seed: any) => Promise<{sessionId: string, executionId: string}>}}} options */
 export function createDeskServer({root = fileURLToPath(new URL('../', import.meta.url)), sessionId = 'sample', productVideoTransport} = {}) {
+  productVideoTransport ??= createCodexProductVideoTransport(root);
   return createServer(async (request, response) => {
     let pathname = new URL(request.url, 'http://localhost').pathname;
     if (pathname === '/api/projects' && request.method === 'GET') {

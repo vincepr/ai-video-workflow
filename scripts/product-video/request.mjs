@@ -34,9 +34,15 @@ export function normalizeRequest(draft, catalog) {
   const choices = draft.choices ?? {};
   const primary = choiceField[workflow];
   const normalizedChoices = workflow === 'reference-remake' ? {} : {[primary]: listed(choices[primary], allowed[`${primary}s`], primary)};
+  let presenterDescription;
   if (workflow === 'direct') {
     normalizedChoices.hook = listed(choices.hook ?? 'none', allowed.hooks, 'hook');
     normalizedChoices.setting = listed(choices.setting ?? 'auto', allowed.settings, 'setting');
+    if (choices.avatar !== undefined) {
+      normalizedChoices.avatar = listed(choices.avatar, allowed.avatars, 'avatar');
+      presenterDescription = catalog.metadata?.avatars?.[normalizedChoices.avatar]?.castingDescription;
+      if (typeof presenterDescription !== 'string') throw new Error(`Missing avatar description: ${normalizedChoices.avatar}`);
+    }
   }
   for (const key of Object.keys(choices)) if (!(key in normalizedChoices)) throw new Error(`Inapplicable choice: ${key}`);
   const references = (draft.references ?? []).map((ref, index) => ({
@@ -45,9 +51,13 @@ export function normalizeRequest(draft, catalog) {
   }));
   if (!references.some(ref => ref.role === 'product')) throw new Error('Missing product reference');
   if (workflow === 'reference-remake' && !references.some(ref => ref.role === 'reference-video')) throw new Error('Missing reference-video source');
+  if (normalizedChoices.avatar === 'custom' && !references.some(ref => ref.role === 'presenter')) throw new Error('Custom avatar requires a presenter reference');
   const brief = draft.brief ?? {};
   if (workflow === 'reference-remake') required(brief.referenceRights, 'reference video rights');
+  if (brief.direction !== undefined && (typeof brief.direction !== 'string' || brief.direction.length > 2000)) throw new Error('Invalid creative direction');
   const execution = draft.execution ?? {};
+  const reviewMode = execution.reviewMode === undefined ? undefined : listed(execution.reviewMode, ['full', 'first-frame'], 'review mode');
+  if (reviewMode === 'first-frame' && workflow !== 'direct') throw new Error('First-frame review is available for direct ads only');
   const voice = execution.voice ?? {mode: 'none'};
   if (!['none', 'replace'].includes(voice.mode) || (voice.mode === 'replace' && (workflow !== 'reference-remake' || !voice.text?.trim()))) throw new Error('Invalid voice replacement');
   const budget = execution.budget ?? {};
@@ -56,8 +66,9 @@ export function normalizeRequest(draft, catalog) {
   return {
     schemaVersion: 1, id, projectId, action: listed(draft.action, actions, 'action'), workflow, choices: normalizedChoices,
     language: required(draft.language, 'language'), destination: listed(draft.destination, Object.keys(catalog.files?.destinations ?? {}), 'destination'),
-    references, brief: {product: required(brief.product, 'product'), facts: Array.isArray(brief.facts) ? brief.facts.map(fact => required(fact, 'fact')) : [], brand: brief.brand?.trim() ?? '', cta: brief.cta?.trim() ?? '', referenceRights: brief.referenceRights?.trim() ?? ''},
-    execution: {provider: required(execution.provider, 'provider'), models: execution.models ?? {}, durationSec: execution.durationSec, aspectRatio: required(execution.aspectRatio, 'aspect ratio'), imageResolution: required(execution.imageResolution ?? execution.resolution, 'image resolution'), resolution: required(execution.resolution, 'video resolution'), audio: Boolean(execution.audio), voice: {mode: voice.mode, ...(voice.mode === 'replace' ? {text: voice.text.trim()} : {})}, budget: {currency: 'USD', maxUsd: budget.maxUsd}},
+    references, brief: {product: required(brief.product, 'product'), facts: Array.isArray(brief.facts) ? brief.facts.map(fact => required(fact, 'fact')) : [], brand: brief.brand?.trim() ?? '', cta: brief.cta?.trim() ?? '', referenceRights: brief.referenceRights?.trim() ?? '', ...(brief.direction === undefined ? {} : {direction: brief.direction.trim()})},
+    ...(presenterDescription === undefined ? {} : {presenterDescription}),
+    execution: {provider: required(execution.provider, 'provider'), models: execution.models ?? {}, durationSec: execution.durationSec, aspectRatio: required(execution.aspectRatio, 'aspect ratio'), imageResolution: required(execution.imageResolution ?? execution.resolution, 'image resolution'), resolution: required(execution.resolution, 'video resolution'), audio: Boolean(execution.audio), voice: {mode: voice.mode, ...(voice.mode === 'replace' ? {text: voice.text.trim()} : {})}, budget: {currency: 'USD', maxUsd: budget.maxUsd}, ...(reviewMode === undefined ? {} : {reviewMode})},
   };
 }
 function requestDirectory(root, projectId, id) {

@@ -7,6 +7,7 @@ import {sendSavedRequest} from './t3-bridge.mjs';
 import {projectPaths, sessionDirectory} from './projects.mjs';
 import {launchProductVideo, readLaunchStatus, cancelProductVideo} from './product-video/launcher.mjs';
 import {refineProductVideo} from './product-video/refine-action.mjs';
+import {readFirstFrameReview, approveFirstFrame} from './product-video/frame-review.mjs';
 import {agentStatus, freezeAgentRevision, latestAgentRevision, shareableAgentSummary} from './agent-video.mjs';
 
 function json(response, status, value) {
@@ -79,7 +80,7 @@ export async function handleSessionRequest(request, response, {root, sessionId, 
     if (pathname === '/api/product-video/catalog' && request.method === 'GET') {
       try {
         const catalog = JSON.parse(await readFile(catalogPath, 'utf8'));
-        const compact = entry => entry?.label ? {label: entry.label, needsPresenter: entry.needsPresenter ?? false, requiredInputs: entry.requiredInputs ?? []}
+        const compact = entry => entry?.label ? {label: entry.label, category: entry.category, castingDescription: entry.castingDescription, needsPresenter: entry.needsPresenter ?? false, requiredInputs: entry.requiredInputs ?? []}
           : Object.fromEntries(Object.entries(entry ?? {}).map(([id, child]) => [id, compact(child)]));
         const metadata = Object.fromEntries(Object.entries(catalog.metadata ?? {}).map(([group, entries]) => [group, compact(entries)]));
         json(response, 200, {version: catalog.version, choices: catalog.choices, metadata, destinations: Object.keys(catalog.files.destinations), runtime: {freshSessionAvailable: typeof productVideoTransport?.createFreshSession === 'function'}});
@@ -89,19 +90,58 @@ export async function handleSessionRequest(request, response, {root, sessionId, 
     if (request.headers.origin && request.headers.origin !== `http://${request.headers.host}`) {json(response, 403, {error: 'Origin does not match the local desk'}); return true;}
     if (pathname === '/api/product-video/status' && request.method === 'GET') {
       const id = new URL(request.url, 'http://localhost').searchParams.get('requestId');
-      try {json(response, 200, await readLaunchStatus(root, sessionId, id));}
+      try {
+        const status = await readLaunchStatus(root, sessionId, id);
+        let editPlan = null;
+        try {
+          const state = JSON.parse(await readFile(path.join(projectPaths(root, sessionId).work, 'product-video', id, 'direct-state.json'), 'utf8'));
+          if (state.status === 'finishing-ready' && state.finishPlan?.version === 1) editPlan = {fps: state.finishPlan.fps, captions: (state.finishPlan.captions ?? []).map(item => ({text: item.text, fromFrame: item.fromFrame, toFrame: item.toFrame}))};
+        } catch (error) {if (error.code !== 'ENOENT') throw error;}
+        json(response, 200, {...status, firstFrame: await readFirstFrameReview(root, sessionId, id), editPlan});
+      }
       catch {json(response, 404, {error: 'Product video request not found'});}
       return true;
     }
-    if (['/api/product-video/generate', '/api/product-video/cancel', '/api/product-video/refine'].includes(pathname) && request.method === 'POST') {
+    if (pathname === '/api/product-video/first-frame' && request.method === 'GET') {
+      const id = new URL(request.url, 'http://localhost').searchParams.get('requestId');
+      try {
+        const review = await readFirstFrameReview(root, sessionId, id);
+        if (!review) throw new Error('No first frame to review');
+        const run = path.join(projectPaths(root, sessionId).work, 'product-video', id);
+        const bytes = await readFile(path.join(run, 'first-frame.bin'));
+        const meta = JSON.parse(await readFile(path.join(run, 'first-frame-meta.json'), 'utf8'));
+        const kind = meta.media_type || 'image/png';
+        if (review.sha256 !== meta.sha256 || !['image/png', 'image/jpeg', 'image/webp'].includes(kind)) throw new Error('Unsupported or changed first-frame image');
+        response.writeHead(200, {'Content-Type': kind, 'Cache-Control': 'no-store'}); response.end(bytes);
+      } catch {json(response, 404, {error: 'First frame is unavailable'});}
+      return true;
+    }
+    if (['/api/product-video/generate', '/api/product-video/cancel', '/api/product-video/refine', '/api/product-video/approve-frame'].includes(pathname) && request.method === 'POST') {
       if (!request.headers['content-type']?.startsWith('application/json')) {json(response, 415, {error: 'Expected JSON'}); return true;}
       const chunks = []; let bytes = 0;
-      for await (const chunk of request) {bytes += chunk.length; if (bytes > 1024) {json(response, 413, {error: 'Request is too large'}); return true;} chunks.push(chunk);}
+      for await (const chunk of request) {bytes += chunk.length; if (bytes > 8192) {json(response, 413, {error: 'Request is too large'}); return true;} chunks.push(chunk);}
       let body;
       try {body = JSON.parse(Buffer.concat(chunks).toString('utf8'));} catch {json(response, 400, {error: 'Invalid JSON'}); return true;}
       if (typeof body?.requestId !== 'string') {json(response, 400, {error: 'Missing request ID'}); return true;}
       try {
-        if (pathname.endsWith('/cancel')) {json(response, 200, await cancelProductVideo(root, sessionId, body.requestId)); return true;}
+        if (pathname.endsWith('/approve-frame')) {
+          const current = await readLaunchStatus(root, sessionId, body.requestId);
+          if (current.launch?.status !== 'dispatched' || current.launch.cancelRequested || current.worker?.status !== 'first-frame-review' || current.launch.executionId !== current.worker.executionId) throw new Error('Agent must finish the active frame review stage before continuing');
+          const approval = await approveFirstFrame(root, sessionId, body.requestId, body.frameSha256, body.videoPrompt);
+          if (productVideoTransport?.resumeSession) {
+            const resumed = await productVideoTransport.resumeSession({projectId: sessionId, requestId: body.requestId}, current.launch.sessionId);
+            const next = {...current.launch, sessionId: resumed.sessionId, executionId: resumed.executionId};
+            const file = path.join(projectPaths(root, sessionId).work, 'product-video', body.requestId, 'launch.json');
+            await writeFile(file, JSON.stringify(next, null, 2) + '\n');
+          }
+          json(response, 200, approval); return true;
+        }
+        if (pathname.endsWith('/cancel')) {
+          const current = await readLaunchStatus(root, sessionId, body.requestId);
+          const cancelled = await cancelProductVideo(root, sessionId, body.requestId);
+          productVideoTransport?.cancelSession?.(current.launch?.executionId);
+          json(response, 200, cancelled); return true;
+        }
         if (pathname.endsWith('/refine') && (typeof body.refinementId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.refinementId))) {
           json(response, 400, {error: 'Invalid refinement ID'}); return true;
         }
@@ -123,7 +163,7 @@ export async function handleSessionRequest(request, response, {root, sessionId, 
         }
         const selected = draft.workflow === 'direct' ? catalog.metadata?.formats?.[draft.choices?.format]
           : catalog.metadata?.styles?.[draft.workflow]?.[draft.choices?.style];
-        for (const role of selected?.requiredInputs ?? []) if (!draft.references?.some(ref => ref.role === role)) throw new Error(`Missing ${role} reference for this choice`);
+        for (const role of selected?.requiredInputs ?? []) if (!draft.references?.some(ref => ref.role === role) && !(role === 'presenter' && draft.choices?.avatar !== undefined)) throw new Error(`Missing ${role} reference for this choice`);
         json(response, 200, await launchProductVideo(root, draft, {catalog, transport: productVideoTransport}));
       } catch (error) {json(response, 400, {error: error.message});}
       return true;

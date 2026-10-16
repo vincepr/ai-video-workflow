@@ -126,6 +126,17 @@
         "car",
         "cafe",
         "seamless"
+      ],
+      "avatars": [
+        "none",
+        "custom",
+        "cn-female-young",
+        "cn-male-young",
+        "female-mature",
+        "male-fit",
+        "girl-cute",
+        "mom-warm",
+        "senior-expert"
       ]
     },
     "skit": {
@@ -820,6 +831,74 @@
           "reuse": "independently-authored",
           "path": "src/lib/marketing-studio/settings.ts"
         }
+      }
+    },
+    "avatars": {
+      "none": {
+        "label": "Auto Design",
+        "upstreamId": "none",
+        "castingDescription": "",
+        "appliesTo": ["direct"],
+        "requiredInputs": ["product"],
+        "version": 1,
+        "source": {"repository": "AtlasCloudAI/atlas-marketing-studio", "commit": "18ec178052f6f97612813997613d88ce34b02fc5", "reuse": "independently-authored", "path": "src/lib/marketing-studio/avatars.ts"}
+      },
+      "custom": {
+        "label": "Custom Presenter",
+        "castingDescription": "Match the supplied presenter reference exactly; preserve their face and identity.",
+        "appliesTo": ["direct"],
+        "requiredInputs": ["product", "presenter"],
+        "version": 1,
+        "source": {"repository": "AtlasCloudAI/atlas-marketing-studio", "commit": "18ec178052f6f97612813997613d88ce34b02fc5", "reuse": "independently-authored", "path": "src/lib/marketing-studio/avatars.ts"}
+      },
+      "cn-female-young": {
+        "label": "Young Woman",
+        "upstreamId": "cn-female-young",
+        "castingDescription": "A friendly young Chinese woman in her mid-twenties, with long straight black hair, natural light makeup, casual chic clothing and a warm approachable smile.",
+        "appliesTo": ["direct"], "requiredInputs": ["product"], "version": 1,
+        "source": {"repository": "AtlasCloudAI/atlas-marketing-studio", "commit": "18ec178052f6f97612813997613d88ce34b02fc5", "reuse": "independently-authored", "path": "src/lib/marketing-studio/avatars.ts"}
+      },
+      "cn-male-young": {
+        "label": "Young Man",
+        "upstreamId": "cn-male-young",
+        "castingDescription": "A friendly young Chinese man in his mid-twenties, with short neat black hair, clean casual clothing and an easygoing confident smile.",
+        "appliesTo": ["direct"], "requiredInputs": ["product"], "version": 1,
+        "source": {"repository": "AtlasCloudAI/atlas-marketing-studio", "commit": "18ec178052f6f97612813997613d88ce34b02fc5", "reuse": "independently-authored", "path": "src/lib/marketing-studio/avatars.ts"}
+      },
+      "female-mature": {
+        "label": "Sophisticated Woman",
+        "upstreamId": "female-mature",
+        "castingDescription": "An elegant Chinese woman in her thirties, with shoulder-length hair, refined smart-casual style and a calm, trustworthy demeanor.",
+        "appliesTo": ["direct"], "requiredInputs": ["product"], "version": 1,
+        "source": {"repository": "AtlasCloudAI/atlas-marketing-studio", "commit": "18ec178052f6f97612813997613d88ce34b02fc5", "reuse": "independently-authored", "path": "src/lib/marketing-studio/avatars.ts"}
+      },
+      "male-fit": {
+        "label": "Fit Guy",
+        "upstreamId": "male-fit",
+        "castingDescription": "An athletic young man in sportswear, with a fit build, energetic upbeat manner and a gym or outdoor feel.",
+        "appliesTo": ["direct"], "requiredInputs": ["product"], "version": 1,
+        "source": {"repository": "AtlasCloudAI/atlas-marketing-studio", "commit": "18ec178052f6f97612813997613d88ce34b02fc5", "reuse": "independently-authored", "path": "src/lib/marketing-studio/avatars.ts"}
+      },
+      "girl-cute": {
+        "label": "Sweet Girl",
+        "upstreamId": "girl-cute",
+        "castingDescription": "A cheerful young woman with bright expressive eyes, a trendy youthful outfit and a playful, energetic vibe.",
+        "appliesTo": ["direct"], "requiredInputs": ["product"], "version": 1,
+        "source": {"repository": "AtlasCloudAI/atlas-marketing-studio", "commit": "18ec178052f6f97612813997613d88ce34b02fc5", "reuse": "independently-authored", "path": "src/lib/marketing-studio/avatars.ts"}
+      },
+      "mom-warm": {
+        "label": "Gentle Mom",
+        "upstreamId": "mom-warm",
+        "castingDescription": "A warm, friendly young mother in her early thirties, with soft casual clothing, a gentle caring smile and a home-lifestyle feel.",
+        "appliesTo": ["direct"], "requiredInputs": ["product"], "version": 1,
+        "source": {"repository": "AtlasCloudAI/atlas-marketing-studio", "commit": "18ec178052f6f97612813997613d88ce34b02fc5", "reuse": "independently-authored", "path": "src/lib/marketing-studio/avatars.ts"}
+      },
+      "senior-expert": {
+        "label": "Seasoned Expert",
+        "upstreamId": "senior-expert",
+        "castingDescription": "A seasoned middle-aged craftsperson or expert with a weathered trustworthy face, practical workwear and a confident authoritative presence.",
+        "appliesTo": ["direct"], "requiredInputs": ["product"], "version": 1,
+        "source": {"repository": "AtlasCloudAI/atlas-marketing-studio", "commit": "18ec178052f6f97612813997613d88ce34b02fc5", "reuse": "independently-authored", "path": "src/lib/marketing-studio/avatars.ts"}
       }
     },
     "styles": {

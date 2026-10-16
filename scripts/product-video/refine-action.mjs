@@ -18,7 +18,11 @@ export async function refineProductVideo({root, projectId, requestId, refinement
   const request = frozen.request;
   if (request.workflow !== 'direct' || request.action !== 'generate') throw new Error('Only accepted direct requests support local refinement');
   const candidate = normalizeRequest({...draft, id: requestId, projectId}, catalog);
-  const fixed = value => ({...value, brief: {...value.brief, cta: '', brand: ''}});
+  const fixed = value => ({...value,
+    choices: {...value.choices, avatar: value.choices.avatar === 'none' ? undefined : value.choices.avatar},
+    brief: {...value.brief, cta: '', brand: '', direction: value.brief.direction || undefined},
+    execution: {...value.execution, reviewMode: value.execution.reviewMode === 'full' ? undefined : value.execution.reviewMode},
+    presenterDescription: value.choices.avatar === 'none' ? undefined : value.presenterDescription});
   if (JSON.stringify(fixed(candidate)) !== JSON.stringify(fixed(normalizeRequest(request, catalog)))) throw new Error('Local refinement may only change brand, CTA or final caption');
   const caption = String(draft.finishing?.caption?.trim() || candidate.brief.cta).trim();
   if (!caption || caption.length > 40 || /[\r\n]/.test(caption)) throw new Error('Final caption must contain 1 to 40 characters on one line');
@@ -29,7 +33,11 @@ export async function refineProductVideo({root, projectId, requestId, refinement
   if (!Number.isInteger(total) || total < 1) throw new Error('Accepted edit has no frames');
   const canvasWidth = state.finishPlan.canvas?.width ?? 1080;
   const fontSize = Math.max(12, Math.min(48, Math.floor(canvasWidth / Math.max(caption.length * 0.62, 12))));
-  const plan = {...state.finishPlan, captions: [...(state.finishPlan.captions ?? []), {text: caption, fromFrame: Math.max(0, total - 2 * state.finishPlan.fps), toFrame: total, fontSize, y: 'h-text_h-40'}]};
+  const originals = state.finishPlan.captions ?? [];
+  const overlayTexts = draft.finishing?.overlayTexts ?? originals.map(item => item.text);
+  if (!Array.isArray(overlayTexts) || overlayTexts.length !== originals.length || overlayTexts.some(text => typeof text !== 'string' || text.length > 100 || /[\r\n]/.test(text))) throw new Error('Overlay edits must match the saved captions and stay on one line');
+  const plan = {...state.finishPlan, captions: [...originals.map((item, index) => ({...item, text: overlayTexts[index]})).filter(item => item.text.trim()),
+    {text: caption, fromFrame: Math.max(0, total - 2 * state.finishPlan.fps), toFrame: total, fontSize, y: 'h-text_h-40'}]};
   const rendered = await renderLocalRefinement({root, projectId, requestId, refinementId, plan, ffmpeg, ffprobe, python});
   const receiptFile = path.join(rendered.directory, 'export.json');
   try {return await json(receiptFile);} catch (error) {if (error.code !== 'ENOENT') throw error;}

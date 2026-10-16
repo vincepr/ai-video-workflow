@@ -66,5 +66,11 @@ test('a legacy frozen request passes the local refinement configuration check', 
     await writeFile(path.join(run, 'request.json'), JSON.stringify({request: frozen, context: {files: []}}));
     await assert.rejects(() => refineProductVideo({root, projectId: 'demo', requestId: id, refinementId,
       draft: {...draft, brief: {...draft.brief, cta: 'New CTA'}}, catalog, ffmpeg: 'unused', ffprobe: 'unused'}), /ENOENT/);
+    await writeFile(path.join(run, 'direct-state.json'), JSON.stringify({status: 'finishing-ready', review: {accepted: true}, finishPlan: {
+      version: 1, fps: 30, segments: [{source: 'video-raw.mp4', fromFrame: 0, toFrame: 30, kind: 'motion'}],
+      captions: [{text: 'First pass', fromFrame: 0, toFrame: 15}], audio: {source: 'none'}}}));
+    await assert.rejects(() => refineProductVideo({root, projectId: 'demo', requestId: id, refinementId,
+      draft: {...draft, brief: {...draft.brief, cta: 'New CTA'}, finishing: {caption: 'New CTA', overlayTexts: []}}, catalog,
+      ffmpeg: 'unused', ffprobe: 'unused'}), /Overlay edits must match/);
   } finally {await rm(root, {recursive: true, force: true});}
 });

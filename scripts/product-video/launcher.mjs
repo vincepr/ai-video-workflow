@@ -55,7 +55,7 @@ export async function recordWorkerUpdate(root, projectId, requestId, update) {
   const launch = current.launch;
   if (!launch || launch.projectId !== projectId || launch.requestId !== requestId) throw new Error('Foreign project or request');
   if (launch.executionId !== update.executionId) throw new Error('Worker execution does not match this request');
-  const allowed = ['prepared', 'accepted', 'raw-artifact', 'edited-export', 'failed', 'unsupported', 'complete'];
+  const allowed = ['prepared', 'running', 'first-frame-review', 'accepted', 'raw-artifact', 'edited-export', 'failed', 'unsupported', 'complete'];
   if (!allowed.includes(update.status)) throw new Error('Invalid worker status');
   if (launch.cancelRequested && !['accepted', 'failed'].includes(update.status)) throw new Error('Request was cancelled; no subsequent stages may start');
   if (update.artifacts !== undefined) {

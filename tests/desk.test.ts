@@ -8,6 +8,7 @@ import {recordRender} from '../scripts/render-history.mjs';
 import {recordWorkerUpdate} from '../scripts/product-video/launcher.mjs';
 import {normalizeRequest} from '../scripts/product-video/request.mjs';
 import {createServer} from 'node:http';
+import {createHash} from 'node:crypto';
 
 test('project desks keep catalogs, sessions and videos separate', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'desk-projects-'));
@@ -186,7 +187,7 @@ test('product video catalog is compact and Generate freezes the saved draft once
     assert.equal(choices.metadata.formats.hypermotion.label, 'Hyper Motion');
     assert.equal(choices.metadata.styles.skit.funny.label, 'Funny');
     assert.equal(JSON.stringify(choices).includes('references/configuration/formats'), false);
-    const draft = {action: 'plan', workflow: 'direct', choices: {format: 'hypermotion', hook: 'none', setting: 'auto'}, language: 'en', destination: 'private', references: [{role: 'product', path: 'projects/alpha/media/cube.png'}], brief: {product: 'Synthetic cube', facts: ['Blue shell']}, execution: {provider: 'openrouter', models: {}, durationSec: 5, aspectRatio: '9:16', resolution: '720p', audio: false, budget: {currency: 'USD', maxUsd: 0}}};
+    const draft = {action: 'generate', workflow: 'direct', choices: {format: 'hypermotion', hook: 'none', setting: 'auto'}, language: 'en', destination: 'private', references: [{role: 'product', path: 'projects/alpha/media/cube.png'}], brief: {product: 'Synthetic cube', facts: ['Blue shell']}, execution: {provider: 'openrouter', models: {}, durationSec: 5, aspectRatio: '9:16', resolution: '720p', audio: false, reviewMode: 'first-frame', budget: {currency: 'USD', maxUsd: 0}}};
     assert.equal((await fetch(`${url}/api/session`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({version: 1, sessionId: 'alpha', productVideo: draft})})).status, 200);
     assert.equal(calls.length, 0);
     const id = '9a4fec5b-d5d4-4fc6-ae92-df73acd109be';
@@ -201,6 +202,22 @@ test('product video catalog is compact and Generate freezes the saved draft once
     const progress = await fetch(`${url}/api/product-video/status?requestId=${id}`).then(response => response.json());
     assert.equal(progress.launch.status, 'dispatched');
     assert.equal(progress.worker.status, 'accepted');
+    const run = path.join(root, 'projects/alpha/work/product-video', id);
+    const frame = Buffer.from('synthetic frame');
+    const sha256 = createHash('sha256').update(frame).digest('hex');
+    await writeFile(path.join(run, 'first-frame.bin'), frame);
+    await writeFile(path.join(run, 'first-frame-meta.json'), JSON.stringify({media_type: 'image/png', sha256}));
+    await writeFile(path.join(run, 'image-prompt.md'), 'Product on clean background');
+    await writeFile(path.join(run, 'video-prompt.md'), 'Slow camera move');
+    await writeFile(path.join(run, 'direct-state.json'), JSON.stringify({status: 'first-frame-review', frameDecision: {accepted: true, notes: 'Good product fidelity'}}));
+    await recordWorkerUpdate(root, 'alpha', id, {executionId: 'run-1', status: 'first-frame-review'});
+    const review = await fetch(`${url}/api/product-video/status?requestId=${id}`).then(response => response.json());
+    assert.equal(review.firstFrame.sha256, sha256);
+    assert.equal((await fetch(`${url}/api/product-video/first-frame?requestId=${id}`)).headers.get('content-type'), 'image/png');
+    const approve = await fetch(`${url}/api/product-video/approve-frame`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({requestId: id, frameSha256: sha256, videoPrompt: 'Controlled reveal'})});
+    assert.equal(approve.status, 200);
+    assert.equal((await fetch(`${url}/api/product-video/status?requestId=${id}`).then(response => response.json())).firstFrame.approved, true);
+    assert.equal((await fetch(`${url}/api/product-video/approve-frame`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({requestId: id, frameSha256: 'stale', videoPrompt: 'Wrong'})})).status, 400);
     const cancel = await fetch(`${url}/api/product-video/cancel`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({requestId: id})});
     assert.equal((await cancel.json()).status, 'cancelled');
     assert.equal((await fetch(`${url}/api/product-video/status?requestId=${id}`).then(response => response.json())).worker.receipt.jobId, 'synthetic-job');

@@ -82,6 +82,12 @@ def payload_for(run, stage, envelope):
     files = snapshots(run, envelope)
     prompt_file = run / ('image-prompt.md' if stage == 'image' else 'video-prompt.md')
     prompt = prompt_file.read_text(encoding='utf-8').strip()
+    if stage == 'video' and execution.get('reviewMode') == 'first-frame':
+        approval = read(run / 'frame-approval.json')
+        frame = (run / 'first-frame.bin').read_bytes()
+        if approval['frameSha256'] != sha(frame):
+            raise ValueError('First-frame approval does not match current frame')
+        prompt = approval['videoPrompt'].strip()
     if not prompt:
         raise ValueError('Empty prompt')
     resolution = execution.get('imageResolution', execution['resolution']) if stage == 'image' else execution['resolution']
@@ -313,6 +319,9 @@ def charge(ledger, run, stage, cost):
 def submit(run, stage, args, root):
     envelope = frozen(run)
     request = envelope['request']
+    launch = run / 'launch.json'
+    if launch.exists() and read(launch).get('cancelRequested'):
+        raise ValueError('Run was cancelled before paid submission')
     marker = run / (stage + '-submission.json')
     if marker.exists():
         raise ValueError('Submission already claimed; inspect receipt or resolve ambiguous state')

@@ -15,6 +15,7 @@ test('catalog preserves the pinned choice IDs and separates recipes from metadat
   exact(catalog.choices.direct.formats, ['ugc','direct-to-camera','selfie-testimonial','gadget-saved-me','secret-hack','review','unboxing','unboxing-asmr','try-on','couple-sharing','tvspot','hypermotion','giant-product','crush-test','camera-pov','mess-to-fresh']);
   exact(catalog.choices.direct.hooks, ['none','conflict','suspense','painpoint','number','contrast','identity','bizarre','freebie','pov','controversial','authority']);
   exact(catalog.choices.direct.settings, ['auto','office','livingroom','kitchen','bedroom','bathroom','street','outdoor','studio','car','cafe','seamless']);
+  exact(catalog.choices.direct.avatars, ['none','custom','cn-female-young','cn-male-young','female-mature','male-fit','girl-cute','mom-warm','senior-expert']);
   exact(catalog.choices.skit.styles, ['funny','reversal','skit','warm','luxury','urgent']);
   exact(catalog.choices.drama.styles, ['epic','palace','wuxia','family','office','hero']);
   assert.equal(catalog.metadata.settings.auto.upstreamId, 'none');
@@ -35,6 +36,12 @@ test('catalog preserves the pinned choice IDs and separates recipes from metadat
       assert.ok(entry.label && entry.requiredInputs?.length);
     }
   }
+  for (const id of catalog.choices.direct.avatars) {
+    const avatar = catalog.metadata.avatars[id];
+    assert.ok(avatar.label);
+    assert.equal(typeof avatar.castingDescription, 'string');
+    assert.equal(avatar.source.path, 'src/lib/marketing-studio/avatars.ts');
+  }
 });
 
 test('real resolver selects Hyper Motion and Bizarre without unrelated recipes', async () => {
@@ -54,4 +61,26 @@ test('real resolver selects Hyper Motion and Bizarre without unrelated recipes',
     assert.deepEqual(manifest.files.filter((f: any) => ['format','hook'].includes(f.role)).map((f: any) => f.path), [catalog.files.formats.hypermotion, catalog.files.hooks.bizarre]);
     assert.equal(manifest.files.some((f: any) => f.path.includes('/settings/') || f.path.includes('/styles/')), false);
   } finally {await rm(temp, {recursive: true, force: true});}
+});
+
+test('direct request freezes an optional catalog avatar and review mode while preserving legacy omission', () => {
+  const base = {id: '9a4fec5b-d5d4-4fc6-ae92-df73acd109be', projectId: 'demo', action: 'plan', workflow: 'direct', choices: {format: 'ugc'}, language: 'en', destination: 'private', references: [{role: 'product', path: 'projects/demo/media/product.png'}], brief: {product: 'Synthetic block'}, execution: {provider: 'offline', durationSec: 5, aspectRatio: '9:16', resolution: '720p', audio: false, budget: {currency: 'USD', maxUsd: 0}}};
+  const legacy = normalizeRequest(base, catalog);
+  assert.equal('avatar' in legacy.choices, false);
+  assert.equal('presenterDescription' in legacy, false);
+  assert.equal('reviewMode' in legacy.execution, false);
+  assert.equal('direction' in legacy.brief, false);
+
+  const preset = normalizeRequest({...base, choices: {...base.choices, avatar: 'senior-expert'}, execution: {...base.execution, reviewMode: 'first-frame'}}, catalog);
+  assert.equal((preset.choices as any).avatar, 'senior-expert');
+  assert.equal(preset.presenterDescription, catalog.metadata.avatars['senior-expert'].castingDescription);
+  assert.equal(preset.execution.reviewMode, 'first-frame');
+  assert.equal(normalizeRequest({...base, brief: {...base.brief, direction: '  Bright, playful pacing  '}}, catalog).brief.direction, 'Bright, playful pacing');
+  assert.equal(normalizeRequest({...base, execution: {...base.execution, reviewMode: 'full'}}, catalog).execution.reviewMode, 'full');
+  assert.doesNotThrow(() => normalizeRequest({...base, choices: {...base.choices, avatar: 'none'}}, catalog));
+  assert.throws(() => normalizeRequest({...base, choices: {...base.choices, avatar: 'unknown'}}, catalog), /Unknown or inapplicable avatar/);
+  assert.throws(() => normalizeRequest({...base, choices: {...base.choices, avatar: 'custom'}}, catalog), /Custom avatar requires a presenter reference/);
+  assert.doesNotThrow(() => normalizeRequest({...base, choices: {...base.choices, avatar: 'custom'}, references: [...base.references, {role: 'presenter', path: 'projects/demo/media/presenter.png'}]}, catalog));
+  assert.throws(() => normalizeRequest({...base, execution: {...base.execution, reviewMode: 'image'}}, catalog), /Unknown or inapplicable review mode/);
+  assert.throws(() => normalizeRequest({...base, brief: {...base.brief, direction: 'x'.repeat(2001)}}, catalog), /Invalid creative direction/);
 });
