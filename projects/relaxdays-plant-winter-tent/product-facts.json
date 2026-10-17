@@ -1,0 +1,70 @@
+{
+  "sku": "10049726",
+  "ean": "4052025497262",
+  "source": "https://relaxdays.de/uberwinterungszelt-fur-pflanzen-10049726.html",
+  "retrieved": "2026-10-17",
+  "dimensions": {
+    "axisOrder": "H x B x T",
+    "units": "cm",
+    "approximate": true,
+    "overall": [
+      185,
+      180,
+      160
+    ],
+    "inside": [
+      180,
+      178,
+      156
+    ]
+  },
+  "door": {
+    "axisOrder": "H x B",
+    "units": "cm",
+    "approximate": true,
+    "height": 158,
+    "widthRange": [
+      38,
+      93
+    ]
+  },
+  "window": {
+    "axisOrder": "H x B",
+    "units": "cm",
+    "approximate": true,
+    "height": 35,
+    "width": 45
+  },
+  "weight": {
+    "kg": 3.7,
+    "approximate": true
+  },
+  "materials": [
+    "Stahl",
+    "PP",
+    "PE"
+  ],
+  "colors": [
+    "Transparent",
+    "Weiß",
+    "Dunkelgrün"
+  ],
+  "quantity": 1,
+  "features": [
+    "Hexagonale Grundfläche",
+    "Doppeltür mit Reißverschluss",
+    "Aufrollbares Gazefenster",
+    "Stecksystem",
+    "Kein Boden"
+  ],
+  "excluded": [
+    "Pflanzen",
+    "Dekoration"
+  ],
+  "unknown": [
+    "Temperaturgrenze",
+    "Verpackungsmaße",
+    "Separat bestätigte Anzahl mitgelieferter Heringe"
+  ],
+  "dimensionDiagram": "media/images/10049726_0_4_a9f893302564ec67404f3b9a28ba31ba.jpg"
+}

@@ -1,0 +1,73 @@
+{
+  "title": "relaxdays | Garten",
+  "shots": [
+    {
+      "image": "media/images/ad-scene-1.svg",
+      "seconds": 3,
+      "text": "Bereit für kalte Nächte?",
+      "from": [
+        50,
+        50,
+        1
+      ],
+      "to": [
+        50,
+        50,
+        1
+      ],
+      "source": "https://cdn.relaxdays.com/media/catalog/product/cache/da78658a64c21a2e667cddbd22099f2e/1/0/10049726_0_2_442ce551fc6776b3dcf9f7ee7be3466e.jpg",
+      "rights": "Unknown. Internal draft only; confirm advertising reuse rights before release."
+    },
+    {
+      "image": "media/images/ad-scene-2.svg",
+      "seconds": 4,
+      "text": "Große Tür. Einfach zugänglich.",
+      "from": [
+        50,
+        50,
+        1
+      ],
+      "to": [
+        50,
+        50,
+        1
+      ],
+      "source": "https://cdn.relaxdays.com/media/catalog/product/cache/da78658a64c21a2e667cddbd22099f2e/1/0/10049726_0_7_b69044cfaa9a309bed8fbc61d0f36ef9.jpg",
+      "rights": "Unknown. Internal draft only; confirm advertising reuse rights before release."
+    },
+    {
+      "image": "media/images/ad-scene-3.svg",
+      "seconds": 4,
+      "text": "Frische Luft? Fenster auf.",
+      "from": [
+        50,
+        50,
+        1
+      ],
+      "to": [
+        50,
+        50,
+        1
+      ],
+      "source": "https://cdn.relaxdays.com/media/catalog/product/cache/da78658a64c21a2e667cddbd22099f2e/1/0/10049726_0_5_d46af94b1a0a90f5d92d6a4c47594fce.jpg",
+      "rights": "Unknown. Internal draft only; confirm advertising reuse rights before release."
+    },
+    {
+      "image": "media/images/ad-scene-4.svg",
+      "seconds": 4,
+      "text": "Jetzt auf relaxdays.de entdecken",
+      "from": [
+        50,
+        50,
+        1
+      ],
+      "to": [
+        50,
+        50,
+        1
+      ],
+      "source": "https://cdn.relaxdays.com/media/catalog/product/cache/da78658a64c21a2e667cddbd22099f2e/1/0/10049726_0_3_abe3adb8f0d7994d1f0f7dbe0468eb47.jpg",
+      "rights": "Unknown. Internal draft only; confirm advertising reuse rights before release."
+    }
+  ]
+}
