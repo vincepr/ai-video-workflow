@@ -1,4 +1,5 @@
 {
+  "version": 2,
   "title": "relaxdays | Garten",
   "shots": [
     {
@@ -19,25 +20,16 @@
       "rights": "Unknown. Internal draft only; confirm advertising reuse rights before release."
     },
     {
-      "image": "media/images/ad-scene-2.svg",
-      "seconds": 4,
-      "text": "Große Tür. Einfach zugänglich.",
-      "from": [
-        50,
-        50,
-        1
-      ],
-      "to": [
-        50,
-        50,
-        1
-      ],
-      "source": "https://cdn.relaxdays.com/media/catalog/product/cache/da78658a64c21a2e667cddbd22099f2e/1/0/10049726_0_7_b69044cfaa9a309bed8fbc61d0f36ef9.jpg",
-      "rights": "Unknown. Internal draft only; confirm advertising reuse rights before release."
+      "video": "media/video/zip-door-7s.mp4",
+      "startFrame": 0,
+      "endFrame": 210,
+      "text": "",
+      "source": "AI-generated with Alibaba Wan 3.0 via OpenRouter, 2026-10-17. Job gen-vid-1792244726-DMvv01JaO844OTjsZxTR. Merchant product references in sources.json.",
+      "rights": "Internal production draft. Merchant reference image reuse rights unconfirmed. Synthetic gardener, no testimonial."
     },
     {
       "image": "media/images/ad-scene-3.svg",
-      "seconds": 4,
+      "seconds": 2,
       "text": "Frische Luft? Fenster auf.",
       "from": [
         50,
@@ -54,7 +46,7 @@
     },
     {
       "image": "media/images/ad-scene-4.svg",
-      "seconds": 4,
+      "seconds": 3,
       "text": "Jetzt auf relaxdays.de entdecken",
       "from": [
         50,

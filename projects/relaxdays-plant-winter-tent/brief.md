@@ -23,4 +23,8 @@ Creative improvement: a gardener closes the existing zip door around the olive t
 
 Attempt status: image request timed out with no returned image or job ID. No video submitted. No charge confirmed; reserve the $0.054 image estimate pending reconciliation. See generation-review.md. Do not retry the ambiguous request.
 
+Continuation: the user explicitly requested continuing. One new first frame cost $0.051 and was rejected for crop and uncertain scale. A wider correction cost $0.048 and passed inspection. The shared key could not reserve the $0.80 720p request, so no 720p job was submitted. Reused the accepted frame for a seven-second 480p Wan 3.0 job, which cost $0.2975. Known spend: $0.3965; additional unresolved reservation: $0.054. The $5 task ceiling remains unchanged.
+
+Current edit: 3-second photo hook, 7-second generated zipper demonstration without captions over the action, 2-second window photo, 3-second photo CTA. Final output is 1080 x 1920 at 30 fps; generated motion is upscaled from 480 x 854. All provider audio is muted. No more generation planned.
+
 Release: internal draft. Merchant photo reuse permission is unknown. The page displays AI labels in its gallery; do not describe these assets as independently verified real footage. Confirm intended placement and image permissions before a public release. No upload or campaign launch requested.
