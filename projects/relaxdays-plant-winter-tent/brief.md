@@ -4,7 +4,7 @@ Prepared: 2026-10-17. Product: 10049726.
 
 User request: make an ad for the linked Relaxdays product.
 
-Draft assumption: German, vertical 1080 x 1920, 15 seconds. Destination and paid generation cap await the user's answers. This first draft uses merchant photos and local typography, with no provider request, narration or music.
+Draft assumption: German, vertical 1080 x 1920, 15 seconds. Destination awaits the user's answer. The user authorized a $5 maximum generation budget on 2026-10-17. The first draft uses merchant photos and local typography, with no provider request, narration or music.
 
 | Time | Picture | Caption |
 | --- | --- | --- |
@@ -17,6 +17,10 @@ Use the actual six-sided tent, translucent grid cover and dark green frame. Keep
 
 Validation: compare merchant detail photos and dimension diagram with product-facts.json; inspect frames from every scene in the encoded draft; run npm run check. Rendering the photo draft does not validate generated motion.
 
-Generation spend: $0. No paid model selected. If generated footage is wanted, first choose a specific visible action that improves this draft, verify current route and exact price, and stay within the user's explicit cap. The model shortlist was reviewed on 2026-10-15; live verification remains necessary before submission.
+Generation attempt: Seedream 5.0 Pro at 1K with three product references, then one eight-second Wan 3.0 clip at 720p, portrait 9:16, no audio. Live discovery on 2026-10-17 verified both routes and controls. Estimate: $0.054 image plus $0.80 video, $0.854 total before any actual receipt adjustment. Hard cap: $5 across this task. No automatic retries.
+
+Creative improvement: a gardener closes the existing zip door around the olive tree, making access and closing visible instead of adding camera motion to a photograph. Inspect the starting frame before buying motion, then inspect the whole clip for zipper continuity, hand contact, unchanged frame geometry and pot/tree identity. Reject a substituted product or invented mechanism. This is an internal production draft while placement remains unspecified. Runtime request and receipts live under work/product-video/1f298bed-a887-4df7-b59e-4ebc01922347/.
+
+Attempt status: image request timed out with no returned image or job ID. No video submitted. No charge confirmed; reserve the $0.054 image estimate pending reconciliation. See generation-review.md. Do not retry the ambiguous request.
 
 Release: internal draft. Merchant photo reuse permission is unknown. The page displays AI labels in its gallery; do not describe these assets as independently verified real footage. Confirm intended placement and image permissions before a public release. No upload or campaign launch requested.
